@@ -1,0 +1,32 @@
+@use './variables';
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: variables.$color-bg-light;
+    color: variables.$color-text-dark;
+    &.dark-mode {
+        background: variables.$color-bg-light-dark;
+        color: variables.$color-text-dark-dark;
+    }
+}
+
+.btn-primary {
+    background: variables.$color-primary;
+    border-radius: 100px;
+    padding: 12px 24px;
+    border: none;
+    color: variables.$color-text-dark-dark;
+    font-size: 20px;
+    &:hover {
+        background: variables.$color-primary-hover;
+    }
+}

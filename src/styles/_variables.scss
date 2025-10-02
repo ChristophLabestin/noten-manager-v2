@@ -1,0 +1,25 @@
+// -------------------------------------
+// Light Mode
+// -------------------------------------
+$color-primary: #1e3a8a; // Dunkles Blau für Hauptbuttons, Header
+$color-primary-hover: #2563eb; // Helleres Blau für Hover
+$color-bg-light: #f9fafb; // Seitenhintergrund
+$color-bg-dark: #e5e7eb; // Karten, Container
+$color-text-dark: #111827; // Haupttext
+$color-text-medium: #6b7280; // Untertext, Labels
+$color-error: #dc2626; // Fehleranzeigen
+$color-success: #16a34a; // Bestätigung / Erfolg
+$color-accent: #f59e0b; // kleine Akzente, z.B. Warnungen oder Highlights
+
+// -------------------------------------
+// Dark Mode
+// -------------------------------------
+$color-primary-dark: #3b82f6; // Hauptbuttons, Header
+$color-primary-hover-dark: #60a5fa; // Hover-Effekt
+$color-bg-light-dark: #1f2937; // Seitenhintergrund
+$color-bg-dark-dark: #374151; // Karten, Container
+$color-text-dark-dark: #f9fafb; // Haupttext
+$color-text-medium-dark: #d1d5db; // Untertext, Labels
+$color-error-dark: #f87171; // Fehleranzeigen
+$color-success-dark: #4ade80; // Bestätigung / Erfolg
+$color-accent-dark: #fbbf24; // Akzente
