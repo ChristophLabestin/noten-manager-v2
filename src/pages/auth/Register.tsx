@@ -54,7 +54,7 @@ const Register: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      window.history.pushState({}, "", "/home");
+      window.history.pushState({}, "", "/");
       window.dispatchEvent(new PopStateEvent("popstate"));
     }
   }, [isAuthenticated]);
