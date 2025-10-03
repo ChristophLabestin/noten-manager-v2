@@ -351,3 +351,10 @@ td {
     opacity: 1;
   }
 }
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
+  padding-bottom: 30px;
+}

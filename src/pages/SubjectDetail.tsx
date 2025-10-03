@@ -114,7 +114,10 @@ export default function SubjectDetailPage({
       (acc, grade) => acc + grade.grade * calculateGradeWeight(grade),
       0
     );
-    const totalWeight = grades.reduce((acc, grade) => acc + calculateGradeWeight(grade), 0);
+    const totalWeight = grades.reduce(
+      (acc, grade) => acc + calculateGradeWeight(grade),
+      0
+    );
     return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
   };
 
@@ -250,97 +253,100 @@ export default function SubjectDetailPage({
       {subjectGrades.length === 0 ? (
         <p>Keine Noten vorhanden</p>
       ) : (
-        <table className="grades-table">
-          <thead>
-            <tr>
-              <th>Datum</th>
-              <th>Note</th>
-              <th>Art</th>
-              <th>Aktionen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subjectGrades.map((grade, index) => (
-              <tr key={grade.id}>
-                {editingIndex === index ? (
-                  <>
-                    <td>{grade.date.toDate().toLocaleDateString()}</td>
-                    <td>
-                      <input
-                        type="number"
-                        className="form-input small"
-                        value={editedGrade.grade}
-                        onChange={(e) =>
-                          setEditedGrade({
-                            ...editedGrade,
-                            grade: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={editedGrade.weight}
-                        className="form-input small"
-                        style={{ minWidth: "130px" }}
-                        onChange={(e) =>
-                          setEditedGrade({
-                            ...editedGrade,
-                            weight: Number(e.target.value),
-                          })
-                        }
-                      >
-                        <option value={0}>Mündlich</option>
-                        <option value={1}>Kurzarbeit</option>
-                        <option value={2}>Schulaufgabe</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button
-                        className="btn-small"
-                        onClick={() => handleSaveClick(grade.id)}
-                      >
-                        <img src={saveIcon}></img>
-                      </button>
-                      <button
-                        className="btn-small"
-                        onClick={() => setEditingIndex(null)}
-                      >
-                        <img src={cancelIcon}></img>
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{grade.date.toDate().toLocaleDateString()}</td>
-                    <td>{grade.grade}</td>
-                    <td>
-                      {grade.weight === 0
-                        ? "Mündlich"
-                        : grade.weight === 1
-                        ? "Kurzarbeit"
-                        : "Schulaufgabe"}
-                    </td>
-                    <td>
-                      <button
-                        className="btn-small"
-                        onClick={() => handleEditClick(index)}
-                      >
-                        <img src={editIcon}></img>
-                      </button>
-                      <button
-                        className="btn-small"
-                        onClick={() => handleDeleteClick(grade.id)}
-                      >
-                        <img src={deleteIcon}></img>
-                      </button>
-                    </td>
-                  </>
-                )}
+        <div className="table-wrapper">
+          <table className="grades-table">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Note</th>
+                <th>Art</th>
+                <th>Aktionen</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {subjectGrades.map((grade, index) => (
+                <tr key={grade.id}>
+                  {editingIndex === index ? (
+                    <>
+                      <td>{grade.date.toDate().toLocaleDateString()}</td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-input small"
+                          value={editedGrade.grade}
+                          style={{ minWidth: "50px" }}
+                          onChange={(e) =>
+                            setEditedGrade({
+                              ...editedGrade,
+                              grade: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </td>
+                      <td>
+                        <select
+                          value={editedGrade.weight}
+                          className="form-input small"
+                          style={{ minWidth: "130px" }}
+                          onChange={(e) =>
+                            setEditedGrade({
+                              ...editedGrade,
+                              weight: Number(e.target.value),
+                            })
+                          }
+                        >
+                          <option value={0}>Mündlich</option>
+                          <option value={1}>Kurzarbeit</option>
+                          <option value={2}>Schulaufgabe</option>
+                        </select>
+                      </td>
+                      <td>
+                        <button
+                          className="btn-small"
+                          onClick={() => handleSaveClick(grade.id)}
+                        >
+                          <img src={saveIcon}></img>
+                        </button>
+                        <button
+                          className="btn-small"
+                          onClick={() => setEditingIndex(null)}
+                        >
+                          <img src={cancelIcon}></img>
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{grade.date.toDate().toLocaleDateString()}</td>
+                      <td>{grade.grade}</td>
+                      <td>
+                        {grade.weight === 0
+                          ? "Mündlich"
+                          : grade.weight === 1
+                          ? "Kurzarbeit"
+                          : "Schulaufgabe"}
+                      </td>
+                      <td>
+                        <button
+                          className="btn-small"
+                          onClick={() => handleEditClick(index)}
+                        >
+                          <img src={editIcon}></img>
+                        </button>
+                        <button
+                          className="btn-small"
+                          onClick={() => handleDeleteClick(grade.id)}
+                        >
+                          <img src={deleteIcon}></img>
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       <div className="add-grade-row">
         <div className="form-two-columns">
