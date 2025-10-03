@@ -3,15 +3,25 @@ import type { Subject } from "../interfaces/Subject";
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import type { Grade } from "../interfaces/Grade";
+import type { EncryptedGrade } from "../interfaces/Grade";
 import helpIcon from "../assets/help.svg";
+import { encryptString } from "../services/cryptoService";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // Fächer aus Home
-  onAddGrade: (subjectId: string, grade: Grade) => void; // Callback für neue Note
+  onAddGrade: (
+    subjectId: string,
+    grade: EncryptedGrade,
+    encryptionKey: CryptoKey
+  ) => void; // Callback für neue Note
+  encryptionKeyProp: CryptoKey;
 }
 
-export default function AddGrade({ subjectsProp, onAddGrade }: AddGradeProps) {
+export default function AddGrade({
+  subjectsProp,
+  onAddGrade,
+  encryptionKeyProp,
+}: AddGradeProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
@@ -43,20 +53,29 @@ export default function AddGrade({ subjectsProp, onAddGrade }: AddGradeProps) {
   const handleAddGrade = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // String in Zahl konvertieren
+    if (!encryptionKeyProp) {
+      alert("Encryption Key fehlt!");
+      return;
+    }
+
     const gradeNumber = Number(newGradeInput);
     if (isNaN(gradeNumber)) {
       alert("Bitte eine gültige Zahl eingeben");
       return;
     }
 
-    const gradeToAdd: Grade = {
-      grade: gradeNumber,
-      weight: gradeWeight,
-      date: Timestamp.fromDate(new Date()),
-    };
-
     try {
+      const encryptedGrade = await encryptString(
+        gradeNumber.toString(),
+        encryptionKeyProp
+      );
+
+      const gradeToAdd: EncryptedGrade = {
+        grade: encryptedGrade,
+        weight: gradeWeight,
+        date: Timestamp.fromDate(new Date()),
+      };
+
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Kein Benutzer angemeldet");
@@ -71,17 +90,14 @@ export default function AddGrade({ subjectsProp, onAddGrade }: AddGradeProps) {
         "grades"
       );
 
-      await addDoc(gradesRef, {
-        ...gradeToAdd,
-      });
+      await addDoc(gradesRef, gradeToAdd);
 
       // Callback an Home
-      onAddGrade(selectedSubjectId, gradeToAdd);
+      onAddGrade(selectedSubjectId, gradeToAdd, encryptionKeyProp);
 
-      // Input zurücksetzen
       setNewGradeInput("");
-    } catch (error) {
-      console.error("Fehler beim Hinzufügen der Note:", error);
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen:", err);
     }
   };
 

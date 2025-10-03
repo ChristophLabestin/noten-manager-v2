@@ -120,11 +120,11 @@ const Login: React.FC = () => {
         </form>
         <div className="login-divider"></div>
         <div className="login-links-wrapper">
-          <p>
+          {/* <p>
             <a className="forgot-password-link" href="/reset-password">
               Passwort vergessen?
             </a>
-          </p>
+          </p> */}
           <p>
             Noch keinen Account?{" "}
             <a

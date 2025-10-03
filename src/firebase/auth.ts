@@ -9,22 +9,30 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { db } from "./firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { generateSalt } from "../services/cryptoService";
 
 // Benutzer registrieren
-export const registerUser = async (email: string, password: string, name: string) => {
+export const registerUser = async (
+  email: string,
+  password: string,
+  name: string
+) => {
   try {
     const { user } = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
+
+    const salt = generateSalt();
+
     await setDoc(doc(db, "users", user.uid), {
       id: user.uid,
       name,
       email,
-      lightmode: false,
       displayTrialResult: true,
+      encryptionSalt: salt,
     });
   } catch (error) {
     console.error("Fehler bei der Registrierung:", error);
@@ -53,16 +61,30 @@ export const loginUserWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Benutzerdaten in Firestore speichern
     const userRef = doc(db, "users", user.uid);
-    await setDoc(userRef, {
-      displayName: user.displayName || "",
-      email: user.email || "",
-      photoURL: user.photoURL || "",
-      lightmode: false,
-      displayTrialResult: true,
-      // Weitere benutzerspezifische Daten hier hinzufügen, falls nötig
-    }, { merge: true }); // merge: true aktualisiert die bestehenden Daten, anstatt sie zu überschreiben
+    const userSnap = await getDoc(userRef);
+
+    let salt: string;
+
+    if (userSnap.exists() && userSnap.data().encryptionSalt) {
+      // Falls schon ein Salt existiert → diesen wiederverwenden
+      salt = userSnap.data().encryptionSalt;
+    } else {
+      // Falls neuer User → Salt generieren
+      salt = generateSalt();
+    }
+
+    await setDoc(
+      userRef,
+      {
+        displayName: user.displayName || "",
+        email: user.email || "",
+        photoURL: user.photoURL || "",
+        displayTrialResult: true,
+        encryptionSalt: salt,
+      },
+      { merge: true }
+    );
 
     return result;
   } catch (error) {

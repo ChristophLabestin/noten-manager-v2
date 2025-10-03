@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext/useAuth";
-import backIcon from "../assets/back.svg";
-import blackBackIcon from "../assets/back-black.svg";
 import type { UserProfile } from "../interfaces/UserProfile";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -15,7 +13,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
 
   const [greeting, setGreeting] = useState<string>("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLightMode, setIsLightMode] = useState<boolean>(false);
 
   useEffect(() => {
     const date = new Date();
@@ -41,13 +38,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
         if (userDocSnap.exists()) {
           const user = userDocSnap.data() as UserProfile;
           setUserProfile(user);
-          if (user.lightmode) {
-            setIsLightMode(user.lightmode);
-            document.body.classList.add("lightmode");
-          } else {
-            setIsLightMode(user.lightmode || false);
-            document.body.classList.remove("lightmode");
-          }
         } else {
           console.log("Keine Benutzerdaten gefunden.");
         }
@@ -65,16 +55,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
           : "burger-menu-wrapper"
       }
     >
-      {props.backToHome && (
-        <a href="/home" className="back-to-home">
-          {!isLightMode ? (
-            <img src={backIcon} alt="Zurück zur Startseite" />
-          ) : (
-            <img src={blackBackIcon} alt="Zurück zur Startseite" />
-          )}
-          Startseite
-        </a>
-      )}
       {!props.backToHome && (
         <h1 className="nav-greeting">
           {greeting}, {user?.displayName

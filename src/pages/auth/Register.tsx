@@ -114,10 +114,10 @@ const Register: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="login-button"
+            className="btn-primary"
             disabled={isRegistering}
           >
-            {isRegistering ? "Registriere..." : "Register"}
+            {isRegistering ? "Registriere..." : "Registrieren"}
           </button>
         </form>
         <div className="login-links-wrapper">

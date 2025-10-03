@@ -4,9 +4,11 @@ import Login from "../pages/auth/Login";
 import Home from "../pages/Home";
 import SubjectsPage from "../pages/Subjects";
 import SubjectDetailPage from "../pages/SubjectDetail";
+import Register from "../pages/auth/Register";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
+  "/register": () => <Register/>,
   "/": () => (
     <PrivateRoute>
       <Home />

@@ -7,9 +7,13 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { UserProfile } from "../interfaces/UserProfile";
 import type { Subject } from "../interfaces/Subject";
-import type { Grade } from "../interfaces/Grade";
+import type { EncryptedGrade, Grade } from "../interfaces/Grade";
 import AddGrade from "../components/AddGrade";
 import Logout from "../components/Logout";
+import {
+  deriveKeyFromPassword,
+  decryptString,
+} from "../services/cryptoService";
 
 export default function Home() {
   const { user } = useAuth();
@@ -18,6 +22,7 @@ export default function Home() {
   const [subjectGrades, setSubjectGrades] = useState<{
     [key: string]: Grade[];
   }>({});
+  const [encryptionKey, setEncryptionKey] = useState<CryptoKey>();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -28,14 +33,21 @@ export default function Home() {
         if (userDocSnap.exists()) {
           const userProfileData = userDocSnap.data() as UserProfile;
           setUserProfile(userProfileData);
-        } else {
-          console.log("Keine Benutzerdaten gefunden.");
+
+          // Key ableiten
+          if (userProfileData.encryptionSalt) {
+            const key = await deriveKeyFromPassword(
+              user.uid,
+              userProfileData.encryptionSalt
+            );
+            setEncryptionKey(key);
+          }
         }
       }
     };
 
     const fetchData = async () => {
-      if (user) {
+      if (user && encryptionKey) {
         const subjectsRef = collection(db, "users", user.uid, "subjects");
         const subjectsSnapshot = await getDocs(subjectsRef);
         const subjectsData: Subject[] = [];
@@ -47,8 +59,8 @@ export default function Home() {
 
         setSubjects(subjectsData);
 
-        // Für jede subjectId die Noten holen
         const gradesData: { [key: string]: Grade[] } = {};
+
         for (const subjectDoc of subjectsSnapshot.docs) {
           const gradesRef = collection(
             db,
@@ -59,9 +71,21 @@ export default function Home() {
             "grades"
           );
           const gradesSnapshot = await getDocs(gradesRef);
-          gradesData[subjectDoc.id] = gradesSnapshot.docs.map(
-            (doc) => doc.data() as Grade
-          );
+
+          // Entschlüsseln
+          const decryptedGrades: Grade[] = [];
+          for (const docSnap of gradesSnapshot.docs) {
+            const gradeData = docSnap.data() as EncryptedGrade;
+            const decryptedGradeNumber = Number(
+              await decryptString(gradeData.grade, encryptionKey)
+            );
+            decryptedGrades.push({
+              ...gradeData,
+              grade: decryptedGradeNumber,
+            });
+          }
+
+          gradesData[subjectDoc.id] = decryptedGrades;
         }
 
         setSubjectGrades(gradesData);
@@ -69,17 +93,34 @@ export default function Home() {
     };
 
     fetchUserProfile();
-    fetchData();
-  }, [user]);
+    if (user && encryptionKey) {
+      fetchData();
+    }
+  }, [user, encryptionKey]);
 
   const handleAddSubjectToState = (newSubject: Subject) => {
     setSubjects((prev) => [...prev, newSubject]);
   };
 
-  const handleAddSubjectGradeToState = (subjectId: string, grade: Grade) => {
+  const handleAddSubjectGradeToState = async (
+    subjectId: string,
+    grade: EncryptedGrade,
+    encryptionKey: CryptoKey
+  ) => {
+    const decryptedGradeNumber = Number(
+      await decryptString(grade.grade, encryptionKey)
+    );
+
+    const decryptedGrade: Grade = {
+      ...grade,
+      grade: decryptedGradeNumber,
+    };
+
     setSubjectGrades((prev) => ({
       ...prev,
-      [subjectId]: prev[subjectId] ? [...prev[subjectId], grade] : [grade],
+      [subjectId]: prev[subjectId]
+        ? [...prev[subjectId], decryptedGrade]
+        : [decryptedGrade],
     }));
   };
 
@@ -90,9 +131,10 @@ export default function Home() {
       <AddGrade
         subjectsProp={subjects}
         onAddGrade={handleAddSubjectGradeToState}
+        encryptionKeyProp={encryptionKey!}
       />
       <AddSubject onAddSubject={handleAddSubjectToState} />
-      <Logout/>
+      <Logout />
     </div>
   );
 }
