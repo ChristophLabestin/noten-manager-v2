@@ -66,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
 .login-title {
   font-size: 2.5rem;
   margin: 0 auto;
-  background: variables.$color-primary;
+  background: variables.$color-text-dark-dark;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -105,6 +105,9 @@ h1, h2, h3, h4, h5, h6 {
   }
   & option {
     color: variables.$color-text-dark !important;
+  }
+  &.small {
+    padding: 4px 4px;
   }
 }
 
@@ -147,7 +150,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .page {
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 .home-layout {
@@ -167,7 +170,7 @@ tr {
       background: variables.$color-bg-dark-dark;
       text-align: left;
     }
-    & > th:nth-child(2) {
+    & > th {
       background: variables.$color-bg-dark-dark;
       text-align: right;
     }
@@ -175,13 +178,15 @@ tr {
   & > td:nth-child(1) {
     text-align: left;
   }
-  & > td:nth-child(2) {
+  & > td {
     text-align: right;
   }
-  &:last-child {
+  &.total-score-row {
     & > td {
       font-weight: 600;
       font-size: 20px;
+      border-top: 2px solid variables.$color-text-medium-dark;
+      padding-top: 10px;
     }
   }
 }
@@ -252,5 +257,97 @@ td {
   flex-direction: column;
   width: 100%;
   gap: 20px;
-  
+  position: relative;
+}
+
+.form-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.subjects-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.subject-box {
+  padding: 20px;
+  border: 2px solid variables.$color-text-medium-dark;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.subject-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subject-detail-grade {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.subject-detail-subheadline {
+  font-weight: 400;
+  color: variables.$color-text-medium-dark;
+}
+
+.btn-small {
+  border: variables.$color-text-medium-dark;
+  background: none;
+}
+
+.back-to-home-wrapper,
+.logout-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.back-to-home-text,
+.logout-text {
+  font-size: 26px;
+  margin: 0;
+}
+
+.add-grade-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.section-headline {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+.help-box {
+  position: absolute;
+  width: 100%;
+  font-size: 14px;
+  background: variables.$color-bg-light;
+  color: variables.$color-text-dark;
+  padding: 14px;
+  top: -230px;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: all .3s ease;
+  &>p {
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  &.active {
+    opacity: 1;
+  }
 }

@@ -77,8 +77,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
       )}
       {!props.backToHome && (
         <h1 className="nav-greeting">
-          {greeting}, <br />
-          {user?.displayName
+          {greeting}, {user?.displayName
             ? `${user.displayName}`
             : userProfile
             ? `${userProfile.name}`

@@ -17,15 +17,36 @@ export default function SubjectsTable({
     );
   };
 
+  const calculateGradeWeight = (subject: Subject, grade: Grade): number => {
+    if (!subject) return 1; // Default
+
+    const type = subject.type;
+
+    if (type === 1) {
+      // Hauptfach
+      return grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
+    }
+
+    if (type === 0) {
+      // Nebenfach
+      return grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
+    }
+
+    return 1; // Default
+  };
+
   // Durchschnitt für ein einzelnes Fach
-  const calculateAverageScore = (grades: Grade[]): string => {
+  const calculateAverageScore = (subject: Subject, grades: Grade[]): string => {
     if (!grades || grades.length === 0) return "—";
 
     const total = grades.reduce(
-      (acc, grade) => acc + grade.grade * grade.weight,
+      (acc, grade) => acc + grade.grade * calculateGradeWeight(subject, grade),
       0
     );
-    const totalWeight = grades.reduce((acc, grade) => acc + grade.weight, 0);
+    const totalWeight = grades.reduce(
+      (acc, grade) => acc + calculateGradeWeight(subject, grade),
+      0
+    );
 
     return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
   };
@@ -35,15 +56,21 @@ export default function SubjectsTable({
     let total = 0;
     let totalWeight = 0;
 
-    for (const grades of Object.values(subjectGrades)) {
-      total += grades.reduce(
-        (acc, grade) => acc + grade.grade * grade.weight,
-        0
-      );
-      totalWeight += grades.reduce((acc, grade) => acc + grade.weight, 0);
+    for (const subject of subjects) {
+      const grades = subjectGrades[subject.name] || [];
+      for (const grade of grades) {
+        const weight = calculateGradeWeight(subject, grade);
+        total += grade.grade * weight;
+        totalWeight += weight;
+      }
     }
 
     return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
+  };
+
+  const goToSubjectPage = (subjectId: string) => {
+    // Weiterleitung zur Unterseite /fach/:id
+    window.location.href = `/fach/${subjectId}`;
   };
 
   return (
@@ -59,7 +86,11 @@ export default function SubjectsTable({
           <tbody className="home-tbody">
             {sortSubjects(subjects).map((subject) => (
               <tr key={subject.name} className="home-tr">
-                <td className="home-td">
+                <td
+                  className="home-td"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => goToSubjectPage(subject.name)}
+                >
                   {subject.name}
                   <br />
                   <span className="subject-type">
@@ -69,19 +100,32 @@ export default function SubjectsTable({
                 <td className="home-td grade">
                   <div
                     className={`grade-box ${
-                      Number(calculateAverageScore(subjectGrades[subject.name] || [])) >= 7
+                      Number(
+                        calculateAverageScore(
+                          subject,
+                          subjectGrades[subject.name] || []
+                        )
+                      ) >= 7
                         ? "good"
-                        : Number(calculateAverageScore(subjectGrades[subject.name] || [])) >= 4
+                        : Number(
+                            calculateAverageScore(
+                              subject,
+                              subjectGrades[subject.name] || []
+                            )
+                          ) >= 4
                         ? "medium"
                         : "bad"
                     }`}
                   >
-                    {calculateAverageScore(subjectGrades[subject.name] || [])}
+                    {calculateAverageScore(
+                      subject,
+                      subjectGrades[subject.name] || []
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
-            <tr>
+            <tr className="total-score-row">
               <td className="home-td bold">Gesamt</td>
               <td className="home-td grade bold">
                 <div

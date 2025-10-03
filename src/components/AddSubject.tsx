@@ -3,6 +3,7 @@ import { doc, setDoc, collection } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
+import helpIcon from "../assets/help.svg";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
@@ -11,6 +12,7 @@ interface AddSubjectProps {
 export default function AddSubject({ onAddSubject }: AddSubjectProps) {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
+  const [helpActive, setHelpActive] = useState<boolean>(false);
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSubjectName(e.target.value);
@@ -53,27 +55,48 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
   return (
     <>
       <form className="add-subject-form" onSubmit={handleAddSubject}>
-        <h2>Fach hinzufügen</h2>
-        <div className="form-group">
-          <label className="form-label">Name:</label>
-          <input
-            className="form-input"
-            type="text"
-            value={subjectName}
-            onChange={handleSubjectChange}
-            placeholder="Mathe"
+        <h2 className="section-headline">
+          Fach hinzufügen
+          <img
+            src={helpIcon}
+            onMouseEnter={() => setHelpActive(true)}
+            onMouseLeave={() => setHelpActive(false)}
           />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Fach Typ:</label>
-          <select
-            className="form-input"
-            value={subjectType}
-            onChange={handleTypeChange}
-          >
-            <option value={1}>Hauptfach</option>
-            <option value={0}>Nebenfach</option>
-          </select>
+          <div className={`help-box ${helpActive ? "active" : ""}`}>
+            <p>Hier kannst du ein Fach hinzufügen. Der Typ wird unterschieden zwischen Haupt- und Nebenfach.</p>
+            <p>
+              In einem Hauptfach wird mindestens 1 Schulaufgabe pro Halbjahr
+              geschrieben.
+            </p>
+            <p>
+              In einem Nebenfach werden keine Schulaufgaben geschrieben sondern
+              nur Kurzarbeiten.
+            </p>
+            <p>Diese Einstellung lässt sich später nicht mehr ändern!</p>
+          </div>
+        </h2>
+        <div className="form-two-columns">
+          <div className="form-group">
+            <label className="form-label">Name:</label>
+            <input
+              className="form-input"
+              type="text"
+              value={subjectName}
+              onChange={handleSubjectChange}
+              placeholder="Mathe"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Fach Typ:</label>
+            <select
+              className="form-input"
+              value={subjectType}
+              onChange={handleTypeChange}
+            >
+              <option value={1}>Hauptfach</option>
+              <option value={0}>Nebenfach</option>
+            </select>
+          </div>
         </div>
         <button className="btn-primary small" type="submit">
           hinzufügen

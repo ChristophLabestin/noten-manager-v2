@@ -9,12 +9,15 @@ import type { UserProfile } from "../interfaces/UserProfile";
 import type { Subject } from "../interfaces/Subject";
 import type { Grade } from "../interfaces/Grade";
 import AddGrade from "../components/AddGrade";
+import Logout from "../components/Logout";
 
 export default function Home() {
   const { user } = useAuth();
   const [, setUserProfile] = useState<UserProfile>();
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [subjectGrades, setSubjectGrades] = useState<{ [key: string]: Grade[] }>({});
+  const [subjectGrades, setSubjectGrades] = useState<{
+    [key: string]: Grade[];
+  }>({});
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -72,20 +75,24 @@ export default function Home() {
   const handleAddSubjectToState = (newSubject: Subject) => {
     setSubjects((prev) => [...prev, newSubject]);
   };
-  
+
   const handleAddSubjectGradeToState = (subjectId: string, grade: Grade) => {
-  setSubjectGrades((prev) => ({
-    ...prev,
-    [subjectId]: prev[subjectId] ? [...prev[subjectId], grade] : [grade],
-  }));
-};
+    setSubjectGrades((prev) => ({
+      ...prev,
+      [subjectId]: prev[subjectId] ? [...prev[subjectId], grade] : [grade],
+    }));
+  };
 
   return (
     <div className="home-layout">
       <BurgerMenu />
       <SubjectsTable subjects={subjects} subjectGrades={subjectGrades} />
-      <AddGrade subjectsProp={subjects} onAddGrade={handleAddSubjectGradeToState}/>
+      <AddGrade
+        subjectsProp={subjects}
+        onAddGrade={handleAddSubjectGradeToState}
+      />
       <AddSubject onAddSubject={handleAddSubjectToState} />
+      <Logout/>
     </div>
   );
 }

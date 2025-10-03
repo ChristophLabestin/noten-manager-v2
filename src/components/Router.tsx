@@ -2,15 +2,30 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext/useAuth";
 import Login from "../pages/auth/Login";
 import Home from "../pages/Home";
+import SubjectsPage from "../pages/Subjects";
+import SubjectDetailPage from "../pages/SubjectDetail";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
-    "/login": () => <Login/>,
-    "/": () => (
-        <PrivateRoute>
-            <Home/>
-        </PrivateRoute>
-    ),
-}
+  "/login": () => <Login />,
+  "/": () => (
+    <PrivateRoute>
+      <Home />
+    </PrivateRoute>
+  ),
+  "/fach": () => (
+    <PrivateRoute>
+      <SubjectsPage />
+    </PrivateRoute>
+  ),
+  "/fach/:id": () => {
+    const subjectId = window.location.pathname.split("/")[2];
+    return (
+      <PrivateRoute>
+        <SubjectDetailPage subjectId={subjectId} />
+      </PrivateRoute>
+    );
+  },
+};
 
 const PrivateRoute = ({ children }: { children: React.JSX.Element }) => {
   const { isAuthenticated } = useAuth(); // Authentifizierungsstatus prüfen
