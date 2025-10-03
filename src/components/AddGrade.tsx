@@ -166,11 +166,13 @@ export default function AddGrade({
           >
             {findSubjectType(selectedSubjectId) === 0 ? (
               <>
+                <option value={3}>Fachreferat</option>
                 <option value={1}>Kurzarbeit</option>
                 <option value={0}>Mündlich</option>
               </>
             ) : (
               <>
+                <option value={3}>Fachreferat</option>
                 <option value={2}>Schulaufgabe</option>
                 <option value={1}>Kurzarbeit</option>
                 <option value={0}>Mündlich</option>

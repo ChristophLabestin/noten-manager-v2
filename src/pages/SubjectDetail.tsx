@@ -128,12 +128,12 @@ export default function SubjectDetailPage({
 
     if (type === 1) {
       // Hauptfach
-      return grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
+      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
     }
 
     if (type === 0) {
       // Nebenfach
-      return grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
+      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
     }
 
     return 1; // Default
@@ -347,9 +347,20 @@ export default function SubjectDetailPage({
                             })
                           }
                         >
-                          <option value={0}>Mündlich</option>
-                          <option value={1}>Kurzarbeit</option>
-                          <option value={2}>Schulaufgabe</option>
+                          {activeSubject.type === 0 ? (
+                            <>
+                              <option value={3}>Fachreferat</option>
+                              <option value={1}>Kurzarbeit</option>
+                              <option value={0}>Mündlich</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value={3}>Fachreferat</option>
+                              <option value={2}>Schulaufgabe</option>
+                              <option value={1}>Kurzarbeit</option>
+                              <option value={0}>Mündlich</option>
+                            </>
+                          )}
                         </select>
                       </td>
                       <td>
@@ -376,7 +387,9 @@ export default function SubjectDetailPage({
                           ? "Mündlich"
                           : grade.weight === 1
                           ? "Kurzarbeit"
-                          : "Schulaufgabe"}
+                          : grade.weight === 2
+                          ? "Schulaufgabe"
+                          : "Fachreferat"}
                       </td>
                       <td>
                         <button
@@ -423,11 +436,13 @@ export default function SubjectDetailPage({
             >
               {activeSubject.type === 0 ? (
                 <>
+                  <option value={3}>Fachreferat</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich</option>
                 </>
               ) : (
                 <>
+                  <option value={3}>Fachreferat</option>
                   <option value={2}>Schulaufgabe</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich</option>
