@@ -4,8 +4,6 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  // updatePassword,
-  // sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { db } from "./firebaseConfig";
@@ -33,8 +31,11 @@ export const registerUser = async (
       email,
       encryptionSalt: salt,
     });
-  } catch (error) {
-    console.error("Fehler bei der Registrierung:", error);
+  } catch (err) {
+    throw new Error(
+      "Fehler bei der Registrierung: " +
+        (err instanceof Error ? err.message : String(err))
+    );
   }
 };
 
@@ -46,10 +47,12 @@ export const loginUser = async (email: string, password: string) => {
       email,
       password
     );
-    return userCredential; // Gibt die UserCredential zurück
-  } catch (error) {
-    console.error("Fehler bei der Anmeldung:", error);
-    throw error; // Wirf den Fehler weiter, um ihn an anderer Stelle behandeln zu können
+    return userCredential;
+  } catch (err) {
+    throw new Error(
+      "Fehler bei der Anmeldung: " +
+        (err instanceof Error ? err.message : String(err))
+    );
   }
 };
 
@@ -85,8 +88,11 @@ export const loginUserWithGoogle = async () => {
     );
 
     return result;
-  } catch (error) {
-    console.error("Fehler bei der Anmeldung mit Google:", error);
+  } catch (err) {
+    throw new Error(
+      "Fehler bei der Anmeldung mit Google: " +
+        (err instanceof Error ? err.message : String(err))
+    );
   }
 };
 
@@ -94,8 +100,11 @@ export const loginUserWithGoogle = async () => {
 export const logoutUser = async () => {
   try {
     await auth.signOut();
-  } catch (error) {
-    console.error("Fehler beim Abmelden:", error);
+  } catch (err) {
+    throw new Error(
+      "Fehler beim Abmelden: " +
+        (err instanceof Error ? err.message : String(err))
+    );
   }
 };
 
@@ -103,8 +112,11 @@ export const logoutUser = async () => {
 export const resetPassword = async (email: string) => {
   try {
     await sendPasswordResetEmail(auth, email);
-  } catch (error) {
-    console.error("Fehler beim Zurücksetzen des Passworts:", error);
+  } catch (err) {
+    throw new Error(
+      "Fehler beim Zurücksetzen des Passworts: " +
+        (err instanceof Error ? err.message : String(err))
+    );
   }
 };
 
@@ -112,8 +124,8 @@ export const resetPassword = async (email: string) => {
 // export const changePassword = async (password: string) => {
 //   try {
 //     await updatePassword(auth.currentUser, password);
-//   } catch (error) {
-//     console.error("Fehler beim Ändern des Passworts:", error);
+//   } catch (err) {
+//     throw new Error("Fehler beim Ändern des Passworts: " + (err instanceof Error ? err.message : String(err)));
 //   }
 // };
 
@@ -123,7 +135,7 @@ export const resetPassword = async (email: string) => {
 //     await sendEmailVerification(auth.currentUser, {
 //       url: `${window.location.origin}/home`,
 //     });
-//   } catch (error) {
-//     console.error("Fehler beim Versenden der Email-Verifizierung:", error);
+//   } catch (err) {
+//     throw new Error("Fehler beim Versenden der Email-Verifizierung: " + (err instanceof Error ? err.message : String(err)));
 //   }
 // };

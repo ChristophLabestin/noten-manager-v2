@@ -97,7 +97,10 @@ export default function AddGrade({
 
       setNewGradeInput("");
     } catch (err) {
-      console.error("Fehler beim Hinzufügen:", err);
+      throw new Error(
+        "Fehler beim Hinzufügen: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 

@@ -39,7 +39,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
           const user = userDocSnap.data() as UserProfile;
           setUserProfile(user);
         } else {
-          console.log("Keine Benutzerdaten gefunden.");
+          throw new Error("Keine Benutzerdaten gefunden")
         }
       }
     };

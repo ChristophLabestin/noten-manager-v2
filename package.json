@@ -11,6 +11,7 @@
     "deploy": "npm run build && firebase deploy"
   },
   "dependencies": {
+    "@sentry/react": "^10.17.0",
     "firebase": "^12.3.0",
     "js-cookie": "^3.0.5",
     "react": "^19.1.1",

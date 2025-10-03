@@ -24,10 +24,10 @@ const CookieBanner: React.FC = () => {
   return (
     <div className="cookie-banner-wrapper">
       <div className={`cookie-banner ${moreInfo ? "more-info" : ""}`}>
-        <p className="display-6 f1-regular">Cookie-Einverständnis</p>
+        <h2 className="display-6">Cookie-Einverständnis</h2>
         {moreInfo ? (
           <div className="cookie-more-info-wrapper">
-            <h2 className="display-6 f1-regular">
+            <h2 className="display-6">
               Warum verwenden wir Cookies?
             </h2>
             <h3>Notwendige Cookies</h3>
@@ -74,7 +74,7 @@ const CookieBanner: React.FC = () => {
               </a>
               .
             </p>
-            <h2 className="display-6 f1-regular">Ihre Auswahlmöglichkeiten</h2>
+            <h2 className="display-6">Ihre Auswahlmöglichkeiten</h2>
             <h3>Akzeptieren</h3>
             <p>
               Wenn Sie auf „Akzeptieren“ klicken, stimmen Sie der Verwendung
@@ -126,7 +126,6 @@ const CookieBanner: React.FC = () => {
               "Schließen"
             ) : (
               <>
-                <span className="icon-16pt">info</span>
                 <span>Mehr Infos</span>
               </>
             )}

@@ -47,8 +47,11 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
 
       setSubjectName("");
       setSubjectType(1);
-    } catch (error) {
-      console.error("Fehler beim Hinzufügen des Fachs:", error);
+    } catch (err) {
+      throw new Error(
+        "Fehler beim Hinzufügen des Fachs: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 
@@ -63,7 +66,10 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
             onMouseLeave={() => setHelpActive(false)}
           />
           <div className={`help-box ${helpActive ? "active" : ""}`}>
-            <p>Hier kannst du ein Fach hinzufügen. Der Typ wird unterschieden zwischen Haupt- und Nebenfach.</p>
+            <p>
+              Hier kannst du ein Fach hinzufügen. Der Typ wird unterschieden
+              zwischen Haupt- und Nebenfach.
+            </p>
             <p>
               In einem Hauptfach wird mindestens 1 Schulaufgabe pro Halbjahr
               geschrieben.
