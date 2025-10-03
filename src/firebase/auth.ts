@@ -31,7 +31,6 @@ export const registerUser = async (
       id: user.uid,
       name,
       email,
-      displayTrialResult: true,
       encryptionSalt: salt,
     });
   } catch (error) {
@@ -80,7 +79,6 @@ export const loginUserWithGoogle = async () => {
         displayName: user.displayName || "",
         email: user.email || "",
         photoURL: user.photoURL || "",
-        displayTrialResult: true,
         encryptionSalt: salt,
       },
       { merge: true }
