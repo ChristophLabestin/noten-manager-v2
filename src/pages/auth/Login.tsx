@@ -108,17 +108,17 @@ const Login: React.FC = () => {
               placeholder="********"
             />
           </div>
-          <button className="login-button" type="submit">
+          <button className="btn-primary" type="submit">
             Login
           </button>
         </form>
-        <div className="login-divider"></div>
         <form className="google-login-form" onSubmit={onGoogleLogin}>
           <button className="google-login-button" type="submit">
             <img src={googleIcon} alt="Google Logo 24px" />
             Login with Google
           </button>
         </form>
+        <div className="login-divider"></div>
         <div className="login-links-wrapper">
           <p>
             <a className="forgot-password-link" href="/reset-password">

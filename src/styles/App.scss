@@ -1,32 +1,251 @@
-@use './variables';
+@use "./variables";
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    background: variables.$color-bg-light;
-    color: variables.$color-text-dark;
-    &.dark-mode {
-        background: variables.$color-bg-light-dark;
-        color: variables.$color-text-dark-dark;
-    }
+  background: variables.$color-bg-light-dark;
+  color: variables.$color-text-dark-dark;
+  overflow-x: hidden;
+  font-family: "Roboto", sans-serif;
 }
 
 .btn-primary {
-    background: variables.$color-primary;
-    border-radius: 100px;
-    padding: 12px 24px;
-    border: none;
-    color: variables.$color-text-dark-dark;
-    font-size: 20px;
-    &:hover {
-        background: variables.$color-primary-hover;
+  background: variables.$color-primary;
+  border-radius: 100px;
+  padding: 12px 24px;
+  border: none;
+  color: variables.$color-text-dark-dark;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  &:hover {
+    background: variables.$color-primary-hover;
+  }
+  &.small {
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+}
+
+//auth
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 30px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-title {
+  font-size: 2.5rem;
+  margin: 0 auto;
+  background: variables.$color-primary;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-size: 1.2rem;
+}
+
+.form-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: variables.$color-text-dark;
+  font-size: 1.2rem;
+  width: 100%;
+  outline: none;
+  &.select {
+    appearance: none;
+    padding: 10px 40px 10px 10px;
+    background-position: right 10px top 50%;
+    background-size: 20px;
+  }
+  &.option {
+    color: black;
+  }
+}
+
+.form-input::placeholder {
+  color: variables.$color-text-medium;
+}
+
+.login-divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(28, 28, 28, 0.3);
+}
+
+.google-login-button {
+  background: #fff;
+  color: #757575;
+  padding: 12px 25px;
+  border: 1px solid #ddd;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-links-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  & > p {
+    margin: 0;
+  }
+}
+
+.page {
+  padding: 20px;
+}
+
+.home-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+tr {
+  &:first-child {
+    & > th:nth-child(1) {
+      background: variables.$color-bg-dark-dark;
+      text-align: left;
     }
+    & > th:nth-child(2) {
+      background: variables.$color-bg-dark-dark;
+      text-align: right;
+    }
+  }
+  & > td:nth-child(1) {
+    text-align: left;
+  }
+  & > td:nth-child(2) {
+    text-align: right;
+  }
+  &:last-child {
+    & > td {
+      font-weight: 600;
+      font-size: 20px;
+    }
+  }
+}
+
+th {
+  padding: 6px 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+td {
+  padding: 4px 15px;
+  font-size: 18px;
+}
+
+.subject-type {
+  color: variables.$color-text-medium;
+  font-size: 16px;
+}
+
+.grade-box {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  &.good {
+    background-color: variables.$color-success;
+  }
+  &.medium {
+    background-color: variables.$color-accent;
+  }
+  &.bad {
+    background-color: variables.$color-error;
+  }
+}
+
+.grade-distribution-wrapper {
+  padding-top: 20px;
+}
+
+.grade-distribution-table {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  & > div {
+    border: 1px solid variables.$color-text-dark-dark;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.grade {
+  grid-column: span 3;
+  font-weight: 600;
+  &:nth-child(6) {
+    grid-column: span 1;
+  }
+}
+
+.point {
+  grid-column: span 1;
+}
+
+.add-subject-form {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
 }
