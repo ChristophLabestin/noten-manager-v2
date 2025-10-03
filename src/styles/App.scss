@@ -17,6 +17,10 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
 .btn-primary {
   background: variables.$color-primary;
   border-radius: 100px;
@@ -89,23 +93,23 @@ body {
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
-  color: variables.$color-text-dark;
+  color: variables.$color-text-dark-dark;
   font-size: 1.2rem;
   width: 100%;
   outline: none;
-  &.select {
+  & select {
     appearance: none;
     padding: 10px 40px 10px 10px;
     background-position: right 10px top 50%;
     background-size: 20px;
   }
-  &.option {
-    color: black;
+  & option {
+    color: variables.$color-text-dark !important;
   }
 }
 
 .form-input::placeholder {
-  color: variables.$color-text-medium;
+  color: variables.$color-text-medium-dark;
 }
 
 .login-divider {
@@ -149,7 +153,7 @@ body {
 .home-layout {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40px;
 }
 
 table {
@@ -202,7 +206,7 @@ td {
   display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
-  color: white;
+  color: variables.$color-text-dark-dark;
   font-weight: bold;
   &.good {
     background-color: variables.$color-success;
@@ -245,7 +249,8 @@ td {
 
 .add-subject-form {
   display: flex;
+  flex-direction: column;
   width: 100%;
-  justify-content: space-between;
-  align-items: center;
+  gap: 20px;
+  
 }

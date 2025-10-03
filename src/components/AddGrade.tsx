@@ -7,9 +7,10 @@ import type { Grade } from "../interfaces/Grade";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // kommt direkt aus Home
+  onAddGrade: (subjectId: string, grade: Grade) => void;
 }
 
-export default function AddGrade({ subjectsProp }: AddGradeProps) {
+export default function AddGrade({ subjectsProp, onAddGrade }: AddGradeProps) {
   // State für ausgewähltes Fach (als Dokument-ID)
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   // State für neue Note
@@ -71,7 +72,7 @@ export default function AddGrade({ subjectsProp }: AddGradeProps) {
         createdAt: new Date(),
       });
 
-      console.log("Note erfolgreich hinzugefügt!");
+      onAddGrade(selectedSubjectId, newGrade);
 
       // Input zurücksetzen
       setNewGrade({
@@ -86,8 +87,9 @@ export default function AddGrade({ subjectsProp }: AddGradeProps) {
 
   return (
     <form className="add-subject-form" onSubmit={handleAddGrade}>
+      <h2>Note hinzufügen</h2>
       <div className="form-group">
-        <label className="form-label">Fach auswählen:</label>
+        <label className="form-label">Fach:</label>
         <select
           className="form-input"
           value={selectedSubjectId}
@@ -103,7 +105,7 @@ export default function AddGrade({ subjectsProp }: AddGradeProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Note hinzufügen:</label>
+        <label className="form-label">Note:</label>
         <input
           className="form-input"
           type="number"

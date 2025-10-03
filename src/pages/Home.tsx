@@ -72,12 +72,19 @@ export default function Home() {
   const handleAddSubjectToState = (newSubject: Subject) => {
     setSubjects((prev) => [...prev, newSubject]);
   };
+  
+  const handleAddSubjectGradeToState = (subjectId: string, grade: Grade) => {
+  setSubjectGrades((prev) => ({
+    ...prev,
+    [subjectId]: prev[subjectId] ? [...prev[subjectId], grade] : [grade],
+  }));
+};
 
   return (
     <div className="home-layout">
       <BurgerMenu />
       <SubjectsTable subjects={subjects} subjectGrades={subjectGrades} />
-      <AddGrade subjectsProp={subjects}/>
+      <AddGrade subjectsProp={subjects} onAddGrade={handleAddSubjectGradeToState}/>
       <AddSubject onAddSubject={handleAddSubjectToState} />
     </div>
   );

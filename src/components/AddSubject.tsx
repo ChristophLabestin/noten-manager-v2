@@ -51,31 +51,34 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
   };
 
   return (
-    <form className="add-subject-form" onSubmit={handleAddSubject}>
-      <div className="form-group">
-        <label className="form-label">Fach hinzufügen:</label>
-        <input
-          className="form-input"
-          type="text"
-          value={subjectName}
-          onChange={handleSubjectChange}
-          placeholder="Mathe"
-        />
-      </div>
-      <div className="form-group">
-        <label className="form-label">Fach Typ:</label>
-        <select
-          className="form-input"
-          value={subjectType}
-          onChange={handleTypeChange}
-        >
-          <option value={1}>Hauptfach</option>
-          <option value={0}>Nebenfach</option>
-        </select>
-      </div>
-      <button className="btn-primary small" type="submit">
-        hinzufügen
-      </button>
-    </form>
+    <>
+      <form className="add-subject-form" onSubmit={handleAddSubject}>
+        <h2>Fach hinzufügen</h2>
+        <div className="form-group">
+          <label className="form-label">Name:</label>
+          <input
+            className="form-input"
+            type="text"
+            value={subjectName}
+            onChange={handleSubjectChange}
+            placeholder="Mathe"
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Fach Typ:</label>
+          <select
+            className="form-input"
+            value={subjectType}
+            onChange={handleTypeChange}
+          >
+            <option value={1}>Hauptfach</option>
+            <option value={0}>Nebenfach</option>
+          </select>
+        </div>
+        <button className="btn-primary small" type="submit">
+          hinzufügen
+        </button>
+      </form>
+    </>
   );
 }
