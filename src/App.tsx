@@ -1,7 +1,5 @@
-import CookieBanner from "./components/CookieBanner";
 import Router from "./components/Router";
 import { AuthProvider } from "./context/authcontext";
-import { CookieConsentProvider } from "./context/cookieContext";
 
 function AppContent() {
   return (
@@ -16,10 +14,7 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <CookieConsentProvider>
-        <AppContent></AppContent>
-        <CookieBanner></CookieBanner>
-      </CookieConsentProvider>
+      <AppContent></AppContent>
     </AuthProvider>
   );
 }
