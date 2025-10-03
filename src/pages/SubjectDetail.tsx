@@ -74,9 +74,8 @@ export default function SubjectDetailPage({
         const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
         const subjectDocSnap = await getDoc(subjectDocRef);
         if (!subjectDocSnap.exists()) {
-          console.error("Fach nicht gefunden!");
           setLoading(false);
-          return;
+          throw new Error("Fach nicht gefunden!");
         }
         const subjectData = subjectDocSnap.data() as Subject;
         setActiveSubject({ ...subjectData, name: subjectDocSnap.id });
@@ -110,9 +109,12 @@ export default function SubjectDetailPage({
 
         setSubjectGrades(gradesData);
         setLoading(false);
-      } catch (error) {
-        console.error("Fehler beim Laden der Fachdaten:", error);
+      } catch (err) {
         setLoading(false);
+        throw new Error(
+          "Fehler beim Laden der Fachdaten: " +
+            (err instanceof Error ? err.message : String(err))
+        );
       }
     };
 
@@ -162,8 +164,11 @@ export default function SubjectDetailPage({
         doc(db, "users", user.uid, "subjects", subjectId, "grades", gradeId)
       );
       setSubjectGrades(subjectGrades.filter((g) => g.id !== gradeId));
-    } catch (error) {
-      console.error("Fehler beim Löschen der Note:", error);
+    } catch (err) {
+      throw new Error(
+        "Fehler beim Löschen der Note: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 
@@ -194,8 +199,11 @@ export default function SubjectDetailPage({
       updatedGrades[editingIndex] = { ...editedGrade, id: gradeId };
       setSubjectGrades(updatedGrades);
       setEditingIndex(null);
-    } catch (error) {
-      console.error("Fehler beim Speichern der Note:", error);
+    } catch (err) {
+      throw new Error(
+        "Fehler beim Speichern der Note: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 
@@ -222,7 +230,7 @@ export default function SubjectDetailPage({
       const user = auth.currentUser;
       if (!user) throw new Error("Kein Benutzer angemeldet");
       if (!activeSubject) throw new Error("Kein Fach ausgewählt");
-      
+
       const encryptedGradeStr = await encryptString(
         gradeNumber.toString(),
         encryptionKey
@@ -257,8 +265,11 @@ export default function SubjectDetailPage({
 
       setNewGradeInput("");
       setGradeWeight(activeSubject.type === 0 ? 1 : 2);
-    } catch (error) {
-      console.error("Fehler beim Hinzufügen der Note:", error);
+    } catch (err) {
+      throw new Error(
+        "Fehler beim Hinzufügen der Note: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
   };
 
@@ -314,6 +325,8 @@ export default function SubjectDetailPage({
                           className="form-input small"
                           value={editedGrade.grade}
                           style={{ minWidth: "50px" }}
+                          min={0}
+                          max={15}
                           onChange={(e) =>
                             setEditedGrade({
                               ...editedGrade,
@@ -397,6 +410,8 @@ export default function SubjectDetailPage({
               value={newGradeInput}
               onChange={handleGradeChange}
               placeholder="15"
+              min={0}
+              max={15}
             />
           </div>
           <div className="form-group">
