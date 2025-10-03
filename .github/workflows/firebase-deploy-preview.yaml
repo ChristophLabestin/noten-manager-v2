@@ -1,9 +1,6 @@
 name: Deploy to Firebase Hosting
 
 on:
-  push:
-    branches:
-      - preview
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -38,6 +35,6 @@ jobs:
           echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}" >> .env
 
       - name: Deploy to Firebase
-        run: npm run deploy  # Dieser Befehl sollte `firebase deploy` ausführen
+        run: npm run deploy-preview  # Dieser Befehl sollte `firebase deploy` ausführen
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
