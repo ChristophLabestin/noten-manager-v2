@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext/useAuth";
 import type { Subject } from "../interfaces/Subject";
-import type { Grade } from "../interfaces/Grade";
+import type { EncryptedGrade, Grade } from "../interfaces/Grade";
 import {
   collection,
   doc,
@@ -19,6 +19,11 @@ import saveIcon from "../assets/save.svg";
 import cancelIcon from "../assets/cancel.svg";
 import BackToHome from "../components/BackToHome";
 import { getAuth } from "firebase/auth";
+import {
+  decryptString,
+  deriveKeyFromPassword,
+  encryptString,
+} from "../services/cryptoService";
 
 interface SubjectDetailPageProps {
   subjectId: string;
@@ -46,48 +51,72 @@ export default function SubjectDetailPage({
     date: Timestamp.fromDate(new Date()),
   });
 
+  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchKeyAndData = async () => {
       if (!user) return;
 
-      // Fachdaten
-      const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
-      const subjectDocSnap = await getDoc(subjectDocRef);
+      try {
+        // User-Dokument
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) throw new Error("UserDoc fehlt");
 
-      if (!subjectDocSnap.exists()) {
-        console.error("Fach nicht gefunden!");
+        const { encryptionSalt } = userSnap.data();
+        if (!encryptionSalt) throw new Error("Encryption Salt fehlt");
+
+        // Key ableiten
+        const key = await deriveKeyFromPassword(user.uid, encryptionSalt);
+        setEncryptionKey(key);
+
+        // Fachdaten
+        const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
+        const subjectDocSnap = await getDoc(subjectDocRef);
+        if (!subjectDocSnap.exists()) {
+          console.error("Fach nicht gefunden!");
+          setLoading(false);
+          return;
+        }
+        const subjectData = subjectDocSnap.data() as Subject;
+        setActiveSubject({ ...subjectData, name: subjectDocSnap.id });
+
+        // Noten aus Firestore holen
+        const gradesRef = collection(
+          db,
+          "users",
+          user.uid,
+          "subjects",
+          subjectId,
+          "grades"
+        );
+        const gradesSnapshot = await getDocs(gradesRef);
+
+        const gradesData: GradeWithId[] = [];
+        for (const gradeDoc of gradesSnapshot.docs) {
+          const encryptedGrade = gradeDoc.data() as EncryptedGrade;
+          // Note entschlüsseln
+          const decryptedGradeStr = await decryptString(
+            encryptedGrade.grade,
+            key
+          );
+          gradesData.push({
+            id: gradeDoc.id,
+            grade: Number(decryptedGradeStr),
+            weight: encryptedGrade.weight,
+            date: encryptedGrade.date,
+          });
+        }
+
+        setSubjectGrades(gradesData);
         setLoading(false);
-        return;
+      } catch (error) {
+        console.error("Fehler beim Laden der Fachdaten:", error);
+        setLoading(false);
       }
-
-      const subjectData = subjectDocSnap.data() as Subject;
-      setActiveSubject({ ...subjectData, name: subjectDocSnap.id });
-
-      // Noten
-      const gradesRef = collection(
-        db,
-        "users",
-        user.uid,
-        "subjects",
-        subjectId,
-        "grades"
-      );
-      const gradesSnapshot = await getDocs(gradesRef);
-
-      const gradesData: GradeWithId[] = gradesSnapshot.docs.map(
-        (doc) =>
-          ({
-            ...doc.data(),
-            date: doc.data().date,
-            id: doc.id,
-          } as GradeWithId)
-      );
-
-      setSubjectGrades(gradesData);
-      setLoading(false);
     };
 
-    fetchData();
+    fetchKeyAndData();
   }, [user, subjectId]);
 
   const calculateGradeWeight = (grade: Grade): number => {
@@ -139,8 +168,13 @@ export default function SubjectDetailPage({
   };
 
   const handleSaveClick = async (gradeId: string) => {
-    if (!user || editingIndex === null) return;
+    if (!user || editingIndex === null || !encryptionKey) return;
     try {
+      // Note verschlüsseln bevor speichern
+      const encryptedGradeStr = await encryptString(
+        editedGrade.grade.toString(),
+        encryptionKey
+      );
       const gradeDocRef = doc(
         db,
         "users",
@@ -151,12 +185,11 @@ export default function SubjectDetailPage({
         gradeId
       );
       await updateDoc(gradeDocRef, {
-        grade: editedGrade.grade,
+        grade: encryptedGradeStr,
         weight: editedGrade.weight,
         date: editedGrade.date,
       });
 
-      // State aktualisieren
       const updatedGrades = [...subjectGrades];
       updatedGrades[editingIndex] = { ...editedGrade, id: gradeId };
       setSubjectGrades(updatedGrades);
@@ -176,25 +209,30 @@ export default function SubjectDetailPage({
 
   const handleAddGrade = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!encryptionKey || !activeSubject) return;
 
-    // String in Zahl konvertieren
     const gradeNumber = Number(newGradeInput);
     if (isNaN(gradeNumber)) {
       alert("Bitte eine gültige Zahl eingeben");
       return;
     }
 
-    const gradeToAdd: Grade = {
-      grade: gradeNumber,
-      weight: gradeWeight,
-      date: Timestamp.fromDate(new Date()),
-    };
-
     try {
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Kein Benutzer angemeldet");
       if (!activeSubject) throw new Error("Kein Fach ausgewählt");
+      
+      const encryptedGradeStr = await encryptString(
+        gradeNumber.toString(),
+        encryptionKey
+      );
+
+      const gradeToAdd: EncryptedGrade = {
+        grade: encryptedGradeStr,
+        weight: gradeWeight,
+        date: Timestamp.fromDate(new Date()),
+      };
 
       const gradesRef = collection(
         db,
@@ -204,20 +242,21 @@ export default function SubjectDetailPage({
         activeSubject.name,
         "grades"
       );
+      const docRef = await addDoc(gradesRef, gradeToAdd);
 
-      const docRef = await addDoc(gradesRef, {
-        ...gradeToAdd,
-      });
-
-      // State aktualisieren – neue Note direkt hinzufügen
+      // State aktualisieren – Note gleich entschlüsseln für Anzeige
       setSubjectGrades((prev) => [
         ...prev,
-        { ...gradeToAdd, id: docRef.id }, // id vom Firestore-Dokument
+        {
+          id: docRef.id,
+          grade: gradeNumber,
+          weight: gradeWeight,
+          date: gradeToAdd.date,
+        },
       ]);
 
-      // Input zurücksetzen
       setNewGradeInput("");
-      setGradeWeight(activeSubject.type === 0 ? 1 : 2); // optional: default wiederherstellen
+      setGradeWeight(activeSubject.type === 0 ? 1 : 2);
     } catch (error) {
       console.error("Fehler beim Hinzufügen der Note:", error);
     }
