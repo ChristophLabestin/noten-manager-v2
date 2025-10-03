@@ -1,6 +1,9 @@
 name: Deploy to Firebase Hosting
 
 on:
+  push:
+    branches:
+      - preview
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
