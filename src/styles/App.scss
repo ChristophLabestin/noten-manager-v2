@@ -287,12 +287,13 @@ td {
 .subject-detail-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .subject-detail-grade {
   font-size: 28px;
   font-weight: 600;
+  margin-top: 14px;
 }
 
 .subject-detail-subheadline {
@@ -376,4 +377,65 @@ td {
   padding: 20px 0;
   text-align: center;
   background: variables.$color-bg-dark-dark;
+}
+
+.extend-button {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.extend-icon {
+  rotate: -90deg;
+  margin-top: -8px;
+  transition: all .3s ease;
+  &.extended {
+    rotate: 90deg;
+    margin-top: 10px;
+  }
+}
+
+.form-hidden {
+  margin-top: -20px;
+  height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: hidden;
+  transition: all .3s ease;
+  &.extended {
+    height: 160px;
+    margin-top: 0px;
+  }
+}
+
+.hidden-textarea {
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 120px;
+  max-height: 120px;
+}
+
+.info-icon-details {
+  opacity: .3;
+  &.active {
+    opacity: 1;
+    cursor: pointer;
+  }
+}
+
+.subject-detail-infos {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 15px;
+  font-size: 22px;
+  &>p {
+    margin: 0;
+  }
+  &>a {
+    font-size: 18px;
+  }
 }

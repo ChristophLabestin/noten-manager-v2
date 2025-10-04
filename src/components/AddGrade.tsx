@@ -6,6 +6,7 @@ import { db } from "../firebase/firebaseConfig";
 import type { EncryptedGrade } from "../interfaces/Grade";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
+import backIcon from "../assets/back.svg";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // Fächer aus Home
@@ -27,6 +28,8 @@ export default function AddGrade({
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
   const [gradeWeight, setGradeWeight] = useState<number>(0);
   const [helpActive, setHelpActive] = useState<boolean>(false);
+  const [infosExtended, setInfosExtended] = useState<boolean>(false);
+  const [gradeNote, setGradeNote] = useState<string>("");
 
   // Update lokale Subjects, wenn props sich ändern
   useEffect(() => {
@@ -44,6 +47,9 @@ export default function AddGrade({
 
   const handleGradeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewGradeInput(e.target.value);
+  };
+  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGradeNote(e.target.value);
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -66,7 +72,7 @@ export default function AddGrade({
 
     if (gradeNumber > 15 || gradeNumber < 0) {
       alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
-      return
+      return;
     }
 
     try {
@@ -79,6 +85,7 @@ export default function AddGrade({
         grade: encryptedGrade,
         weight: gradeWeight,
         date: Timestamp.fromDate(new Date()),
+        note: gradeNote
       };
 
       const auth = getAuth();
@@ -101,6 +108,7 @@ export default function AddGrade({
       onAddGrade(selectedSubjectId, gradeToAdd, encryptionKeyProp);
 
       setNewGradeInput("");
+      setGradeNote("")
     } catch (err) {
       throw new Error(
         "Fehler beim Hinzufügen: " +
@@ -185,6 +193,27 @@ export default function AddGrade({
             )}
           </select>
         </div>
+      </div>
+      <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
+        <div className="form-group">
+          <label className="form-label">Notiz:</label>
+          <textarea
+            className="form-input hidden-textarea"
+            value={gradeNote}
+            onChange={handleNoteChange}
+            placeholder="Mitarbeitsnote vom Freitag..."
+          ></textarea>
+        </div>
+      </div>
+      <div
+        className="extend-button"
+        onClick={() => setInfosExtended(!infosExtended)}
+      >
+        <img
+          className={`extend-icon ${infosExtended ? "extended" : ""}`}
+          src={backIcon}
+        />
+        <p>Notiz hinzufügen</p>
       </div>
       <button className="btn-primary small" type="submit">
         Hinzufügen

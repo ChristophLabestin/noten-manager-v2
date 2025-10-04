@@ -25,6 +25,8 @@ import {
   encryptString,
 } from "../services/cryptoService";
 import Loading from "../components/Loading";
+import backIcon from "../assets/back.svg";
+import infoIcon from "../assets/info.svg";
 
 interface SubjectDetailPageProps {
   subjectId: string;
@@ -43,6 +45,8 @@ export default function SubjectDetailPage({
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
   const [gradeWeight, setGradeWeight] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [infosExtended, setInfosExtended] = useState<boolean>(false);
+  const [gradeNote, setGradeNote] = useState<string>("");
 
   // State für editierbare Note
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -50,6 +54,7 @@ export default function SubjectDetailPage({
     grade: 0,
     weight: 1,
     date: Timestamp.fromDate(new Date()),
+    note: "",
   });
 
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
@@ -105,6 +110,7 @@ export default function SubjectDetailPage({
             grade: Number(decryptedGradeStr),
             weight: encryptedGrade.weight,
             date: encryptedGrade.date,
+            note: encryptedGrade.note,
           });
         }
 
@@ -195,6 +201,7 @@ export default function SubjectDetailPage({
         grade: encryptedGradeStr,
         weight: editedGrade.weight,
         date: editedGrade.date,
+        note: editedGrade.note,
       });
 
       const updatedGrades = [...subjectGrades];
@@ -211,6 +218,10 @@ export default function SubjectDetailPage({
 
   const handleGradeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewGradeInput(e.target.value);
+  };
+
+  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGradeNote(e.target.value);
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -247,6 +258,7 @@ export default function SubjectDetailPage({
         grade: encryptedGradeStr,
         weight: gradeWeight,
         date: Timestamp.fromDate(new Date()),
+        note: gradeNote,
       };
 
       const gradesRef = collection(
@@ -267,10 +279,12 @@ export default function SubjectDetailPage({
           grade: gradeNumber,
           weight: gradeWeight,
           date: gradeToAdd.date,
+          note: gradeToAdd.note,
         },
       ]);
 
       setNewGradeInput("");
+      setGradeNote("");
       setGradeWeight(activeSubject.type === 0 ? 1 : 2);
     } catch (err) {
       throw new Error(
@@ -278,6 +292,17 @@ export default function SubjectDetailPage({
           (err instanceof Error ? err.message : String(err))
       );
     }
+  };
+
+  const showNote = (gradeId: string) => {
+    const _g = subjectGrades.find((g) => g.id === gradeId) as Grade;
+    if (_g === undefined && !_g) {
+      return null;
+    }
+    if (_g.note === "") {
+      return null;
+    }
+    return alert(_g.note);
   };
 
   if (isLoading) {
@@ -293,6 +318,24 @@ export default function SubjectDetailPage({
           <h2 className="subject-detail-subheadline">
             {activeSubject.type === 0 ? "Nebenfach" : "Hauptfach"}
           </h2>
+          {(activeSubject.teacher ||
+            activeSubject.alias ||
+            activeSubject.email) && (
+            <div className="subject-detail-infos">
+              {activeSubject.teacher && <p>{activeSubject.teacher}</p>}
+              {activeSubject.alias && <p>{activeSubject.alias}</p>}
+              {activeSubject.email && (
+                <a href={`mailto:${activeSubject.email}`}>
+                  {activeSubject.email}
+                </a>
+              )}
+            </div>
+          )}
+          {activeSubject.room && (
+            <div className="subject-detail-infos">
+              <p>Raum: {activeSubject.room}</p>
+            </div>
+          )}
         </div>
         <div className="subject-detail-grade">
           <div
@@ -319,105 +362,117 @@ export default function SubjectDetailPage({
                 <th>Datum</th>
                 <th>Note</th>
                 <th>Art</th>
+                <th>Notiz</th>
                 <th>Aktionen</th>
               </tr>
             </thead>
             <tbody>
-              {subjectGrades.map((grade, index) => (
-                <tr key={grade.id}>
-                  {editingIndex === index ? (
-                    <>
-                      <td>{grade.date.toDate().toLocaleDateString()}</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-input small"
-                          value={editedGrade.grade}
-                          style={{ minWidth: "50px" }}
-                          min={0}
-                          max={15}
-                          onChange={(e) =>
-                            setEditedGrade({
-                              ...editedGrade,
-                              grade: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </td>
-                      <td>
-                        <select
-                          value={editedGrade.weight}
-                          className="form-input small"
-                          style={{ minWidth: "130px" }}
-                          onChange={(e) =>
-                            setEditedGrade({
-                              ...editedGrade,
-                              weight: Number(e.target.value),
-                            })
-                          }
-                        >
-                          {activeSubject.type === 0 ? (
-                            <>
-                              <option value={3}>Fachreferat</option>
-                              <option value={1}>Kurzarbeit</option>
-                              <option value={0}>Mündlich</option>
-                            </>
-                          ) : (
-                            <>
-                              <option value={3}>Fachreferat</option>
-                              <option value={2}>Schulaufgabe</option>
-                              <option value={1}>Kurzarbeit</option>
-                              <option value={0}>Mündlich</option>
-                            </>
-                          )}
-                        </select>
-                      </td>
-                      <td>
-                        <button
-                          className="btn-small"
-                          onClick={() => handleSaveClick(grade.id)}
-                        >
-                          <img src={saveIcon}></img>
-                        </button>
-                        <button
-                          className="btn-small"
-                          onClick={() => setEditingIndex(null)}
-                        >
-                          <img src={cancelIcon}></img>
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{grade.date.toDate().toLocaleDateString()}</td>
-                      <td>{grade.grade}</td>
-                      <td>
-                        {grade.weight === 0
-                          ? "Mündlich"
-                          : grade.weight === 1
-                          ? "Kurzarbeit"
-                          : grade.weight === 2
-                          ? "Schulaufgabe"
-                          : "Fachreferat"}
-                      </td>
-                      <td>
-                        <button
-                          className="btn-small"
-                          onClick={() => handleEditClick(index)}
-                        >
-                          <img src={editIcon}></img>
-                        </button>
-                        <button
-                          className="btn-small"
-                          onClick={() => handleDeleteClick(grade.id)}
-                        >
-                          <img src={deleteIcon}></img>
-                        </button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
+              {subjectGrades
+                .sort((a, b) => b.date.seconds - a.date.seconds)
+                .map((grade, index) => (
+                  <tr key={grade.id}>
+                    {editingIndex === index ? (
+                      <>
+                        <td>{grade.date.toDate().toLocaleDateString()}</td>
+                        <td>
+                          <input
+                            type="number"
+                            className="form-input small"
+                            value={editedGrade.grade}
+                            style={{ minWidth: "50px" }}
+                            min={0}
+                            max={15}
+                            onChange={(e) =>
+                              setEditedGrade({
+                                ...editedGrade,
+                                grade: Number(e.target.value),
+                              })
+                            }
+                          />
+                        </td>
+                        <td>
+                          <select
+                            value={editedGrade.weight}
+                            className="form-input small"
+                            style={{ minWidth: "130px" }}
+                            onChange={(e) =>
+                              setEditedGrade({
+                                ...editedGrade,
+                                weight: Number(e.target.value),
+                              })
+                            }
+                          >
+                            {activeSubject.type === 0 ? (
+                              <>
+                                <option value={3}>Fachreferat</option>
+                                <option value={1}>Kurzarbeit</option>
+                                <option value={0}>Mündlich</option>
+                              </>
+                            ) : (
+                              <>
+                                <option value={3}>Fachreferat</option>
+                                <option value={2}>Schulaufgabe</option>
+                                <option value={1}>Kurzarbeit</option>
+                                <option value={0}>Mündlich</option>
+                              </>
+                            )}
+                          </select>
+                        </td>
+                        <td>
+                          <button
+                            className="btn-small"
+                            onClick={() => handleSaveClick(grade.id)}
+                          >
+                            <img src={saveIcon}></img>
+                          </button>
+                          <button
+                            className="btn-small"
+                            onClick={() => setEditingIndex(null)}
+                          >
+                            <img src={cancelIcon}></img>
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{grade.date.toDate().toLocaleDateString()}</td>
+                        <td>{grade.grade}</td>
+                        <td>
+                          {grade.weight === 0
+                            ? "Mündlich"
+                            : grade.weight === 1
+                            ? "Kurzarbeit"
+                            : grade.weight === 2
+                            ? "Schulaufgabe"
+                            : "Fachreferat"}
+                        </td>
+                        <td>
+                          <img
+                            src={infoIcon}
+                            className={`info-icon-details ${
+                              grade.note !== "" ? "active" : ""
+                            }`}
+                            onClick={() => showNote(grade.id)}
+                          />
+                        </td>
+                        <td>
+                          <button
+                            className="btn-small"
+                            onClick={() => handleEditClick(index)}
+                          >
+                            <img src={editIcon}></img>
+                          </button>
+                          <button
+                            className="btn-small"
+                            onClick={() => handleDeleteClick(grade.id)}
+                          >
+                            <img src={deleteIcon}></img>
+                          </button>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -460,10 +515,30 @@ export default function SubjectDetailPage({
             </select>
           </div>
         </div>
+        <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
+          <div className="form-group">
+            <label className="form-label">Notiz:</label>
+            <textarea
+              className="form-input hidden-textarea"
+              value={gradeNote}
+              onChange={handleNoteChange}
+              placeholder="Mitarbeitsnote vom Freitag..."
+            ></textarea>
+          </div>
+        </div>
+        <div
+          className="extend-button"
+          onClick={() => setInfosExtended(!infosExtended)}
+        >
+          <img
+            className={`extend-icon ${infosExtended ? "extended" : ""}`}
+            src={backIcon}
+          />
+          <p>Notiz hinzufügen</p>
+        </div>
         <button className="btn-primary small" onClick={handleAddGrade}>
           Hinzufügen
         </button>
-        preview
       </div>
       <BackToHome />
     </div>

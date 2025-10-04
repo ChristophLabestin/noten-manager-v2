@@ -4,6 +4,7 @@ import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
+import backIcon from "../assets/back.svg";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
@@ -12,10 +13,27 @@ interface AddSubjectProps {
 export default function AddSubject({ onAddSubject }: AddSubjectProps) {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
+  const [teacherName, setTeacherName] = useState<string>("");
+  const [roomName, setRoomName] = useState<string>("");
   const [helpActive, setHelpActive] = useState<boolean>(false);
+  const [infosExtended, setInfosExtended] = useState<boolean>(false);
+  const [teacherEmail, setTeacherEmail] = useState<string>("");
+  const [teacherAlias, setTeacherAlias] = useState<string>("");
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSubjectName(e.target.value);
+  };
+  const handleTeacherNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTeacherName(e.target.value);
+  };
+  const handleRoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRoomName(e.target.value);
+  };
+  const handleTeacherEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTeacherEmail(e.target.value);
+  };
+  const handleTeacherAliasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTeacherAlias(e.target.value);
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -38,6 +56,10 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
         name: subjectName,
         type: subjectType,
         date: new Date(),
+        teacher: teacherName,
+        room: roomName,
+        email: teacherEmail,
+        alias: teacherAlias,
       };
 
       await setDoc(subjectDocRef, newSubject);
@@ -47,6 +69,10 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
 
       setSubjectName("");
       setSubjectType(1);
+      setTeacherName("")
+      setRoomName("")
+      setTeacherEmail("")
+      setTeacherAlias("")
     } catch (err) {
       throw new Error(
         "Fehler beim Hinzufügen des Fachs: " +
@@ -104,8 +130,64 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
             </select>
           </div>
         </div>
+        <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
+          <div className="form-two-columns">
+            <div className="form-group">
+              <label className="form-label">Lehrer:</label>
+              <input
+                className="form-input"
+                type="text"
+                value={teacherName}
+                onChange={handleTeacherNameChange}
+                placeholder="Herr Mustermann"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Raum:</label>
+              <input
+                className="form-input"
+                type="text"
+                value={roomName}
+                onChange={handleRoomChange}
+                placeholder="K100"
+              />
+            </div>
+          </div>
+          <div className="form-two-columns">
+            <div className="form-group">
+              <label className="form-label">E-Mail:</label>
+              <input
+                className="form-input"
+                type="text"
+                value={teacherEmail}
+                onChange={handleTeacherEmailChange}
+                placeholder="mustermann@gmail.com"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Kürzel:</label>
+              <input
+                className="form-input"
+                type="text"
+                value={teacherAlias}
+                onChange={handleTeacherAliasChange}
+                placeholder="MUS"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="extend-button"
+          onClick={() => setInfosExtended(!infosExtended)}
+        >
+          <img
+            className={`extend-icon ${infosExtended ? "extended" : ""}`}
+            src={backIcon}
+          />
+          <p>zusätzliche Infos hinzufügen</p>
+        </div>
         <button className="btn-primary small" type="submit">
-          hinzufügen
+          Hinzufügen
         </button>
       </form>
     </>
