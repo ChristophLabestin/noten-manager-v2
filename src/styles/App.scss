@@ -428,8 +428,8 @@ td {
 
 .subject-detail-infos {
   margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: max-content max-content;
   gap: 5px 15px;
   font-size: 22px;
   &>p {
@@ -437,5 +437,6 @@ td {
   }
   &>a {
     font-size: 18px;
+    grid-column: span 2;
   }
 }
