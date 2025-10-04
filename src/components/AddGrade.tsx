@@ -64,6 +64,11 @@ export default function AddGrade({
       return;
     }
 
+    if (gradeNumber > 15 || gradeNumber < 0) {
+      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
+      return
+    }
+
     try {
       const encryptedGrade = await encryptString(
         gradeNumber.toString(),
@@ -166,11 +171,13 @@ export default function AddGrade({
           >
             {findSubjectType(selectedSubjectId) === 0 ? (
               <>
+                <option value={3}>Fachreferat</option>
                 <option value={1}>Kurzarbeit</option>
                 <option value={0}>Mündlich</option>
               </>
             ) : (
               <>
+                <option value={3}>Fachreferat</option>
                 <option value={2}>Schulaufgabe</option>
                 <option value={1}>Kurzarbeit</option>
                 <option value={0}>Mündlich</option>

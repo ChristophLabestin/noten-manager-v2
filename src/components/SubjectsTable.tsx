@@ -24,12 +24,12 @@ export default function SubjectsTable({
 
     if (type === 1) {
       // Hauptfach
-      return grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
+      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
     }
 
     if (type === 0) {
       // Nebenfach
-      return grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
+      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
     }
 
     return 1; // Default

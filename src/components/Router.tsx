@@ -5,10 +5,12 @@ import Home from "../pages/Home";
 import SubjectsPage from "../pages/Subjects";
 import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
-  "/register": () => <Register/>,
+  "/register": () => <Register />,
+  "/datenschutz": () => <PrivacyPolicy />,
   "/": () => (
     <PrivateRoute>
       <Home />

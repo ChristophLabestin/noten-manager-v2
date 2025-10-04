@@ -24,6 +24,7 @@ import {
   deriveKeyFromPassword,
   encryptString,
 } from "../services/cryptoService";
+import Loading from "../components/Loading";
 
 interface SubjectDetailPageProps {
   subjectId: string;
@@ -39,9 +40,9 @@ export default function SubjectDetailPage({
   const { user } = useAuth();
   const [activeSubject, setActiveSubject] = useState<Subject>();
   const [subjectGrades, setSubjectGrades] = useState<GradeWithId[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
   const [gradeWeight, setGradeWeight] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // State für editierbare Note
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -74,7 +75,7 @@ export default function SubjectDetailPage({
         const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
         const subjectDocSnap = await getDoc(subjectDocRef);
         if (!subjectDocSnap.exists()) {
-          setLoading(false);
+          setIsLoading(false);
           throw new Error("Fach nicht gefunden!");
         }
         const subjectData = subjectDocSnap.data() as Subject;
@@ -108,17 +109,18 @@ export default function SubjectDetailPage({
         }
 
         setSubjectGrades(gradesData);
-        setLoading(false);
+        setIsLoading(false);
       } catch (err) {
-        setLoading(false);
+        setIsLoading(false);
         throw new Error(
           "Fehler beim Laden der Fachdaten: " +
             (err instanceof Error ? err.message : String(err))
         );
       }
     };
-
+    setIsLoading(true);
     fetchKeyAndData();
+    setIsLoading(true);
   }, [user, subjectId]);
 
   const calculateGradeWeight = (grade: Grade): number => {
@@ -128,12 +130,12 @@ export default function SubjectDetailPage({
 
     if (type === 1) {
       // Hauptfach
-      return grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
+      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
     }
 
     if (type === 0) {
       // Nebenfach
-      return grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
+      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
     }
 
     return 1; // Default
@@ -221,7 +223,12 @@ export default function SubjectDetailPage({
 
     const gradeNumber = Number(newGradeInput);
     if (isNaN(gradeNumber)) {
-      alert("Bitte eine gültige Zahl eingeben");
+      alert("Bitte eine gültige Zahl eingeben.");
+      return;
+    }
+
+    if (gradeNumber > 15 || gradeNumber < 0) {
+      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
       return;
     }
 
@@ -273,7 +280,9 @@ export default function SubjectDetailPage({
     }
   };
 
-  if (loading) return <p>Lade Fachdaten...</p>;
+  if (isLoading) {
+    return <Loading />;
+  }
   if (!activeSubject) return <p>Fach nicht gefunden!</p>;
 
   return (
@@ -347,9 +356,20 @@ export default function SubjectDetailPage({
                             })
                           }
                         >
-                          <option value={0}>Mündlich</option>
-                          <option value={1}>Kurzarbeit</option>
-                          <option value={2}>Schulaufgabe</option>
+                          {activeSubject.type === 0 ? (
+                            <>
+                              <option value={3}>Fachreferat</option>
+                              <option value={1}>Kurzarbeit</option>
+                              <option value={0}>Mündlich</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value={3}>Fachreferat</option>
+                              <option value={2}>Schulaufgabe</option>
+                              <option value={1}>Kurzarbeit</option>
+                              <option value={0}>Mündlich</option>
+                            </>
+                          )}
                         </select>
                       </td>
                       <td>
@@ -376,7 +396,9 @@ export default function SubjectDetailPage({
                           ? "Mündlich"
                           : grade.weight === 1
                           ? "Kurzarbeit"
-                          : "Schulaufgabe"}
+                          : grade.weight === 2
+                          ? "Schulaufgabe"
+                          : "Fachreferat"}
                       </td>
                       <td>
                         <button
@@ -423,11 +445,13 @@ export default function SubjectDetailPage({
             >
               {activeSubject.type === 0 ? (
                 <>
+                  <option value={3}>Fachreferat</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich</option>
                 </>
               ) : (
                 <>
+                  <option value={3}>Fachreferat</option>
                   <option value={2}>Schulaufgabe</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich</option>
