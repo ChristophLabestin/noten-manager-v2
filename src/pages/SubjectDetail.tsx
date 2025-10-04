@@ -24,6 +24,7 @@ import {
   deriveKeyFromPassword,
   encryptString,
 } from "../services/cryptoService";
+import Loading from "../components/Loading";
 
 interface SubjectDetailPageProps {
   subjectId: string;
@@ -39,9 +40,9 @@ export default function SubjectDetailPage({
   const { user } = useAuth();
   const [activeSubject, setActiveSubject] = useState<Subject>();
   const [subjectGrades, setSubjectGrades] = useState<GradeWithId[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
   const [gradeWeight, setGradeWeight] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // State für editierbare Note
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -74,7 +75,7 @@ export default function SubjectDetailPage({
         const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
         const subjectDocSnap = await getDoc(subjectDocRef);
         if (!subjectDocSnap.exists()) {
-          setLoading(false);
+          setIsLoading(false);
           throw new Error("Fach nicht gefunden!");
         }
         const subjectData = subjectDocSnap.data() as Subject;
@@ -108,17 +109,18 @@ export default function SubjectDetailPage({
         }
 
         setSubjectGrades(gradesData);
-        setLoading(false);
+        setIsLoading(false);
       } catch (err) {
-        setLoading(false);
+        setIsLoading(false);
         throw new Error(
           "Fehler beim Laden der Fachdaten: " +
             (err instanceof Error ? err.message : String(err))
         );
       }
     };
-
+    setIsLoading(true);
     fetchKeyAndData();
+    setIsLoading(true);
   }, [user, subjectId]);
 
   const calculateGradeWeight = (grade: Grade): number => {
@@ -221,7 +223,12 @@ export default function SubjectDetailPage({
 
     const gradeNumber = Number(newGradeInput);
     if (isNaN(gradeNumber)) {
-      alert("Bitte eine gültige Zahl eingeben");
+      alert("Bitte eine gültige Zahl eingeben.");
+      return;
+    }
+
+    if (gradeNumber > 15 || gradeNumber < 0) {
+      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
       return;
     }
 
@@ -273,7 +280,9 @@ export default function SubjectDetailPage({
     }
   };
 
-  if (loading) return <p>Lade Fachdaten...</p>;
+  if (isLoading) {
+    return <Loading />;
+  }
   if (!activeSubject) return <p>Fach nicht gefunden!</p>;
 
   return (

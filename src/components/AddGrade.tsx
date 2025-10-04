@@ -64,6 +64,11 @@ export default function AddGrade({
       return;
     }
 
+    if (gradeNumber > 15 || gradeNumber < 0) {
+      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
+      return
+    }
+
     try {
       const encryptedGrade = await encryptString(
         gradeNumber.toString(),

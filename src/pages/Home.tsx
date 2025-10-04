@@ -14,6 +14,7 @@ import {
   deriveKeyFromPassword,
   decryptString,
 } from "../services/cryptoService";
+import Loading from "../components/Loading";
 
 export default function Home() {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ export default function Home() {
     [key: string]: Grade[];
   }>({});
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -92,10 +94,12 @@ export default function Home() {
       }
     };
 
+    setIsLoading(true);
     fetchUserProfile();
     if (user && encryptionKey) {
       fetchData();
     }
+    setIsLoading(false);
   }, [user, encryptionKey]);
 
   const handleAddSubjectToState = (newSubject: Subject) => {
@@ -123,6 +127,10 @@ export default function Home() {
         : [decryptedGrade],
     }));
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="home-layout">

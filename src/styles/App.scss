@@ -117,7 +117,7 @@ a {
 }
 
 .form-input::placeholder {
-  color: variables.$color-text-medium-dark;
+  color: variables.$color-text-medium;
 }
 
 .login-divider {
@@ -364,94 +364,9 @@ td {
   padding-bottom: 30px;
 }
 
-.cookie-banner-wrapper {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  top: 0;
-  right: 0;
-  width: 100%;
-  background: rgba($color: #000000, $alpha: .6);
-  color: white;
-  padding: 10px 20px;
+.loading-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-}
-
-.cookie-more-info-wrapper {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.cookie-banner {
-  background: variables.$color-bg-light-dark;
-  padding: 40px 20px 40px;
-  border-radius: 20px;
-  border: 3px solid variables.$color-primary-dark;
-  max-width: 600px;
-  max-height: 500px;
   height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  transition: all 1s;
-  &.more-info {
-    max-width: 1000px;
-    max-height: 700px;
-  }
-}
-
-.hyperlink {
-  color: variables.$color-primary-dark !important;
-}
-
-.cookie-accept {
-  background: variables.$color-primary-dark;
-  padding: 10px 20px;
-  font-size: 18px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  border: none;
-  flex: 1 1 35%;
-  justify-self: end;
-}
-
-.cookie-decline {
-  background: variables.$color-bg-light-dark;
-  padding: 10px 20px;
-  font-size: 18px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  border: none;
-  flex: 1 1 35%;
-  justify-self: start;
-}
-
-.cookie-more-info {
-  background: variables.$color-bg-light-dark;
-  padding: 10px 20px;
-  font-size: 18px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  grid-column: span 2;
-}
-
-.btn-wrapper.cookie {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  justify-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
