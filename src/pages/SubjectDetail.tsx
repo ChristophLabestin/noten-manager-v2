@@ -418,6 +418,7 @@ export default function SubjectDetailPage({
                             )}
                           </select>
                         </td>
+                        <td></td>
                         <td>
                           <button
                             className="btn-small"
