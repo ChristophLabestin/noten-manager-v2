@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 import { doc, setDoc, collection } from "firebase/firestore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
@@ -8,9 +8,11 @@ import backIcon from "../assets/back.svg";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
+  subjectsProps: Subject[]
 }
 
-export default function AddSubject({ onAddSubject }: AddSubjectProps) {
+export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectProps) {
+  const [subjects, setSubjects] = useState<Subject[]>()
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
   const [teacherName, setTeacherName] = useState<string>("");
@@ -19,6 +21,10 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
   const [infosExtended, setInfosExtended] = useState<boolean>(false);
   const [teacherEmail, setTeacherEmail] = useState<string>("");
   const [teacherAlias, setTeacherAlias] = useState<string>("");
+
+  useEffect(() => {
+    setSubjects(subjectsProps)
+  }, [subjectsProps])
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSubjectName(e.target.value);
@@ -40,6 +46,14 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
     setSubjectType(Number(e.target.value));
   };
 
+  const countSubjects = () => {
+    if(subjects) {
+      const subjectsCount = subjects.length
+      return subjectsCount
+    }
+    return 0
+  }
+
   const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectName.trim()) return;
@@ -56,6 +70,7 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
         name: subjectName,
         type: subjectType,
         date: new Date(),
+        order: countSubjects() + 1,
         teacher: teacherName,
         room: roomName,
         email: teacherEmail,

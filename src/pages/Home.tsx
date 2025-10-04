@@ -135,13 +135,20 @@ export default function Home() {
   return (
     <div className="home-layout">
       <BurgerMenu />
-      <SubjectsTable subjects={subjects} subjectGrades={subjectGrades} />
+      <SubjectsTable
+        userId={user!.uid}
+        subjects={subjects}
+        subjectGrades={subjectGrades}
+      />
       <AddGrade
         subjectsProp={subjects}
         onAddGrade={handleAddSubjectGradeToState}
         encryptionKeyProp={encryptionKey!}
       />
-      <AddSubject onAddSubject={handleAddSubjectToState} />
+      <AddSubject
+        subjectsProps={subjects}
+        onAddSubject={handleAddSubjectToState}
+      />
       <Logout />
     </div>
   );
