@@ -155,7 +155,7 @@ a {
 }
 
 .page {
-  padding: 40px 20px;
+  padding: 40px 20px 0px;
 }
 
 .home-layout {
@@ -369,4 +369,11 @@ td {
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.footer {
+  margin-top: 40px;
+  padding: 20px 0;
+  text-align: center;
+  background: variables.$color-bg-dark-dark;
 }
