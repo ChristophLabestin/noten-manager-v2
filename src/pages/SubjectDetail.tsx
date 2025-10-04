@@ -463,6 +463,7 @@ export default function SubjectDetailPage({
         <button className="btn-primary small" onClick={handleAddGrade}>
           Hinzufügen
         </button>
+        preview
       </div>
       <BackToHome />
     </div>
