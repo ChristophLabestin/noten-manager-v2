@@ -76,11 +76,12 @@ export default function SubjectsTable({
   return (
     <div>
       <div className="table-wrapper">
+        <h2 className="section-head">Notenübersicht</h2>
         <table className="home-table">
           <thead className="home-thead">
             <tr className="home-tr">
               <th className="home-th">Fach</th>
-              <th className="home-th">Durchschnitt</th>
+              <th className="home-th">Ø</th>
             </tr>
           </thead>
           <tbody className="home-tbody">

@@ -3,16 +3,15 @@ import { useAuth } from "../context/authcontext/useAuth";
 import type { UserProfile } from "../interfaces/UserProfile";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import Logout from "./Logout";
 
-interface BurgerMenuProps {
-  backToHome?: boolean;
-}
 
-const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
+const BurgerMenu: React.FC = () => {
   const { user } = useAuth();
 
   const [greeting, setGreeting] = useState<string>("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isHome, setIsHome] = useState<boolean>(true)
 
   useEffect(() => {
     const date = new Date();
@@ -44,20 +43,29 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
       }
     };
 
+    // 🔍 Prüfen, ob aktuelle Seite die Startseite ist
+    const checkIfHome = () => {
+      if (typeof window !== "undefined") {
+        const pathname = window.location.pathname;
+        setIsHome(pathname === "/");
+      }
+    };
+
     fetchUserProfile();
+    checkIfHome();
   }, [user]);
 
   return (
     <div
       className={
-        props.backToHome
+        !isHome
           ? "burger-menu-wrapper with-back"
           : "burger-menu-wrapper"
       }
     >
-      {!props.backToHome && (
+      {isHome && (
         <h1 className="nav-greeting">
-          {greeting}, {user?.displayName
+          <span className="greeting-small">{greeting},</span><br/> {user?.displayName
             ? `${user.displayName}`
             : userProfile
             ? `${userProfile.name}`
@@ -65,6 +73,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = (props) => {
           !
         </h1>
       )}
+      <Logout/>
     </div>
   );
 };

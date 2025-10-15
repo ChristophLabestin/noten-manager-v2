@@ -4,13 +4,17 @@ import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
-import backIcon from "../assets/back.svg";
+import backIcon from "../assets/back-black.svg";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
+  isFirstSubject: boolean;
 }
 
-export default function AddSubject({ onAddSubject }: AddSubjectProps) {
+export default function AddSubject({
+  onAddSubject,
+  isFirstSubject,
+}: AddSubjectProps) {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
   const [teacherName, setTeacherName] = useState<string>("");
@@ -69,10 +73,10 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
 
       setSubjectName("");
       setSubjectType(1);
-      setTeacherName("")
-      setRoomName("")
-      setTeacherEmail("")
-      setTeacherAlias("")
+      setTeacherName("");
+      setRoomName("");
+      setTeacherEmail("");
+      setTeacherAlias("");
     } catch (err) {
       throw new Error(
         "Fehler beim Hinzufügen des Fachs: " +
@@ -107,6 +111,13 @@ export default function AddSubject({ onAddSubject }: AddSubjectProps) {
             <p>Diese Einstellung lässt sich später nicht mehr ändern!</p>
           </div>
         </h2>
+        {isFirstSubject && (
+          <p>
+            Du hast scheinbar noch kein Fach angelegt. Fange damit an ein Fach
+            anzulegen um dann Noten einzutragen. Du kannst ein weiteres Fach
+            später jederzeit über die Schnell Aktionen hinzufügen
+          </p>
+        )}
         <div className="form-two-columns">
           <div className="form-group">
             <label className="form-label">Name:</label>

@@ -11,13 +11,25 @@ body {
 }
 
 body {
-  background: variables.$color-bg-light-dark;
-  color: variables.$color-text-dark-dark;
+  background: variables.$color-bg;
+  color: variables.$color-text-dark;
   overflow-x: hidden;
   font-family: "Roboto", sans-serif;
+  min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+#root {
+  min-height: 100vh;
+  padding-bottom: 100px;
+  position: relative;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
 }
 
@@ -38,8 +50,10 @@ a {
     background: variables.$color-primary-hover-dark;
   }
   &.small {
-    padding: 8px 16px;
+    padding: 10px 26px;
     font-size: 16px;
+    width: max-content;
+    margin: 0 auto;
   }
 }
 
@@ -96,9 +110,9 @@ a {
 .form-input {
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: variables.$color-text-dark-dark;
+  border: none;
+  background: rgba(180, 180, 180, 0.4);
+  color: variables.$color-text-dark;
   font-size: 1.2rem;
   width: 100%;
   outline: none;
@@ -164,6 +178,24 @@ a {
   gap: 40px;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
+  padding: 10px 10px 10px;
+  box-shadow: variables.$box-shadow;
+  border-radius: 20px;
+  background: variables.$color-bg-light;
+}
+
+.section-head {
+  padding-left: 15px;
+  padding-bottom: 10px;
+  &.no-padding {
+    padding: 0;
+  }
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -172,12 +204,21 @@ table {
 tr {
   &:first-child {
     & > th:nth-child(1) {
-      background: variables.$color-bg-dark-dark;
+      display: none;
+      background: variables.$color-bg-light;
       text-align: left;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
     }
     & > th {
-      background: variables.$color-bg-dark-dark;
+      display: none;
+      background: variables.$color-bg-light;
       text-align: right;
+    }
+    & > th:last-child {
+      display: none;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
     }
   }
   & > td:nth-child(1) {
@@ -209,7 +250,7 @@ td {
 
 .subject-type {
   color: variables.$color-text-medium;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .grade-box {
@@ -227,6 +268,37 @@ td {
   &.bad {
     background-color: variables.$color-error;
   }
+}
+
+.burger-menu-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  color: variables.$color-text-dark-dark;
+  &.with-back {
+    justify-content: space-between;
+  }
+  &::before {
+    content: "";
+    background-color: variables.$color-bg-dark-dark;
+    position: absolute;
+    top: -40px;
+    left: -20px;
+    right: -20px;
+    // width: 100%;
+    height: 220px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    z-index: -1;
+  }
+}
+
+.greeting-small {
+  font-size: 16px;
+  font-weight: 300;
+  color: variables.$color-text-medium-dark;
 }
 
 .grade-distribution-wrapper {
@@ -255,6 +327,74 @@ td {
 
 .point {
   grid-column: span 1;
+}
+
+.quick-access-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+  width: 100%;
+  padding: 0 15px;
+  & > :first-child {
+    grid-column: span 2;
+  }
+}
+
+.quick-access-button {
+  padding: 10px 10px 10px;
+  box-shadow: variables.$box-shadow;
+  border-radius: 20px;
+  background: variables.$color-bg-light;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: 500;
+  border: none;
+}
+
+.quick-access-icon {
+  color: variables.$color-primary-dark;
+  font-size: 30px;
+}
+
+.modal-wrapper {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  max-width: 100vw;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.modal-background {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 8;
+}
+
+.modal {
+  width: 100%;
+  background: variables.$color-bg-light;
+  padding: 20px 30px;
+  border-radius: 30px;
+  z-index: 10;
+  position: relative;
+}
+
+.close-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
 .add-subject-form {
@@ -344,8 +484,8 @@ td {
   border-radius: 20px;
   pointer-events: none;
   opacity: 0;
-  transition: all .3s ease;
-  &>p {
+  transition: all 0.3s ease;
+  & > p {
     &:first-child {
       margin-top: 0;
     }
@@ -358,13 +498,6 @@ td {
   }
 }
 
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
-  padding-bottom: 30px;
-}
-
 .loading-wrapper {
   display: flex;
   justify-content: center;
@@ -373,10 +506,13 @@ td {
 }
 
 .footer {
-  margin-top: 40px;
-  padding: 20px 0;
+  padding: 15px 0;
   text-align: center;
   background: variables.$color-bg-dark-dark;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .extend-button {
@@ -390,7 +526,7 @@ td {
 .extend-icon {
   rotate: -90deg;
   margin-top: -8px;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   &.extended {
     rotate: 90deg;
     margin-top: 10px;
@@ -404,7 +540,7 @@ td {
   flex-direction: column;
   gap: 20px;
   overflow-y: hidden;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   &.extended {
     height: 160px;
     margin-top: 0px;
@@ -416,10 +552,11 @@ td {
   min-width: 100%;
   min-height: 120px;
   max-height: 120px;
+  font-family: 'Roboto';
 }
 
 .info-icon-details {
-  opacity: .3;
+  opacity: 0.3;
   &.active {
     opacity: 1;
     cursor: pointer;
@@ -432,10 +569,10 @@ td {
   grid-template-columns: max-content max-content;
   gap: 5px 15px;
   font-size: 22px;
-  &>p {
+  & > p {
     margin: 0;
   }
-  &>a {
+  & > a {
     font-size: 18px;
     grid-column: span 2;
   }

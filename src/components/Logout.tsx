@@ -13,7 +13,6 @@ export default function Logout() {
   return (
     <div className="logout-wrapper" onClick={handleLogout}>
         <img src={logoutIcon}/>
-        <p className="logout-text">Ausloggen</p>
     </div>
   );
 }

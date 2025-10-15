@@ -6,7 +6,7 @@ import { db } from "../firebase/firebaseConfig";
 import type { EncryptedGrade } from "../interfaces/Grade";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
-import backIcon from "../assets/back.svg";
+import backIcon from "../assets/back-black.svg";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // Fächer aus Home
