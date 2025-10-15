@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { registerUser } from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
+import logo from "../../assets/noten-manager-logo.png"
 
 const Register: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -62,6 +63,7 @@ const Register: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
+        <img src={logo} className="login-logo" />
         <h2 className="login-title">Register</h2>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">

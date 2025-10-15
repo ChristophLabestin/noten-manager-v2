@@ -4,6 +4,7 @@ import type { UserProfile } from "../interfaces/UserProfile";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import Logout from "./Logout";
+import BackToHome from "./BackToHome";
 
 
 const BurgerMenu: React.FC = () => {
@@ -72,6 +73,9 @@ const BurgerMenu: React.FC = () => {
             : ""}
           !
         </h1>
+      )}
+      {!isHome && (
+        <BackToHome />
       )}
       <Logout/>
     </div>

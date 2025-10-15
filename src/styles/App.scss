@@ -35,7 +35,10 @@ h6 {
 
 a {
   text-decoration: none;
-  color: variables.$color-primary-hover-dark;
+  color: variables.$color-text-medium-dark;
+  &.register-link {
+    color: variables.$color-primary-hover;
+  }
 }
 
 .btn-primary {
@@ -59,7 +62,6 @@ a {
 
 //auth
 .login-container {
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -77,18 +79,25 @@ a {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
   width: 100%;
   max-width: 450px;
+}
+
+.login-logo {
+  width: 80px;
+  border-radius: 50%;
+  margin: 0 auto;
 }
 
 .login-title {
   font-size: 2.5rem;
   margin: 0 auto;
-  background: variables.$color-text-dark-dark;
+  background: variables.$color-text-dark;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-weight: 400;
 }
 
 .login-form {
@@ -196,7 +205,7 @@ a {
   }
 }
 
-table {
+table.home-table {
   width: 100%;
   border-collapse: collapse;
 }
@@ -217,6 +226,47 @@ tr {
     }
     & > th:last-child {
       display: none;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+  }
+  & > td:nth-child(1) {
+    text-align: left;
+  }
+  & > td {
+    text-align: right;
+  }
+  &.total-score-row {
+    & > td {
+      font-weight: 600;
+      font-size: 20px;
+      border-top: 2px solid variables.$color-text-medium-dark;
+      padding-top: 10px;
+    }
+  }
+}
+
+table.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+tr {
+  &:first-child {
+    & > th:nth-child(1) {
+      display: table-cell;
+      background: variables.$color-bg-light;
+      text-align: left;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+    & > th {
+      display: table-cell;
+      background: variables.$color-bg-light;
+      text-align: right;
+    }
+    & > th:last-child {
+      display: table-cell;
       border-top-right-radius: 8px;
       border-bottom-right-radius: 8px;
     }
@@ -292,6 +342,12 @@ td {
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
     z-index: -1;
+  }
+}
+
+.burger-menu-wrapper.with-back {
+  &::before {
+    height: 100px;
   }
 }
 
@@ -438,11 +494,11 @@ td {
 
 .subject-detail-subheadline {
   font-weight: 400;
-  color: variables.$color-text-medium-dark;
+  color: variables.$color-text-medium;
 }
 
 .btn-small {
-  border: variables.$color-text-medium-dark;
+  border: variables.$color-text-medium;
   background: none;
 }
 
@@ -475,7 +531,8 @@ td {
 
 .help-box {
   position: absolute;
-  width: 100%;
+  left: -20px;
+  right: -20px;
   font-size: 14px;
   background: variables.$color-bg-light;
   color: variables.$color-text-dark;
@@ -485,6 +542,7 @@ td {
   pointer-events: none;
   opacity: 0;
   transition: all 0.3s ease;
+  z-index: 20;
   & > p {
     &:first-child {
       margin-top: 0;

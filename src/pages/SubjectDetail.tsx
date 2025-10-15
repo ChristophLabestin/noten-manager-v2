@@ -13,11 +13,10 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import editIcon from "../assets/edit.svg";
-import deleteIcon from "../assets/delete.svg";
-import saveIcon from "../assets/save.svg";
+import editIcon from "../assets/edit-black.svg";
+import deleteIcon from "../assets/delete-black.svg";
+import saveIcon from "../assets/save-black.svg";
 import cancelIcon from "../assets/cancel.svg";
-import BackToHome from "../components/BackToHome";
 import { getAuth } from "firebase/auth";
 import {
   decryptString,
@@ -25,8 +24,9 @@ import {
   encryptString,
 } from "../services/cryptoService";
 import Loading from "../components/Loading";
-import backIcon from "../assets/back.svg";
-import infoIcon from "../assets/info.svg";
+import backIcon from "../assets/back-black.svg";
+import infoIcon from "../assets/info-black.svg";
+import BurgerMenu from "../components/BurgerMenu";
 
 interface SubjectDetailPageProps {
   subjectId: string;
@@ -312,6 +312,7 @@ export default function SubjectDetailPage({
 
   return (
     <div className="home-layout">
+      <BurgerMenu />
       <div className="subject-detail-head">
         <div>
           <h1>{activeSubject.name}</h1>
@@ -325,7 +326,7 @@ export default function SubjectDetailPage({
               {activeSubject.teacher && <p>{activeSubject.teacher}</p>}
               {activeSubject.alias && <p>{activeSubject.alias}</p>}
               {activeSubject.email && (
-                <a href={`mailto:${activeSubject.email}`}>
+                <a className="register-link" href={`mailto:${activeSubject.email}`}>
                   {activeSubject.email}
                 </a>
               )}
@@ -356,6 +357,7 @@ export default function SubjectDetailPage({
         <p>Keine Noten vorhanden</p>
       ) : (
         <div className="table-wrapper">
+          <h2 className="section-head">Notenliste</h2>
           <table className="grades-table">
             <thead>
               <tr>
@@ -541,7 +543,6 @@ export default function SubjectDetailPage({
           Hinzufügen
         </button>
       </div>
-      <BackToHome />
     </div>
   );
 }

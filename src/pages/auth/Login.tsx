@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { loginUser, loginUserWithGoogle } from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
 import googleIcon from "../../assets/google-icon.svg";
+import logo from "../../assets/noten-manager-logo.png"
 
 const Login: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -86,6 +87,7 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
+        <img src={logo} className="login-logo" />
         <h2 className="login-title">Login</h2>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
