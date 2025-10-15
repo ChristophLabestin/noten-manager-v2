@@ -81,7 +81,6 @@ export const loginUserWithGoogle = async () => {
       {
         name: user.displayName || "",
         email: user.email || "",
-        photoURL: user.photoURL || "",
         encryptionSalt: salt,
       },
       { merge: true }
