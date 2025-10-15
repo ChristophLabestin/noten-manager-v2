@@ -1,0 +1,12 @@
+{
+  "name": "Noten Manager",
+  "short_name": "Noten Manager",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#1b478e",
+  "background_color": "#f7f7f7",
+  "icons": [
+    { "src": "/icons/favicon.png", "sizes": "1024x1024", "type": "image/png" }
+  ]
+}
