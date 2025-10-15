@@ -6,6 +6,7 @@ import SubjectsPage from "../pages/Subjects";
 import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import Settings from "../pages/Settings";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
@@ -29,6 +30,13 @@ const routes: { [key: string]: () => React.JSX.Element } = {
       </PrivateRoute>
     );
   },
+  "/einstellungen": () => {
+    return (
+      <PrivateRoute>
+        <Settings/>
+      </PrivateRoute>
+    )
+  }
 };
 
 const PrivateRoute = ({ children }: { children: React.JSX.Element }) => {

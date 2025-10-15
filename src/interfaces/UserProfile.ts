@@ -3,4 +3,5 @@ export interface UserProfile {
     name: string;
     email: string;
     encryptionSalt: string;
+    displayName?: string;
 }

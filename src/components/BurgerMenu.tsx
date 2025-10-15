@@ -5,14 +5,14 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import Logout from "./Logout";
 import BackToHome from "./BackToHome";
-
+import settingsIcon from "../assets/settings.svg";
 
 const BurgerMenu: React.FC = () => {
   const { user } = useAuth();
 
   const [greeting, setGreeting] = useState<string>("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isHome, setIsHome] = useState<boolean>(true)
+  const [isHome, setIsHome] = useState<boolean>(true);
 
   useEffect(() => {
     const date = new Date();
@@ -39,45 +39,64 @@ const BurgerMenu: React.FC = () => {
           const user = userDocSnap.data() as UserProfile;
           setUserProfile(user);
         } else {
-          throw new Error("Keine Benutzerdaten gefunden")
+          throw new Error("Keine Benutzerdaten gefunden");
         }
       }
     };
 
-    // 🔍 Prüfen, ob aktuelle Seite die Startseite ist
-    const checkIfHome = () => {
-      if (typeof window !== "undefined") {
-        const pathname = window.location.pathname;
-        setIsHome(pathname === "/");
-      }
+    fetchUserProfile();
+  }, [user]);
+
+  useEffect(() => {
+    const isHomePath = () => {
+      if (typeof window === "undefined") return true;
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
+      return path === "/" || path === "/index.html";
     };
 
-    fetchUserProfile();
-    checkIfHome();
-  }, [user]);
+    const updateIsHome = () => setIsHome(isHomePath());
+
+    updateIsHome();
+    window.addEventListener("popstate", updateIsHome);
+    window.addEventListener("hashchange", updateIsHome);
+    document.addEventListener("visibilitychange", updateIsHome);
+
+    return () => {
+      window.removeEventListener("popstate", updateIsHome);
+      window.removeEventListener("hashchange", updateIsHome);
+      document.removeEventListener("visibilitychange", updateIsHome);
+    };
+  }, []);
+
+  const navigateToSettings = () => {
+        window.location.href = "/einstellungen";
+    }
 
   return (
     <div
       className={
-        !isHome
-          ? "burger-menu-wrapper with-back"
-          : "burger-menu-wrapper"
+        !isHome ? "burger-menu-wrapper with-back" : "burger-menu-wrapper"
       }
     >
       {isHome && (
         <h1 className="nav-greeting">
-          <span className="greeting-small">{greeting},</span><br/> {user?.displayName
-            ? `${user.displayName}`
+          <span className="greeting-small">{greeting},</span>
+          <br />{" "}
+          {userProfile?.displayName
+            ? `${userProfile.displayName}`
             : userProfile
             ? `${userProfile.name}`
             : ""}
           !
         </h1>
       )}
-      {!isHome && (
-        <BackToHome />
-      )}
-      <Logout/>
+      {!isHome && <BackToHome />}
+      <div className="burger-buttons">
+        <div className="settings-button" onClick={navigateToSettings}>
+          <img src={settingsIcon} />
+        </div>
+        <Logout />
+      </div>
     </div>
   );
 };
