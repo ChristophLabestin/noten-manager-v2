@@ -675,6 +675,14 @@ td {
   }
 }
 
+.settings-top {
+  padding: 30px;
+  box-shadow: variables.$box-shadow;
+  background: #ffffff;
+  margin-bottom: 30px;
+  border-radius: 20px;
+}
+
 .settings-form {
   display: flex;
   flex-direction: column;

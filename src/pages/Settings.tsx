@@ -64,11 +64,15 @@ export default function Settings() {
       <div className="home-layout">
         <BurgerMenu />
         <div className="settings-head">
-          <h2 className="section-head">Einstellungen</h2>
+          {/* <div className="settings-top">
+            <h2 className="section-head">Einstellungen</h2>
+          </div> */}
 
           <form onSubmit={handleNameUpdate} className="settings-form">
             <div className="form-group">
-              <label htmlFor="username" className="form-label">Name ändern</label>
+              <label htmlFor="username" className="form-label">
+                Name ändern
+              </label>
               <input
                 className="form-input"
                 id="username"
