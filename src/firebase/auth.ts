@@ -79,9 +79,8 @@ export const loginUserWithGoogle = async () => {
     await setDoc(
       userRef,
       {
-        displayName: user.displayName || "",
+        name: user.displayName || "",
         email: user.email || "",
-        photoURL: user.photoURL || "",
         encryptionSalt: salt,
       },
       { merge: true }

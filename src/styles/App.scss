@@ -191,7 +191,7 @@ a {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
-  padding: 10px 10px 10px;
+  padding: 30px 10px 20px;
   box-shadow: variables.$box-shadow;
   border-radius: 20px;
   background: variables.$color-bg-light;
@@ -502,8 +502,14 @@ td {
   background: none;
 }
 
+.burger-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .back-to-home-wrapper,
-.logout-wrapper {
+.logout-wrapper,
+.settings-button {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -634,4 +640,18 @@ td {
     font-size: 18px;
     grid-column: span 2;
   }
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px 30px 30px;
+  box-shadow: variables.$box-shadow;
+  border-radius: 20px;
+  background: variables.$color-bg-light;
+}
+
+.success-msg {
+  margin: 0 auto;
 }
