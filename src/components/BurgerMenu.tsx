@@ -75,7 +75,7 @@ const BurgerMenu: React.FC = () => {
   return (
     <div
       className={
-        !isHome ? "burger-menu-wrapper with-back" : "burger-menu-wrapper"
+        !isHome ? "burger-menu-wrapper" : "burger-menu-wrapper"
       }
     >
       {isHome && (

@@ -246,6 +246,38 @@ tr {
   }
 }
 
+.grades-wrapper {
+
+}
+
+.grades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grade-entity {
+  display: flex;
+  gap: 10px;
+  padding: 10px 10px 10px 20px;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 20px;
+  box-shadow: variables.$box-shadow;
+}
+
+.grade-detail-grade {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.grade-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 table.grades-table {
   width: 100%;
   border-collapse: collapse;
@@ -482,8 +514,20 @@ td {
 
 .subject-detail-head {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 30px;
+  box-shadow: variables.$box-shadow;
+  width: 100%;
+}
+
+.subject-detail-top {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .subject-detail-grade {
@@ -562,13 +606,6 @@ td {
   }
 }
 
-.loading-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-
 .footer {
   padding: 15px 0;
   text-align: center;
@@ -616,7 +653,7 @@ td {
   min-width: 100%;
   min-height: 120px;
   max-height: 120px;
-  font-family: 'Roboto';
+  font-family: "Roboto";
 }
 
 .info-icon-details {
@@ -654,4 +691,45 @@ td {
 
 .success-msg {
   margin: 0 auto;
+}
+
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(214, 214, 214, 0.32);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(214, 214, 214, 0.28);
+  z-index: 100;
+  font-size: 22px;
+  opacity: 1;
+  transition: .3s all ease-in-out;
+  transition-delay: .2s;
+  &.finished {
+    opacity: 0;
+  }
+}
+
+.loading-progress-bar {
+  width: 80%;
+  height: 30px;
+  background: rgba(180, 180, 180, 0.4);
+  border: 1px ;
+  border-radius: 20px;
+}
+
+.loading-progress-handle {
+  height: 30px;
+  background: variables.$color-primary-hover;
+  border-radius: 20px;
 }

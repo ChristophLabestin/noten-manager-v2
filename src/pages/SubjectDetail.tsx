@@ -16,7 +16,7 @@ import { db } from "../firebase/firebaseConfig";
 import editIcon from "../assets/edit-black.svg";
 import deleteIcon from "../assets/delete-black.svg";
 import saveIcon from "../assets/save-black.svg";
-import cancelIcon from "../assets/cancel.svg";
+import cancelIcon from "../assets/cancel-black.svg";
 import { getAuth } from "firebase/auth";
 import {
   decryptString,
@@ -36,6 +36,19 @@ interface GradeWithId extends Grade {
   id: string;
 }
 
+// const pastelColors = [
+//   "#FFB3BA", // helles Rosa
+//   "#FFDFBA", // Pfirsich
+//   "#FFFFBA", // Hellgelb
+//   "#BAFFC9", // Mintgrün
+//   "#BAE1FF", // Hellblau
+//   "#E2BAFF", // Lavendel
+//   "#FFD6E8", // Blassrosa
+//   "#C7FFD8", // Mint
+//   "#FFF3B0", // Vanille
+//   "#D4E2FF", // Nebelblau
+// ];
+
 export default function SubjectDetailPage({
   subjectId,
 }: SubjectDetailPageProps) {
@@ -47,6 +60,8 @@ export default function SubjectDetailPage({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [infosExtended, setInfosExtended] = useState<boolean>(false);
   const [gradeNote, setGradeNote] = useState<string>("");
+  const [loadingLabel, setLoadingLabel] = useState<string>("");
+  const [progress, setProgress] = useState<number>(0);
 
   // State für editierbare Note
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -60,11 +75,23 @@ export default function SubjectDetailPage({
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
 
   useEffect(() => {
-    const fetchKeyAndData = async () => {
-      if (!user) return;
+    if (!user) return;
+    const cancelled = false;
 
+    const setPct = (pct: number, label?: string) => {
+      if (cancelled) return;
+      const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+      setProgress(clamped);
+      if (label !== undefined) setLoadingLabel(label);
+    };
+
+    setIsLoading(true);
+    setPct(0, "Starte …");
+
+    const fetchKeyAndData = async () => {
       try {
         // User-Dokument
+        setPct(10, "Profil laden …");
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) throw new Error("UserDoc fehlt");
@@ -73,20 +100,22 @@ export default function SubjectDetailPage({
         if (!encryptionSalt) throw new Error("Encryption Salt fehlt");
 
         // Key ableiten
+        setPct(20, "Schlüssel ableiten …");
         const key = await deriveKeyFromPassword(user.uid, encryptionSalt);
         setEncryptionKey(key);
 
         // Fachdaten
+        setPct(35, "Fach laden …");
         const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
         const subjectDocSnap = await getDoc(subjectDocRef);
         if (!subjectDocSnap.exists()) {
-          setIsLoading(false);
           throw new Error("Fach nicht gefunden!");
         }
         const subjectData = subjectDocSnap.data() as Subject;
         setActiveSubject({ ...subjectData, name: subjectDocSnap.id });
 
         // Noten aus Firestore holen
+        setPct(50, "Noten ermitteln …");
         const gradesRef = collection(
           db,
           "users",
@@ -115,18 +144,22 @@ export default function SubjectDetailPage({
         }
 
         setSubjectGrades(gradesData);
-        setIsLoading(false);
       } catch (err) {
-        setIsLoading(false);
+        setSubjectGrades([]);
+        setPct(100, "Fertig");
         throw new Error(
           "Fehler beim Laden der Fachdaten: " +
             (err instanceof Error ? err.message : String(err))
         );
       }
     };
-    setIsLoading(true);
+
+    setSubjectGrades([]);
+    setPct(100, "Fertig");
     fetchKeyAndData();
-    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
   }, [user, subjectId]);
 
   const calculateGradeWeight = (grade: Grade): number => {
@@ -305,20 +338,36 @@ export default function SubjectDetailPage({
     return alert(_g.note);
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-  if (!activeSubject) return <p>Fach nicht gefunden!</p>;
+  // const randomColor =
+  //   pastelColors[Math.floor(Math.random() * pastelColors.length)];
 
-  return (
-    <div className="home-layout">
-      <BurgerMenu />
-      <div className="subject-detail-head">
-        <div>
-          <h1>{activeSubject.name}</h1>
-          <h2 className="subject-detail-subheadline">
-            {activeSubject.type === 0 ? "Nebenfach" : "Hauptfach"}
-          </h2>
+  if (activeSubject) {
+    return (
+      <div className="home-layout">
+        {isLoading && <Loading progress={progress} label={loadingLabel} />}
+        <BurgerMenu />
+        <div className="subject-detail-head">
+          <div className="subject-detail-top">
+            <div className="">
+              <h1>{activeSubject.name}</h1>
+              <h2 className="subject-detail-subheadline">
+                {activeSubject.type === 0 ? "Nebenfach" : "Hauptfach"}
+              </h2>
+            </div>
+            <div className="subject-detail-grade">
+              <div
+                className={`grade-box ${
+                  Number(calculateAverageScore(subjectGrades)) >= 7
+                    ? "good"
+                    : Number(calculateAverageScore(subjectGrades)) >= 4
+                    ? "medium"
+                    : "bad"
+                }`}
+              >
+                {calculateAverageScore(subjectGrades)}
+              </div>
+            </div>
+          </div>
           {(activeSubject.teacher ||
             activeSubject.alias ||
             activeSubject.email) && (
@@ -326,7 +375,10 @@ export default function SubjectDetailPage({
               {activeSubject.teacher && <p>{activeSubject.teacher}</p>}
               {activeSubject.alias && <p>{activeSubject.alias}</p>}
               {activeSubject.email && (
-                <a className="register-link" href={`mailto:${activeSubject.email}`}>
+                <a
+                  className="register-link"
+                  href={`mailto:${activeSubject.email}`}
+                >
                   {activeSubject.email}
                 </a>
               )}
@@ -338,45 +390,29 @@ export default function SubjectDetailPage({
             </div>
           )}
         </div>
-        <div className="subject-detail-grade">
-          <div
-            className={`grade-box ${
-              Number(calculateAverageScore(subjectGrades)) >= 7
-                ? "good"
-                : Number(calculateAverageScore(subjectGrades)) >= 4
-                ? "medium"
-                : "bad"
-            }`}
-          >
-            {calculateAverageScore(subjectGrades)}
-          </div>
-        </div>
-      </div>
 
-      {subjectGrades.length === 0 ? (
-        <p>Keine Noten vorhanden</p>
-      ) : (
-        <div className="table-wrapper">
-          <h2 className="section-head">Notenliste</h2>
-          <table className="grades-table">
-            <thead>
-              <tr>
-                <th>Datum</th>
-                <th>Note</th>
-                <th>Art</th>
-                <th>Notiz</th>
-                <th>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
+        {subjectGrades.length === 0 ? (
+          <p>Keine Noten vorhanden</p>
+        ) : (
+          <div className="grades-wrapper">
+            <h2 className="section-head">Notenliste</h2>
+            <div className="grades-list">
               {subjectGrades
                 .sort((a, b) => b.date.seconds - a.date.seconds)
                 .map((grade, index) => (
-                  <tr key={grade.id}>
+                  <div
+                    className="grade-entity"
+                    key={grade.id}
+                    style={{
+                      backgroundColor: "#ffffff",
+                    }}
+                  >
                     {editingIndex === index ? (
                       <>
-                        <td>{grade.date.toDate().toLocaleDateString()}</td>
-                        <td>
+                        {/* <div className="grade-date">
+                        {grade.date.toDate().toLocaleDateString()}
+                        </div> */}
+                        <div>
                           <input
                             type="number"
                             className="form-input small"
@@ -391,8 +427,8 @@ export default function SubjectDetailPage({
                               })
                             }
                           />
-                        </td>
-                        <td>
+                        </div>
+                        <div>
                           <select
                             value={editedGrade.weight}
                             className="form-input small"
@@ -419,9 +455,9 @@ export default function SubjectDetailPage({
                               </>
                             )}
                           </select>
-                        </td>
-                        <td></td>
-                        <td>
+                        </div>
+                        <div></div>
+                        <div>
                           <button
                             className="btn-small"
                             onClick={() => handleSaveClick(grade.id)}
@@ -434,22 +470,36 @@ export default function SubjectDetailPage({
                           >
                             <img src={cancelIcon}></img>
                           </button>
-                        </td>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <td>{grade.date.toDate().toLocaleDateString()}</td>
-                        <td>{grade.grade}</td>
-                        <td>
-                          {grade.weight === 0
-                            ? "Mündlich"
-                            : grade.weight === 1
-                            ? "Kurzarbeit"
-                            : grade.weight === 2
-                            ? "Schulaufgabe"
-                            : "Fachreferat"}
-                        </td>
-                        <td>
+                        <div className="grade-detail-grade">
+                          <div
+                            className={`grade-box ${
+                              grade.grade >= 7
+                                ? "good"
+                                : grade.grade >= 4
+                                ? "medium"
+                                : "bad"
+                            }`}
+                          >
+                            {grade.grade}
+                          </div>
+                        </div>
+                        <div className="grade-detail-wrapper">
+                          <div>
+                            {grade.weight === 0
+                              ? "Mündlich"
+                              : grade.weight === 1
+                              ? "Kurzarbeit"
+                              : grade.weight === 2
+                              ? "Schulaufgabe"
+                              : "Fachreferat"}
+                          </div>
+                          <div>{grade.date.toDate().toLocaleDateString()}</div>
+                        </div>
+                        <div>
                           <img
                             src={infoIcon}
                             className={`info-icon-details ${
@@ -457,8 +507,8 @@ export default function SubjectDetailPage({
                             }`}
                             onClick={() => showNote(grade.id)}
                           />
-                        </td>
-                        <td>
+                        </div>
+                        <div>
                           <button
                             className="btn-small"
                             onClick={() => handleEditClick(index)}
@@ -471,78 +521,78 @@ export default function SubjectDetailPage({
                           >
                             <img src={deleteIcon}></img>
                           </button>
-                        </td>
+                        </div>
                       </>
                     )}
-                  </tr>
+                  </div>
                 ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      <div className="add-grade-row">
-        <div className="form-two-columns">
-          <div className="form-group">
-            <label className="form-label">Note:</label>
-            <input
-              className="form-input"
-              type="number"
-              value={newGradeInput}
-              onChange={handleGradeChange}
-              placeholder="15"
-              min={0}
-              max={15}
+            </div>
+          </div>
+        )}
+        <div className="add-grade-row">
+          <div className="form-two-columns">
+            <div className="form-group">
+              <label className="form-label">Note:</label>
+              <input
+                className="form-input"
+                type="number"
+                value={newGradeInput}
+                onChange={handleGradeChange}
+                placeholder="15"
+                min={0}
+                max={15}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Art:</label>
+              <select
+                className="form-input"
+                value={gradeWeight}
+                onChange={handleWeightChange}
+              >
+                {activeSubject.type === 0 ? (
+                  <>
+                    <option value={3}>Fachreferat</option>
+                    <option value={1}>Kurzarbeit</option>
+                    <option value={0}>Mündlich</option>
+                  </>
+                ) : (
+                  <>
+                    <option value={3}>Fachreferat</option>
+                    <option value={2}>Schulaufgabe</option>
+                    <option value={1}>Kurzarbeit</option>
+                    <option value={0}>Mündlich</option>
+                  </>
+                )}
+              </select>
+            </div>
+          </div>
+          <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
+            <div className="form-group">
+              <label className="form-label">Notiz:</label>
+              <textarea
+                className="form-input hidden-textarea"
+                value={gradeNote}
+                onChange={handleNoteChange}
+                placeholder="Mitarbeitsnote vom Freitag..."
+              ></textarea>
+            </div>
+          </div>
+          <div
+            className="extend-button"
+            onClick={() => setInfosExtended(!infosExtended)}
+          >
+            <img
+              className={`extend-icon ${infosExtended ? "extended" : ""}`}
+              src={backIcon}
             />
+            <p>Notiz hinzufügen</p>
           </div>
-          <div className="form-group">
-            <label className="form-label">Art:</label>
-            <select
-              className="form-input"
-              value={gradeWeight}
-              onChange={handleWeightChange}
-            >
-              {activeSubject.type === 0 ? (
-                <>
-                  <option value={3}>Fachreferat</option>
-                  <option value={1}>Kurzarbeit</option>
-                  <option value={0}>Mündlich</option>
-                </>
-              ) : (
-                <>
-                  <option value={3}>Fachreferat</option>
-                  <option value={2}>Schulaufgabe</option>
-                  <option value={1}>Kurzarbeit</option>
-                  <option value={0}>Mündlich</option>
-                </>
-              )}
-            </select>
-          </div>
+          <button className="btn-primary small" onClick={handleAddGrade}>
+            Hinzufügen
+          </button>
         </div>
-        <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
-          <div className="form-group">
-            <label className="form-label">Notiz:</label>
-            <textarea
-              className="form-input hidden-textarea"
-              value={gradeNote}
-              onChange={handleNoteChange}
-              placeholder="Mitarbeitsnote vom Freitag..."
-            ></textarea>
-          </div>
-        </div>
-        <div
-          className="extend-button"
-          onClick={() => setInfosExtended(!infosExtended)}
-        >
-          <img
-            className={`extend-icon ${infosExtended ? "extended" : ""}`}
-            src={backIcon}
-          />
-          <p>Notiz hinzufügen</p>
-        </div>
-        <button className="btn-primary small" onClick={handleAddGrade}>
-          Hinzufügen
-        </button>
       </div>
-    </div>
-  );
+    );
+  }
 }
