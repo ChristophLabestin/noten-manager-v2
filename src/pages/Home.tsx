@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AddSubject from "../components/AddSubject";
 import BurgerMenu from "../components/BurgerMenu";
 import SubjectsTable from "../components/SubjectsTable";
@@ -38,10 +38,10 @@ export default function Home() {
   const [loadingLabel, setLoadingLabel] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
 
-  const disableAddGrade = useMemo(
-    () => !encryptionKey || subjects.length === 0,
-    [encryptionKey, subjects.length]
-  );
+  // const disableAddGrade = useMemo(
+  //   () => !encryptionKey || subjects.length === 0,
+  //   [encryptionKey, subjects.length]
+  // );
 
   useEffect(() => {
     if (!user) return;
@@ -243,7 +243,7 @@ export default function Home() {
 
       <SubjectsTable subjects={subjects} subjectGrades={subjectGrades} />
 
-      <div className="quick-access-wrapper">
+      {/* <div className="quick-access-wrapper">
         <h2 className="section-head no-padding">Schnelle Aktionen</h2>
 
         <button
@@ -269,7 +269,7 @@ export default function Home() {
           <div className="quick-access-icon">+</div>
           Fach
         </button>
-      </div>
+      </div> */}
 
       {activeModal !== "" && (
         <div className="modal-wrapper">

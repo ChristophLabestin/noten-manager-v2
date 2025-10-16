@@ -1,3 +1,4 @@
+import Navigation from "./components/Navigation";
 import Router from "./components/Router";
 import { AuthProvider } from "./context/authcontext";
 
@@ -7,6 +8,7 @@ function AppContent() {
       <div className="page">
         <main style={{ position: "relative" }}>
           <Router />
+          <Navigation/>
         </main>
       </div>
       <div className="footer">

@@ -717,8 +717,8 @@ td {
   z-index: 100;
   font-size: 22px;
   opacity: 1;
-  transition: .3s all ease-in-out;
-  transition-delay: .2s;
+  transition: 0.3s all ease-in-out;
+  transition-delay: 0.2s;
   &.finished {
     opacity: 0;
   }
@@ -728,7 +728,7 @@ td {
   width: 80%;
   height: 30px;
   background: rgba(180, 180, 180, 0.4);
-  border: 1px ;
+  border: 1px;
   border-radius: 20px;
 }
 
@@ -736,4 +736,45 @@ td {
   height: 30px;
   background: variables.$color-primary-hover;
   border-radius: 20px;
+}
+
+.nav-bar {
+  background: #ffffff;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  height: 60px;
+  box-shadow: variables.$box-shadow;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+
+}
+
+.nav-add-button {
+  font-size: 30px;
+  padding: 10px 20px;
+  background: variables.$color-primary-hover;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  color: #ffffff;
+  margin-top: -20px;
+  box-shadow: variables.$box-shadow;
+}
+
+.nav-menu-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &>img {
+    width: 26px;
+  }
 }
