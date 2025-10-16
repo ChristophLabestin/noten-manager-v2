@@ -75,7 +75,7 @@ a {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 30px;
+  border-radius: variables.$border-radius;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -193,7 +193,7 @@ a {
   -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
   padding: 30px 10px 20px;
   box-shadow: variables.$box-shadow;
-  border-radius: 20px;
+  border-radius: variables.$border-radius;
   background: variables.$color-bg-light;
 }
 
@@ -470,7 +470,7 @@ td {
   width: 100%;
   background: variables.$color-bg-light;
   padding: 20px 30px;
-  border-radius: 30px;
+  border-radius: variables.$border-radius;
   z-index: 10;
   position: relative;
 }
@@ -504,7 +504,7 @@ td {
 .subject-box {
   padding: 20px;
   border: 2px solid variables.$color-text-medium-dark;
-  border-radius: 20px;
+  border-radius: variables.$border-radius;
   cursor: pointer;
 }
 
@@ -515,7 +515,7 @@ td {
   align-items: flex-start;
   background: #ffffff;
   padding: 20px;
-  border-radius: 30px;
+  border-radius: variables.$border-radius;
   box-shadow: variables.$box-shadow;
   width: 100%;
 }
@@ -680,7 +680,7 @@ td {
   box-shadow: variables.$box-shadow;
   background: #ffffff;
   margin-bottom: 30px;
-  border-radius: 20px;
+  border-radius: variables.$border-radius;
 }
 
 .settings-form {
@@ -689,7 +689,7 @@ td {
   gap: 20px;
   padding: 30px 30px 30px;
   box-shadow: variables.$box-shadow;
-  border-radius: 20px;
+  border-radius: variables.$border-radius;
   background: variables.$color-bg-light;
 }
 
