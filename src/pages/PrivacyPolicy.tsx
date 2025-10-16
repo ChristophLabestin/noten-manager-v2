@@ -4,7 +4,7 @@ import BurgerMenu from "../components/BurgerMenu";
 const PrivacyPolicy: React.FC = () => {
   return (
     <>
-      <BurgerMenu />
+      <BurgerMenu isSmall={true}/>
       <div style={{marginTop: "60px"}}>
         <h1 className="text-3xl font-bold mb-6">Datenschutzerklärung</h1>
 

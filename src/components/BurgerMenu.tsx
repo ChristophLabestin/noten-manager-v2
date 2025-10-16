@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext/useAuth";
 import type { UserProfile } from "../interfaces/UserProfile";
 import { doc, getDoc } from "firebase/firestore";
@@ -7,7 +7,11 @@ import Logout from "./Logout";
 import BackToHome from "./BackToHome";
 import settingsIcon from "../assets/settings.svg";
 
-const BurgerMenu: React.FC = () => {
+interface BurgerMenuProps {
+  isSmall?: boolean;
+}
+
+function BurgerMenu({isSmall}: BurgerMenuProps) {
   const { user } = useAuth();
 
   const [greeting, setGreeting] = useState<string>("");
@@ -75,7 +79,7 @@ const BurgerMenu: React.FC = () => {
   return (
     <div
       className={
-        !isHome ? "burger-menu-wrapper" : "burger-menu-wrapper"
+        isSmall ? "burger-menu-wrapper with-back" : "burger-menu-wrapper"
       }
     >
       {isHome && (
