@@ -535,7 +535,7 @@ td {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(0px + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
   pointer-events: auto;
