@@ -14,9 +14,16 @@ interface AddGradeProps {
     subjectId: string,
     grade: EncryptedGrade,
     encryptionKey: CryptoKey
-  ) => void; // Callback für neue Note
+  ) => void; // Callback fuer neue Note
   encryptionKeyProp: CryptoKey;
 }
+
+const getDefaultHalfYear = (): 1 | 2 => {
+  const today = new Date();
+  // 23.02.2026 (Monat 1 = Februar)
+  const switchDate = new Date(2026, 1, 23);
+  return today < switchDate ? 1 : 2;
+};
 
 export default function AddGrade({
   subjectsProp,
@@ -30,8 +37,9 @@ export default function AddGrade({
   const [helpActive, setHelpActive] = useState<boolean>(false);
   const [infosExtended, setInfosExtended] = useState<boolean>(false);
   const [gradeNote, setGradeNote] = useState<string>("");
+  const [halfYear, setHalfYear] = useState<1 | 2>(getDefaultHalfYear());
 
-  // Update lokale Subjects, wenn props sich ändern
+  // Update lokale Subjects, wenn Props sich ändern
   useEffect(() => {
     setSubjects(subjectsProp);
   }, [subjectsProp]);
@@ -48,12 +56,17 @@ export default function AddGrade({
   const handleGradeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewGradeInput(e.target.value);
   };
+
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setGradeNote(e.target.value);
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setGradeWeight(Number(e.target.value));
+  };
+
+  const handleHalfYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setHalfYear(Number(e.target.value) as 1 | 2);
   };
 
   const handleAddGrade = async (e: React.FormEvent) => {
@@ -71,7 +84,7 @@ export default function AddGrade({
     }
 
     if (gradeNumber > 15 || gradeNumber < 0) {
-      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
+      alert("Bitte eine gültige Zahl im Bereich 0-15 eingeben.");
       return;
     }
 
@@ -85,7 +98,8 @@ export default function AddGrade({
         grade: encryptedGrade,
         weight: gradeWeight,
         date: Timestamp.fromDate(new Date()),
-        note: gradeNote
+        note: gradeNote,
+        halfYear,
       };
 
       const auth = getAuth();
@@ -108,7 +122,8 @@ export default function AddGrade({
       onAddGrade(selectedSubjectId, gradeToAdd, encryptionKeyProp);
 
       setNewGradeInput("");
-      setGradeNote("")
+      setGradeNote("");
+      setHalfYear(getDefaultHalfYear());
     } catch (err) {
       throw new Error(
         "Fehler beim Hinzufügen: " +
@@ -121,37 +136,41 @@ export default function AddGrade({
     <form className="add-subject-form" onSubmit={handleAddGrade}>
       <h2 className="section-headline">
         Note hinzufügen
-        <img
-          src={helpIcon}
+        <span
+          className="help-icon-wrapper"
           onMouseEnter={() => setHelpActive(true)}
           onMouseLeave={() => setHelpActive(false)}
-        />
+        >
+          <img src={helpIcon} alt="Hilfe" />
+        </span>
         <div className={`help-box ${helpActive ? "active" : ""}`}>
-          <p>Hier kannst du eine Note hinzufügen für ein Fach deiner Wahl.</p>
+          <p>
+            Hier kannst du eine Note hinzufügen für ein Fach deiner Wahl.
+          </p>
           <p>Die Notenpunkte können maximal 15 betragen und minimal 0.</p>
           <p>
-            Die Art ist abhängig von dem ausgewählten Fach. Wenn dein Fach als
-            ein Nebenfach erstellt wurde, dann kannst du hier nur "Mündlich" und
-            "Kurzarbeit" auswählen. Bei einem Hauptfach erscheint die Option
-            "Schulaufgabe" zusätzlich.
+            Die Art ist abhängig vom ausgewählten Fach. Wenn dein Fach als
+            Nebenfach erstellt wurde, kannst du hier nur „Mündlich“ und
+            „Kurzarbeit“ auswählen. Bei einem Hauptfach erscheint die Option
+            „Schulaufgabe“ zusätzlich.
           </p>
           <p>
             Berechnung der Gewichtung:
             <br />
-            -- bei Hauptfach: Schulaufgabe 2x, Kurzarbeit 1x, Mündlich 1x
+            - bei Hauptfach: Schulaufgabe 2x, Kurzarbeit 1x, Mündlich 1x
             <br />
-            -- bei Nebenfach: Kurzarbeit 2x, Mündlich 1x
+            - bei Nebenfach: Kurzarbeit 2x, Mündlich 1x
           </p>
         </div>
       </h2>
       <div className="form-group">
-        <label className="form-label">Fach:</label>
+        <label className="form-label">Fach</label>
         <select
           className="form-input"
           value={selectedSubjectId}
           onChange={handleSubjectChange}
         >
-          <option value="">-- Fach auswählen --</option>
+          <option value="">— Fach auswählen —</option>
           {subjects.map((subject) => (
             <option key={subject.name} value={subject.name}>
               {subject.name}
@@ -161,17 +180,32 @@ export default function AddGrade({
       </div>
       <div className="form-two-columns">
         <div className="form-group">
-          <label className="form-label">Note:</label>
-          <input
-            className="form-input"
-            type="number"
-            value={newGradeInput}
-            onChange={handleGradeChange}
-            placeholder="15"
-          />
+          <label className="form-label">Note</label>
+          <div className="grade-halfyear-row">
+            <input
+              className="form-input"
+              type="number"
+              value={newGradeInput}
+              onChange={handleGradeChange}
+              placeholder="Notenpunkte"
+              min={0}
+              max={15}
+            />
+            <div className="halfyear-field">
+              {/* <label className="form-label">Halbjahr</label> */}
+              <select
+                className="form-input small"
+                value={halfYear}
+                onChange={handleHalfYearChange}
+              >
+                <option value={1}>1. Hj</option>
+                <option value={2}>2. Hj</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Art:</label>
+          <label className="form-label">Art</label>
           <select
             className="form-input"
             value={gradeWeight}
@@ -196,7 +230,7 @@ export default function AddGrade({
       </div>
       <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
         <div className="form-group">
-          <label className="form-label">Notiz:</label>
+          <label className="form-label">Notiz</label>
           <textarea
             className="form-input hidden-textarea"
             value={gradeNote}
@@ -212,6 +246,7 @@ export default function AddGrade({
         <img
           className={`extend-icon ${infosExtended ? "extended" : ""}`}
           src={backIcon}
+          alt="Weitere Felder ein-/ausklappen"
         />
         <p>Notiz hinzufügen</p>
       </div>
@@ -221,3 +256,4 @@ export default function AddGrade({
     </form>
   );
 }
+

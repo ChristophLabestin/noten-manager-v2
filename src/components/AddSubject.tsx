@@ -90,11 +90,13 @@ export default function AddSubject({
       <form className="add-subject-form" onSubmit={handleAddSubject}>
         <h2 className="section-headline">
           Fach hinzufügen
-          <img
-            src={helpIcon}
+          <span
+            className="help-icon-wrapper"
             onMouseEnter={() => setHelpActive(true)}
             onMouseLeave={() => setHelpActive(false)}
-          />
+          >
+            <img src={helpIcon} alt="Hilfe" />
+          </span>
           <div className={`help-box ${helpActive ? "active" : ""}`}>
             <p>
               Hier kannst du ein Fach hinzufügen. Der Typ wird unterschieden
@@ -105,22 +107,22 @@ export default function AddSubject({
               geschrieben.
             </p>
             <p>
-              In einem Nebenfach werden keine Schulaufgaben geschrieben sondern
-              nur Kurzarbeiten.
+              In einem Nebenfach werden keine Schulaufgaben geschrieben,
+              sondern nur Kurzarbeiten.
             </p>
             <p>Diese Einstellung lässt sich später nicht mehr ändern!</p>
           </div>
         </h2>
         {isFirstSubject && (
           <p>
-            Du hast scheinbar noch kein Fach angelegt. Fange damit an ein Fach
-            anzulegen um dann Noten einzutragen. Du kannst ein weiteres Fach
-            später jederzeit über die Schnell Aktionen hinzufügen
+            Du hast scheinbar noch kein Fach angelegt. Fange damit an, ein Fach
+            anzulegen, um dann Noten einzutragen. Du kannst ein weiteres Fach
+            später jederzeit über die Schnellaktionen hinzufügen.
           </p>
         )}
         <div className="form-two-columns">
           <div className="form-group">
-            <label className="form-label">Name:</label>
+            <label className="form-label">Name</label>
             <input
               className="form-input"
               type="text"
@@ -130,7 +132,7 @@ export default function AddSubject({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Fach Typ:</label>
+            <label className="form-label">Fachtyp</label>
             <select
               className="form-input"
               value={subjectType}
@@ -144,7 +146,7 @@ export default function AddSubject({
         <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
           <div className="form-two-columns">
             <div className="form-group">
-              <label className="form-label">Lehrer:</label>
+              <label className="form-label">Lehrer</label>
               <input
                 className="form-input"
                 type="text"
@@ -154,7 +156,7 @@ export default function AddSubject({
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Raum:</label>
+              <label className="form-label">Raum</label>
               <input
                 className="form-input"
                 type="text"
@@ -166,7 +168,7 @@ export default function AddSubject({
           </div>
           <div className="form-two-columns">
             <div className="form-group">
-              <label className="form-label">E-Mail:</label>
+              <label className="form-label">E-Mail</label>
               <input
                 className="form-input"
                 type="text"
@@ -176,7 +178,7 @@ export default function AddSubject({
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Kürzel:</label>
+              <label className="form-label">Kürzel</label>
               <input
                 className="form-input"
                 type="text"
@@ -194,8 +196,9 @@ export default function AddSubject({
           <img
             className={`extend-icon ${infosExtended ? "extended" : ""}`}
             src={backIcon}
+            alt="Weitere Felder ein-/ausklappen"
           />
-          <p>zusätzliche Infos hinzufügen</p>
+          <p>Zusätzliche Infos hinzufügen</p>
         </div>
         <button className="btn-primary small" type="submit">
           Hinzufügen

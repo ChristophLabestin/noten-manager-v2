@@ -1,15 +1,19 @@
 import type { Timestamp } from "firebase/firestore";
 
 export interface EncryptedGrade {
-  grade: string; // verschlüsselt
+  grade: string; // verschluesselt
   weight: number;
   date: Timestamp;
   note?: string;
+  // 1 = 1. Halbjahr, 2 = 2. Halbjahr
+  halfYear?: 1 | 2;
 }
 
 export interface Grade {
-  grade: number; // entschlüsselt
+  grade: number; // entschluesselt
   weight: number;
   date: Timestamp;
   note?: string;
+  // 1 = 1. Halbjahr, 2 = 2. Halbjahr
+  halfYear?: 1 | 2;
 }

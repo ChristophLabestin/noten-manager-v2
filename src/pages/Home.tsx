@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import AddSubject from "../components/AddSubject";
 import BurgerMenu from "../components/BurgerMenu";
 import SubjectsTable from "../components/SubjectsTable";
+import BottomNav from "../components/BottomNav";
 import { useAuth } from "../context/authcontext/useAuth";
 import {
   collection,
@@ -14,13 +14,11 @@ import { db } from "../firebase/firebaseConfig";
 import type { UserProfile } from "../interfaces/UserProfile";
 import type { Subject } from "../interfaces/Subject";
 import type { EncryptedGrade, Grade } from "../interfaces/Grade";
-import AddGrade from "../components/AddGrade";
 import {
   deriveKeyFromPassword,
   decryptString,
 } from "../services/cryptoService";
 import Loading from "../components/Loading";
-import closeIcon from "../assets/close.svg";
 
 export default function Home() {
   const { user } = useAuth();
@@ -32,17 +30,25 @@ export default function Home() {
   );
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
 
-  const [isLoading, setIsLoading] = useState<boolean>();
-  const [activeModal, setActiveModal] = useState<"" | "grade" | "subject">("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFirstSubject, setIsFirstSubject] = useState<boolean>(false);
   const [loadingLabel, setLoadingLabel] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
+  const [halfYearFilter, setHalfYearFilter] =
+    useState<"all" | 1 | 2>("all");
 
   const disableAddGrade = useMemo(
     () => !encryptionKey || subjects.length === 0,
     [encryptionKey, subjects.length]
   );
 
+  const addGradeTitle = useMemo(() => {
+    if (!encryptionKey) return "Lade Schlüssel…";
+    if (subjects.length === 0) return "Lege zuerst ein Fach an";
+    return "";
+  }, [encryptionKey, subjects.length]);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -61,7 +67,7 @@ export default function Home() {
       let activeKey: CryptoKey | null = null;
 
       try {
-        // --- 1) Profil -------------------------------------------------------
+        // 1) Profil laden
         setPct(10, "Profil laden …");
         let salt: string | undefined;
         try {
@@ -77,23 +83,23 @@ export default function Home() {
           console.error("[Home] getDoc(users/uid) failed:", err);
         }
 
-        // --- 2) Key (optional) ----------------------------------------------
+        // 2) Schlüssel ableiten (optional)
         if (salt) {
           setPct(20, "Schlüssel ableiten …");
           try {
             const key = await deriveKeyFromPassword(user.uid, salt);
             if (cancelled) return;
-            setEncryptionKey(key); // für Buttons
-            activeKey = key; // für sofortiges Entschlüsseln
+            setEncryptionKey(key);
+            activeKey = key;
           } catch (err) {
             console.error("[Home] deriveKeyFromPassword failed:", err);
-            activeKey = null; // weiter ohne Key → leere Noten
+            activeKey = null;
           }
         } else {
-          activeKey = encryptionKey; // evtl. schon vorhanden
+          activeKey = encryptionKey;
         }
 
-        // --- 3) Fächer -------------------------------------------------------
+        // 3) Fächer laden
         setPct(35, "Fächer laden …");
         let subjectsSnapshot;
         try {
@@ -111,17 +117,18 @@ export default function Home() {
               name: d.id,
             }))
           : [];
+
         setSubjects(subjectsData);
 
         const noSubjects = subjectsData.length === 0;
         setIsFirstSubject(noSubjects);
-        if (noSubjects && activeModal === "") setActiveModal("subject");
 
-        // --- 4) Noten sammeln -----------------------------------------------
+        // 4) Noten sammeln
         setPct(50, "Noten ermitteln …");
         const gradeSnaps: Array<{ subjectId: string; docs: EncryptedGrade[] }> =
           [];
         let totalGrades = 0;
+
         if (subjectsSnapshot) {
           for (const subjectDoc of subjectsSnapshot.docs) {
             try {
@@ -150,16 +157,18 @@ export default function Home() {
           }
         }
 
-        // --- 5) Ohne Key → leere Arrays setzen, fertig ----------------------
+        // 5) Falls kein Schlüssel: leere Noten setzen
         if (!activeKey) {
           const empty: Record<string, Grade[]> = {};
-          for (const { subjectId } of gradeSnaps) empty[subjectId] = [];
+          for (const { subjectId } of gradeSnaps) {
+            empty[subjectId] = [];
+          }
           setSubjectGrades(empty);
           setPct(100, "Fertig");
           return;
         }
 
-        // --- 6) Entschlüsseln mit Progress ----------------------------------
+        // 6) Noten entschlüsseln
         const totalUnits = Math.max(1, subjectsData.length + totalGrades);
         let doneUnits = 0;
         const gradesData: Record<string, Grade[]> = {};
@@ -179,38 +188,30 @@ export default function Home() {
             if (cancelled) return;
           }
           gradesData[subjectId] = decrypted;
-          doneUnits += 1; // Fach abgeschlossen
+          doneUnits += 1;
           setPct(60 + (doneUnits / totalUnits) * 40);
           if (cancelled) return;
         }
 
         setSubjectGrades(gradesData);
         setPct(100, "Fertig");
-        
       } finally {
         setTimeout(() => {
           if (!cancelled) setIsLoading(false);
-        }, 500)
+        }, 500);
       }
     };
 
     run();
+
     return () => {
       cancelled = true;
     };
   }, [user]);
-
-  // Body-Scroll sperren, wenn Modal offen ist
-  useEffect(() => {
-    document.body.classList.toggle("scroll-disable", activeModal !== "");
-    return () => {
-      document.body.classList.remove("scroll-disable");
-    };
-  }, [activeModal]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleAddSubjectToState = (newSubject: Subject) => {
     setSubjects((prev) => [...prev, newSubject]);
-    if (isFirstSubject) setActiveModal("");
   };
 
   const handleAddSubjectGradeToState = async (
@@ -227,77 +228,169 @@ export default function Home() {
         ? [...prev[subjectId], decryptedGrade]
         : [decryptedGrade],
     }));
-    setActiveModal("");
   };
 
-  const handleModal = (modal: "" | "grade" | "subject") =>
-    setActiveModal(modal);
+  const calculateGradeWeightForOverall = (
+    subject: Subject,
+    grade: Grade
+  ): number => {
+    if (!subject) return 1;
+    const type = subject.type;
+    if (type === 1) {
+      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
+    }
+    if (type === 0) {
+      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
+    }
+    return 1;
+  };
+
+  const filteredSubjectGrades = useMemo(
+    () => {
+      if (halfYearFilter === "all") return subjectGrades;
+
+      const result: Record<string, Grade[]> = {};
+      for (const subject of subjects) {
+        const grades = subjectGrades[subject.name] || [];
+        result[subject.name] = grades.filter(
+          (grade) => grade.halfYear === halfYearFilter
+        );
+      }
+      return result;
+    },
+    [subjectGrades, subjects, halfYearFilter]
+  );
+
+  const overallAverage = useMemo(() => {
+    if (subjects.length === 0) return null;
+    let total = 0;
+    let totalWeight = 0;
+
+    for (const subject of subjects) {
+      const grades = filteredSubjectGrades[subject.name] || [];
+      for (const grade of grades) {
+        const weight = calculateGradeWeightForOverall(subject, grade);
+        total += grade.grade * weight;
+        totalWeight += weight;
+      }
+    }
+
+    if (totalWeight === 0) return null;
+    return total / totalWeight;
+  }, [subjects, filteredSubjectGrades]);
+
+  const totalGradesCount = useMemo(
+    () =>
+      Object.values(filteredSubjectGrades).reduce(
+        (sum, grades) => sum + grades.length,
+        0
+      ),
+    [filteredSubjectGrades]
+  );
+
+  const formatAverage = (value: number | null): string =>
+    value === null ? "–" : value.toFixed(2);
+
+  const getGradeClass = (value: number | null): string => {
+    if (value === null) return "";
+    if (value >= 7) return "good";
+    if (value >= 4) return "medium";
+    return "bad";
+  };
 
   return (
-    <div className="home-layout">
+    <div className="home-layout home-layout--home">
       {isLoading && (
-          <Loading progress={progress} label={loadingLabel} />
+        <Loading progress={progress} label={loadingLabel} />
       )}
 
-      <BurgerMenu />
+      <header className="home-header">
+        <BurgerMenu />
+      </header>
 
-      <SubjectsTable subjects={subjects} subjectGrades={subjectGrades} />
+      <main className="home-main">
+        <div className="home-halfyear-toggle">
+          <button
+            type="button"
+            className={`home-halfyear-toggle-button ${
+              halfYearFilter === "all"
+                ? "home-halfyear-toggle-button--active"
+                : ""
+            }`}
+            onClick={() => setHalfYearFilter("all")}
+          >
+            Alle
+          </button>
+          <button
+            type="button"
+            className={`home-halfyear-toggle-button ${
+              halfYearFilter === 1
+                ? "home-halfyear-toggle-button--active"
+                : ""
+            }`}
+            onClick={() => setHalfYearFilter(1)}
+          >
+            1. Hj
+          </button>
+          <button
+            type="button"
+            className={`home-halfyear-toggle-button ${
+              halfYearFilter === 2
+                ? "home-halfyear-toggle-button--active"
+                : ""
+            }`}
+            onClick={() => setHalfYearFilter(2)}
+          >
+            2. Hj
+          </button>
+        </div>
 
-      <div className="quick-access-wrapper">
-        <h2 className="section-head no-padding">Schnelle Aktionen</h2>
+        <section className="home-summary">
+          <div className="home-summary-card home-summary-card--average">
+            <span className="home-summary-label">Gesamt</span>
+            <div
+              className={`home-summary-value-pill ${getGradeClass(
+                overallAverage
+              )}`}
+            >
+              {formatAverage(overallAverage)}
+            </div>
+          </div>
+          <div className="home-summary-card">
+            <span className="home-summary-label">Fächer</span>
+            <span className="home-summary-value home-summary-value-pill">{subjects.length}</span>
+          </div>
+          <div className="home-summary-card">
+            <span className="home-summary-label">Noten</span>
+            <span className="home-summary-value home-summary-value-pill">{totalGradesCount}</span>
+          </div>
+        </section>
 
-        <button
-          className="quick-access-button"
-          onClick={() => handleModal("grade")}
-          disabled={disableAddGrade}
-          title={
-            !encryptionKey
-              ? "Lade Schlüssel…"
-              : subjects.length === 0
-              ? "Lege zuerst ein Fach an"
-              : ""
-          }
-        >
-          <div className="quick-access-icon">+</div>
-          Note
-        </button>
-
-        <button
-          className="quick-access-button"
-          onClick={() => handleModal("subject")}
-        >
-          <div className="quick-access-icon">+</div>
-          Fach
-        </button>
-      </div>
-
-      {activeModal !== "" && (
-        <div className="modal-wrapper">
-          <div
-            className="modal-background"
-            onClick={() => handleModal("")}
-          ></div>
-          <div className="modal">
-            {activeModal === "grade" ? (
-              <AddGrade
-                subjectsProp={subjects}
-                onAddGrade={handleAddSubjectGradeToState}
-                encryptionKeyProp={encryptionKey as CryptoKey}
-              />
-            ) : (
-              <AddSubject
-                onAddSubject={handleAddSubjectToState}
-                isFirstSubject={isFirstSubject}
-              />
-            )}
-            <img
-              src={closeIcon}
-              className="close-icon"
-              onClick={() => handleModal("")}
+        <section className="home-section">
+          <div className="home-section-header">
+            <h2 className="home-section-title">Fächer &amp; Noten</h2>
+            <span className="home-section-subtitle">
+              Tippe auf ein Fach für Details
+            </span>
+          </div>
+          <div className="home-section-body">
+            <SubjectsTable
+              subjects={subjects}
+              subjectGrades={filteredSubjectGrades}
             />
           </div>
-        </div>
-      )}
+        </section>
+      </main>
+
+      <BottomNav
+        subjects={subjects}
+        encryptionKey={encryptionKey}
+        onAddGradeToState={handleAddSubjectGradeToState}
+        onAddSubjectToState={handleAddSubjectToState}
+        isFirstSubject={isFirstSubject}
+        disableAddGrade={disableAddGrade}
+        addGradeTitle={addGradeTitle}
+      />
     </div>
   );
 }

@@ -1,7 +1,10 @@
 import Router from "./components/Router";
 import { AuthProvider } from "./context/authcontext";
+import { useAuth } from "./context/authcontext/useAuth";
 
 function AppContent() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <>
       <div className="page">
@@ -9,9 +12,11 @@ function AppContent() {
           <Router />
         </main>
       </div>
-      <div className="footer">
-        <a href="/datenschutz">Datenschutzerklärung</a>
-      </div>
+      {!isAuthenticated && (
+        <div className="footer">
+          <a href="/datenschutz">Datenschutzerklärung</a>
+        </div>
+      )}
     </>
   );
 }

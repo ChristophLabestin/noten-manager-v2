@@ -140,6 +140,7 @@ export default function SubjectDetailPage({
             weight: encryptedGrade.weight,
             date: encryptedGrade.date,
             note: encryptedGrade.note,
+            halfYear: encryptedGrade.halfYear,
           });
         }
 
@@ -596,3 +597,5 @@ export default function SubjectDetailPage({
     );
   }
 }
+
+

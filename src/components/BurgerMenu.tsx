@@ -5,7 +5,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import Logout from "./Logout";
 import BackToHome from "./BackToHome";
-import settingsIcon from "../assets/settings.svg";
 
 interface BurgerMenuProps {
   isSmall?: boolean;
@@ -72,10 +71,6 @@ function BurgerMenu({isSmall}: BurgerMenuProps) {
     };
   }, []);
 
-  const navigateToSettings = () => {
-        window.location.href = "/einstellungen";
-    }
-
   return (
     <div
       className={
@@ -96,9 +91,6 @@ function BurgerMenu({isSmall}: BurgerMenuProps) {
       )}
       {!isHome && <BackToHome />}
       <div className="burger-buttons">
-        <div className="settings-button" onClick={navigateToSettings}>
-          <img src={settingsIcon} />
-        </div>
         <Logout />
       </div>
     </div>

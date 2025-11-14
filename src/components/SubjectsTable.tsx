@@ -10,7 +10,6 @@ export default function SubjectsTable({
   subjects,
   subjectGrades,
 }: SubjectsTableProps) {
-  // Hilfsfunktion: sortiere Fächer alphabetisch
   const sortSubjects = (subjects: Subject[]): Subject[] => {
     return [...subjects].sort((a, b) =>
       a.name.toLowerCase().localeCompare(b.name.toLowerCase())
@@ -24,20 +23,22 @@ export default function SubjectsTable({
 
     if (type === 1) {
       // Hauptfach
-      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
+      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
     }
 
     if (type === 0) {
       // Nebenfach
-      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
+      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
     }
 
     return 1; // Default
   };
 
-  // Durchschnitt für ein einzelnes Fach
-  const calculateAverageScore = (subject: Subject, grades: Grade[]): string => {
-    if (!grades || grades.length === 0) return "—";
+  const calculateAverageScore = (
+    subject: Subject,
+    grades: Grade[]
+  ): number | null => {
+    if (!grades || grades.length === 0) return null;
 
     const total = grades.reduce(
       (acc, grade) => acc + grade.grade * calculateGradeWeight(subject, grade),
@@ -48,132 +49,63 @@ export default function SubjectsTable({
       0
     );
 
-    return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
+    if (totalWeight === 0) return null;
+    return total / totalWeight;
   };
 
-  // Gesamtdurchschnitt über alle Fächer
-  const calculateOverallAverageScore = (): string => {
-    let total = 0;
-    let totalWeight = 0;
+  const formatAverage = (value: number | null): string =>
+    value === null ? "–" : value.toFixed(2);
 
-    for (const subject of subjects) {
-      const grades = subjectGrades[subject.name] || [];
-      for (const grade of grades) {
-        const weight = calculateGradeWeight(subject, grade);
-        total += grade.grade * weight;
-        totalWeight += weight;
-      }
-    }
-
-    return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
+  const getGradeClass = (value: number | null): string => {
+    if (value === null) return "";
+    if (value >= 7) return "good";
+    if (value >= 4) return "medium";
+    return "bad";
   };
 
   const goToSubjectPage = (subjectId: string) => {
-    // Weiterleitung zur Unterseite /fach/:id
     window.location.href = `/fach/${subjectId}`;
   };
 
   return (
-    <div>
-      <div className="table-wrapper">
-        <h2 className="section-head">Notenübersicht</h2>
-        <table className="home-table">
-          <thead className="home-thead">
-            <tr className="home-tr">
-              <th className="home-th">Fach</th>
-              <th className="home-th">Ø</th>
-            </tr>
-          </thead>
-          <tbody className="home-tbody">
-            {sortSubjects(subjects).map((subject) => (
-              <tr key={subject.name} className="home-tr">
-                <td
-                  className="home-td"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => goToSubjectPage(subject.name)}
-                >
-                  {subject.name}
-                  <br />
-                  <span className="subject-type">
-                    {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
-                  </span>
-                </td>
-                <td className="home-td grade">
-                  <div
-                    className={`grade-box ${
-                      Number(
-                        calculateAverageScore(
-                          subject,
-                          subjectGrades[subject.name] || []
-                        )
-                      ) >= 7
-                        ? "good"
-                        : Number(
-                            calculateAverageScore(
-                              subject,
-                              subjectGrades[subject.name] || []
-                            )
-                          ) >= 4
-                        ? "medium"
-                        : "bad"
-                    }`}
-                  >
-                    {calculateAverageScore(
-                      subject,
-                      subjectGrades[subject.name] || []
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            <tr className="total-score-row">
-              <td className="home-td bold">Gesamt</td>
-              <td className="home-td grade bold">
-                <div
-                  className={`grade-box ${
-                    Number(calculateOverallAverageScore()) >= 7
-                      ? "good"
-                      : Number(calculateOverallAverageScore()) >= 4
-                      ? "medium"
-                      : "bad"
+    <div className="subjects-list">
+      {sortSubjects(subjects).map((subject) => {
+        const grades = subjectGrades[subject.name] || [];
+        const avg = calculateAverageScore(subject, grades);
+        const gradesCount = grades.length;
+
+        return (
+          <button
+            key={subject.name}
+            type="button"
+            className="subject-row"
+            onClick={() => goToSubjectPage(subject.name)}
+          >
+            <div className="subject-row-main">
+              <div className="subject-row-name">{subject.name}</div>
+              <div className="subject-row-meta">
+                <span
+                  className={`subject-tag ${
+                    subject.type === 1
+                      ? "subject-tag--main"
+                      : "subject-tag--minor"
                   }`}
                 >
-                  {calculateOverallAverageScore()}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Punkte-Tabelle unten */}
-      {/* <div className="grade-distribution-wrapper">
-        Noten-Punkte-Verteilung
-        <div className="grade-distribution-table">
-          <div className="grade">1</div>
-          <div className="grade">2</div>
-          <div className="grade">3</div>
-          <div className="grade">4</div>
-          <div className="grade">5</div>
-          <div className="grade">6</div>
-          <div className="point">15</div>
-          <div className="point">14</div>
-          <div className="point">13</div>
-          <div className="point">12</div>
-          <div className="point">11</div>
-          <div className="point">10</div>
-          <div className="point">9</div>
-          <div className="point">8</div>
-          <div className="point">7</div>
-          <div className="point">6</div>
-          <div className="point">5</div>
-          <div className="point">4</div>
-          <div className="point">3</div>
-          <div className="point">2</div>
-          <div className="point">1</div>
-          <div className="point">0</div>
-        </div>
-      </div> */}
+                  {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
+                </span>
+                <span className="subject-row-count">
+                  {gradesCount} {gradesCount === 1 ? "Note" : "Noten"}
+                </span>
+              </div>
+            </div>
+            <div className="subject-row-grade">
+              <div className={`grade-box ${getGradeClass(avg)}`}>
+                {formatAverage(avg)}
+              </div>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

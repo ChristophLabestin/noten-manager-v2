@@ -1,8 +1,8 @@
-import logoutIcon from "../assets/logout.svg";
 import { useAuth } from "../context/authcontext/useAuth";
+import { LogoutIcon } from "./icons";
 
 export default function Logout() {
-    const { logout } = useAuth();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -12,7 +12,7 @@ export default function Logout() {
 
   return (
     <div className="logout-wrapper" onClick={handleLogout}>
-        <img src={logoutIcon}/>
+      <LogoutIcon size={24} />
     </div>
   );
 }
