@@ -2,11 +2,15 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  type User,
+  type UserCredential,
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { db } from "./firebaseConfig";
@@ -40,6 +44,42 @@ export const registerUser = async (
         (err instanceof Error ? err.message : String(err))
     );
   }
+};
+
+const isIosStandalonePwa = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent || "";
+  const isIos = /iphone|ipad|ipod/i.test(ua);
+  const isStandalone =
+    // iOS Safari
+    (window.navigator as unknown as { standalone?: boolean }).standalone ===
+      true ||
+    // PWA display-mode
+    window.matchMedia("(display-mode: standalone)").matches;
+  return isIos && isStandalone;
+};
+
+const ensureUserProfile = async (user: User): Promise<void> => {
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  let salt: string;
+
+  if (userSnap.exists() && userSnap.data().encryptionSalt) {
+    salt = userSnap.data().encryptionSalt;
+  } else {
+    salt = generateSalt();
+  }
+
+  await setDoc(
+    userRef,
+    {
+      name: user.displayName || "",
+      email: user.email || "",
+      encryptionSalt: salt,
+    },
+    { merge: true }
+  );
 };
 
 // Benutzer anmelden
@@ -77,36 +117,37 @@ export const loginUserWithGoogle = async (rememberMe: boolean) => {
     );
 
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
 
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    let salt: string;
-
-    if (userSnap.exists() && userSnap.data().encryptionSalt) {
-      // Falls schon ein Salt existiert → diesen wiederverwenden
-      salt = userSnap.data().encryptionSalt;
-    } else {
-      // Falls neuer User → Salt generieren
-      salt = generateSalt();
+    if (isIosStandalonePwa()) {
+      await signInWithRedirect(auth, provider);
+      return null;
     }
 
-    await setDoc(
-      userRef,
-      {
-        name: user.displayName || "",
-        email: user.email || "",
-        encryptionSalt: salt,
-      },
-      { merge: true }
-    );
+    const result = await signInWithPopup(auth, provider);
+    await ensureUserProfile(result.user);
 
     return result;
   } catch (err) {
     throw new Error(
       "Fehler bei der Anmeldung mit Google: " +
+        (err instanceof Error ? err.message : String(err))
+    );
+  }
+};
+
+// Google Redirect-Flow (v.a. für iOS-PWA) auswerten
+export const handleGoogleRedirectLogin = async (): Promise<
+  UserCredential | null
+> => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return null;
+
+    await ensureUserProfile(result.user);
+    return result;
+  } catch (err) {
+    throw new Error(
+      "Fehler bei der Anmeldung mit Google (Redirect): " +
         (err instanceof Error ? err.message : String(err))
     );
   }

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { loginUser, loginUserWithGoogle } from "../../firebase/auth";
+import {
+  handleGoogleRedirectLogin,
+  loginUser,
+  loginUserWithGoogle,
+} from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
 import googleIcon from "../../assets/google-icon.svg";
 
@@ -59,10 +63,13 @@ const Login: React.FC = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await loginUserWithGoogle(rememberMe);
-        // Weiterleiten nach erfolgreichem Google-Login
-        window.history.pushState({}, "", "/");
-        window.dispatchEvent(new PopStateEvent("popstate"));
+        const result = await loginUserWithGoogle(rememberMe);
+        // Bei Popup-Flow direkt weiterleiten, beim Redirect-Flow übernimmt Firebase
+        if (result) {
+          window.history.pushState({}, "", "/");
+          window.dispatchEvent(new PopStateEvent("popstate"));
+          setIsSigningIn(false);
+        }
       } catch (error: unknown) {
         if (error instanceof Error) {
           // Fehlerbehandlung
@@ -70,8 +77,8 @@ const Login: React.FC = () => {
             "Fehler bei der Anmeldung mit Google. Bitte versuchen Sie es später erneut. " +
               error.message
           );
-          setIsSigningIn(false);
         }
+        setIsSigningIn(false);
       }
     }
   };
@@ -87,6 +94,27 @@ const Login: React.FC = () => {
       window.dispatchEvent(new PopStateEvent("popstate"));
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Redirect-Ergebnis (z. B. iOS-PWA) auswerten
+    void (async () => {
+      try {
+        const result = await handleGoogleRedirectLogin();
+        if (result) {
+          window.history.pushState({}, "", "/");
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(
+            "Fehler bei der Anmeldung mit Google. Bitte versuchen Sie es später erneut. " +
+              error.message
+          );
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="login-container">
