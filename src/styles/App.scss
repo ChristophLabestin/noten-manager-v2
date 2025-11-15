@@ -254,6 +254,10 @@ a {
   color: variables.$color-text-medium;
 }
 
+body.dark-mode .login-header-title {
+  color: variables.$color-text-dark-dark;
+}
+
 @media (min-width: 768px) {
   .login-card {
     max-width: 560px;
@@ -277,6 +281,10 @@ a {
   margin-top: 18px;
 }
 
+body.dark-mode .login-tabs {
+  background: rgba(31, 41, 55, 0.9);
+}
+
 .login-tab {
   flex: 1 1 0;
   border: none;
@@ -292,6 +300,20 @@ a {
   background: #ffffff;
   color: variables.$color-text-dark;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+}
+
+body.dark-mode .login-tab {
+  color: variables.$color-text-medium-dark;
+}
+
+body.dark-mode .login-tab--active {
+  background: rgba(15, 23, 42, 1);
+  color: variables.$color-text-dark-dark;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.6);
+}
+
+body.theme-feminine .login-tab--active {
+  color: variables.$color-primary-feminine;
 }
 
 .form-group {
