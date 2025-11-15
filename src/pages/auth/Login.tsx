@@ -190,8 +190,12 @@ const Login: React.FC = () => {
         <div className="login-divider">
           <span>oder weiter mit</span>
         </div>
-        <form className="google-login-form" onSubmit={onGoogleLogin}>
-          <button className="google-login-button" type="submit">
+        <form className="google-login-form">
+          <button
+            className="google-login-button"
+            type="button"
+            onClick={onGoogleLogin}
+          >
             <img src={googleIcon} alt="Google Logo 24px" />
             mit Google anmelden
           </button>

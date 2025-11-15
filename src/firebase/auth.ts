@@ -46,6 +46,19 @@ export const registerUser = async (
   }
 };
 
+const isIosStandalonePwa = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent || "";
+  const isIos = /iphone|ipad|ipod/i.test(ua);
+  const isStandalone =
+    // iOS Safari Standalone
+    (window.navigator as unknown as { standalone?: boolean }).standalone ===
+      true ||
+    // PWA display-mode
+    window.matchMedia("(display-mode: standalone)").matches;
+  return isIos && isStandalone;
+};
+
 const ensureUserProfile = async (user: User): Promise<void> => {
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
@@ -100,12 +113,20 @@ export const loginUserWithGoogle = async (
   rememberMe: boolean
 ): Promise<UserCredential | null> => {
   try {
+    const provider = new GoogleAuthProvider();
+
+    // iOS-PWA: direkt Redirect-Flow nutzen und auf explizite Persistenz verzichten,
+    // da Popups und bestimmte Storage-APIs hier eingeschränkt sein können.
+    if (isIosStandalonePwa()) {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+
     await setPersistence(
       auth,
       rememberMe ? browserLocalPersistence : browserSessionPersistence
     );
 
-    const provider = new GoogleAuthProvider();
     try {
       // Bevorzugt Popup-Flow (funktioniert in den meisten Browsern)
       const result = await signInWithPopup(auth, provider);
