@@ -101,7 +101,7 @@ export default function BottomNav({
             className="bottom-nav-item"
             type="button"
             onClick={() => navigate("/fach")}
-            aria-label={"F\u00e4cher"}
+            aria-label={"Fächer"}
           >
             <span
               className={

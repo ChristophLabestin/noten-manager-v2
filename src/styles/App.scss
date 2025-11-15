@@ -889,7 +889,7 @@ td {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
   pointer-events: auto;
@@ -903,9 +903,9 @@ td {
   width: calc(100% - 32px);
   padding: 10px 18px 14px;
   background: variables.$color-bg-dark-dark;
-  border-top-right-radius: 20px;
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
   border-bottom-right-radius: 40px;
-  border-top-left-radius: 20px;
   border-bottom-left-radius: 40px;
   box-shadow: variables.$box-shadow;
   display: flex;
@@ -1087,7 +1087,7 @@ body.theme-feminine .bottom-nav-fab:active {
 }
 
 .bottom-nav-icon {
-  color: variables.$color-text-medium-dark;
+  color: #ffffff;
 }
 
 .bottom-nav-dot--active .bottom-nav-icon {
