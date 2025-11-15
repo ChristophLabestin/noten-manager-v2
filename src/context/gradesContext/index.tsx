@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
@@ -15,7 +16,11 @@ import {
   deriveKeyFromPassword,
 } from "../../services/cryptoService";
 import { useAuth } from "../authcontext/useAuth";
-import { GradesContext, type GradesContextType } from "./context";
+import {
+  GradesContext,
+  type GradesContextType,
+  type SubjectSortMode,
+} from "./context";
 
 export function GradesProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -26,6 +31,9 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
   >({});
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
   const [compactView, setCompactView] = useState<boolean>(false);
+  const [subjectSortMode, setSubjectSortMode] =
+    useState<SubjectSortMode>("name");
+  const [subjectSortOrder, setSubjectSortOrder] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingLabel, setLoadingLabel] = useState<string>("");
@@ -41,6 +49,8 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
       setLoadingLabel("");
       setProgress(0);
       setCompactView(false);
+      setSubjectSortMode("name");
+      setSubjectSortOrder([]);
       return;
     }
 
@@ -66,6 +76,21 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
           const profile = snap.data() as UserProfile;
           salt = profile.encryptionSalt;
           setCompactView(profile.compactView ?? false);
+          const mode = profile.subjectSortMode;
+          if (
+            mode === "name" ||
+            mode === "average" ||
+            mode === "custom"
+          ) {
+            setSubjectSortMode(mode);
+          } else {
+            setSubjectSortMode("name");
+          }
+          if (Array.isArray(profile.subjectSortOrder)) {
+            setSubjectSortOrder(profile.subjectSortOrder);
+          } else {
+            setSubjectSortOrder([]);
+          }
         }
       } catch (err) {
         console.error("[GradesProvider] getDoc(users/uid) failed:", err);
@@ -231,6 +256,31 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const updateSubjectSortPreferences = (
+    mode: SubjectSortMode,
+    order: string[]
+  ) => {
+    setSubjectSortMode(mode);
+    setSubjectSortOrder(order);
+
+    if (!user) return;
+
+    void (async () => {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          subjectSortMode: mode,
+          subjectSortOrder: order,
+        });
+      } catch (err) {
+        console.error(
+          "[GradesProvider] updateSubjectSortPreferences failed:",
+          err
+        );
+      }
+    })();
+  };
+
   const value: GradesContextType = {
     subjects,
     gradesBySubject,
@@ -239,11 +289,14 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     loadingLabel,
     progress,
     compactView,
+    subjectSortMode,
+    subjectSortOrder,
     addSubject,
     addGrade,
     updateGrade,
     deleteGrade,
     refresh,
+    updateSubjectSortPreferences,
   };
 
   return (

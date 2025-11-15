@@ -11,9 +11,12 @@
     "deploy": "npm run build && firebase deploy",
     "deploy-preview": "npm run build && firebase hosting:channel:deploy preview",
     "deploy-edit-subjects": "npm run build && firebase hosting:channel:deploy edit-subjects",
-    "deploy-redesign": "npm run build && firebase hosting:channel:deploy redesign"
+    "deploy-sorting": "npm run build && firebase hosting:channel:deploy sorting"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@sentry/react": "^10.17.0",
     "firebase": "^12.3.0",
     "js-cookie": "^3.0.5",

@@ -162,7 +162,7 @@ body.dark-mode .subject-detail-grade-pill.bad {
 }
 
 body.scroll-disable {
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 #root {
@@ -647,6 +647,8 @@ body.compact-view .home-section {
   align-items: baseline;
   justify-content: space-between;
   padding: 0 2px 8px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .home-section-title {
@@ -661,6 +663,53 @@ body.compact-view .home-section {
 
 .home-section-body {
   margin-top: 4px;
+}
+
+.home-section-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home-sort-select {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.home-sort-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: variables.$color-text-medium;
+}
+
+.home-sort-select-input {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(255, 255, 255, 0.95);
+  color: variables.$color-text-dark;
+  min-width: 140px;
+}
+
+body.dark-mode .home-sort-select-input {
+  background: rgba(15, 23, 42, 0.96);
+  color: variables.$color-text-dark-dark;
+  border-color: rgba(148, 163, 184, 0.9);
+}
+
+@media (max-width: 480px) {
+  .home-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-sort-select {
+    align-items: flex-start;
+  }
 }
 
 .table-wrapper {
@@ -1410,6 +1459,7 @@ body.dark-mode .subjects-manage-summary-value {
 }
 
 .subject-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1425,6 +1475,35 @@ body.dark-mode .subjects-manage-summary-value {
 
 body.compact-view .subject-row {
   padding: 8px 10px;
+}
+
+.subject-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subject-row-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  font-size: 16px;
+  color: variables.$color-text-medium;
+  cursor: grab;
+  touch-action: none;
+}
+
+.subject-row-drag-handle:active {
+  cursor: grabbing;
+}
+
+body.dark-mode .subject-row-drag-handle {
+  color: variables.$color-text-medium-dark;
+}
+
+.subject-row--dragging {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
 }
 
 .subject-row-main {

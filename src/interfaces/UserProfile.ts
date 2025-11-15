@@ -7,4 +7,6 @@ export interface UserProfile {
     theme?: "default" | "feminine";
     darkMode?: boolean;
     compactView?: boolean;
+    subjectSortMode?: "name" | "average" | "custom";
+    subjectSortOrder?: string[];
 }

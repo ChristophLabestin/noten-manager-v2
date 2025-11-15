@@ -71,6 +71,12 @@ const Router: React.FC = () => {
     window.scrollTo(0, 0);
   }, [currentPath]);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.classList.remove("scroll-disable");
+    }
+  }, [currentPath]);
+
   const renderRoute = () => {
     const route = Object.keys(routes).find((route) => {
       // Wenn der Pfad eine dynamische Route ist, wie z.B. '/season/:seasonId/race/:id'
