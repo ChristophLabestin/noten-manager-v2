@@ -7,6 +7,7 @@ import type { EncryptedGrade, Grade, GradeWithId } from "../interfaces/Grade";
 import Loading from "../components/Loading";
 import { useGrades } from "../context/gradesContext/useGrades";
 import { decryptString } from "../services/cryptoService";
+import InstallPwaModal from "../components/InstallPwaModal";
 
 export default function Home() {
   const {
@@ -146,6 +147,8 @@ export default function Home() {
       {isLoading && (
         <Loading progress={progress} label={loadingLabel} />
       )}
+
+      <InstallPwaModal />
 
       <header className="home-header">
         <BurgerMenu />

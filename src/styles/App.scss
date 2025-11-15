@@ -1804,6 +1804,42 @@ body.dark-mode .add-subject-form .form-label {
   color: variables.$color-text-medium-dark;
 }
 
+.install-pwa-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.install-pwa-modal p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.install-pwa-steps {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.install-pwa-steps li {
+  margin: 0;
+}
+
+.install-pwa-note {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: variables.$color-text-medium;
+}
+
+.install-pwa-share-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
 body.dark-mode .add-subject-form .form-input {
   background: rgba(15, 23, 42, 0.96);
   border-color: rgba(148, 163, 184, 0.85);
