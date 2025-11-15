@@ -9,6 +9,7 @@ import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Settings from "../pages/Settings";
 import ResetPassword from "../pages/auth/ResetPassword";
 import ForgotPassword from "../pages/auth/ForgotPassword";
+import { unlockBodyScroll } from "../services/scrollLock";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
@@ -76,9 +77,7 @@ const Router: React.FC = () => {
   }, [currentPath]);
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.body.classList.remove("scroll-disable");
-    }
+    unlockBodyScroll();
   }, [currentPath]);
 
   const renderRoute = () => {

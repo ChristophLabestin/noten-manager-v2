@@ -7,6 +7,7 @@ import AddSubject from "./AddSubject";
 import closeIcon from "../assets/close.svg";
 import folderIcon from "../assets/folder.svg";
 import { navigate } from "../services/navigation";
+import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 
 interface BottomNavProps {
   subjects: Subject[];
@@ -67,9 +68,13 @@ export default function BottomNav({
   };
 
   useEffect(() => {
-    document.body.classList.toggle("scroll-disable", activeModal !== "");
+    if (activeModal !== "") {
+      lockBodyScroll();
+    } else {
+      unlockBodyScroll();
+    }
     return () => {
-      document.body.classList.remove("scroll-disable");
+      unlockBodyScroll();
     };
   }, [activeModal]);
 

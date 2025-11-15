@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 import {
   collection,
   deleteDoc,
@@ -208,13 +209,13 @@ export default function SubjectsPage() {
   const openDeleteModal = (subjectName: string) => {
     setDeleteModalSubjectName(subjectName);
     setDeleteModalOpen(true);
-    document.body.classList.add("scroll-disable");
+    lockBodyScroll();
   };
 
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
     setDeleteModalSubjectName(null);
-    document.body.classList.remove("scroll-disable");
+    unlockBodyScroll();
   };
 
   const handleDeleteSubject = async (subjectName: string) => {

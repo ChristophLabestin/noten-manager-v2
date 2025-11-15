@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 import { useAuth } from "../context/authcontext/useAuth";
 import type { Subject } from "../interfaces/Subject";
 import type { EncryptedGrade, Grade, GradeWithId } from "../interfaces/Grade";
@@ -87,8 +88,7 @@ export default function SubjectDetailPage({
     note: "",
     halfYear: 1,
   });
-  const [halfYearFilter, setHalfYearFilter] =
-    useState<"all" | 1 | 2>("all");
+  const [halfYearFilter, setHalfYearFilter] = useState<"all" | 1 | 2>("all");
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.name === subjectId),
@@ -103,18 +103,13 @@ export default function SubjectDetailPage({
   const filteredGrades = useMemo(
     () =>
       subjectGrades.filter(
-        (grade) =>
-          halfYearFilter === "all" ||
-          grade.halfYear === halfYearFilter
+        (grade) => halfYearFilter === "all" || grade.halfYear === halfYearFilter
       ),
     [subjectGrades, halfYearFilter]
   );
 
   const sortedGrades = useMemo(
-    () =>
-      [...filteredGrades].sort(
-        (a, b) => b.date.seconds - a.date.seconds
-      ),
+    () => [...filteredGrades].sort((a, b) => b.date.seconds - a.date.seconds),
     [filteredGrades]
   );
 
@@ -257,14 +252,14 @@ export default function SubjectDetailPage({
     setNoteModalGradeId(gradeId);
     setNoteModalValue(grade.note ?? "");
     setNoteModalOpen(true);
-    document.body.classList.add("scroll-disable");
+    lockBodyScroll();
   };
 
   const closeNoteModal = () => {
     setNoteModalOpen(false);
     setNoteModalGradeId(null);
     setNoteModalValue("");
-    document.body.classList.remove("scroll-disable");
+    unlockBodyScroll();
   };
 
   const handleSaveNote = async () => {
@@ -310,13 +305,13 @@ export default function SubjectDetailPage({
   const openDeleteModal = (gradeId: string) => {
     setDeleteModalGradeId(gradeId);
     setDeleteModalOpen(true);
-    document.body.classList.add("scroll-disable");
+    lockBodyScroll();
   };
 
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
     setDeleteModalGradeId(null);
-    document.body.classList.remove("scroll-disable");
+    unlockBodyScroll();
   };
 
   const handleConfirmDelete = async () => {
@@ -360,9 +355,7 @@ export default function SubjectDetailPage({
 
   return (
     <div className="subject-detail-page">
-      {isLoading && (
-        <Loading progress={progress} label={loadingLabel} />
-      )}
+      {isLoading && <Loading progress={progress} label={loadingLabel} />}
 
       <header className="subject-detail-header">
         <BurgerMenu
@@ -412,12 +405,8 @@ export default function SubjectDetailPage({
 
           <section className="home-summary two-columns">
             <div className="home-summary-card">
-              <span className="home-summary-label">
-                Durchschnitt
-              </span>
-              <div
-                className={`subject-detail-summary-pill ${averageClass}`}
-              >
+              <span className="home-summary-label">Durchschnitt</span>
+              <div className={`subject-detail-summary-pill ${averageClass}`}>
                 {averageDisplay}
               </div>
             </div>
@@ -448,9 +437,7 @@ export default function SubjectDetailPage({
                 )}
                 {activeSubject.alias && (
                   <div className="subject-detail-detail-row">
-                    <span className="subject-detail-detail-label">
-                      Kürzel
-                    </span>
+                    <span className="subject-detail-detail-label">Kürzel</span>
                     <span className="subject-detail-detail-value">
                       {activeSubject.alias}
                     </span>
@@ -458,9 +445,7 @@ export default function SubjectDetailPage({
                 )}
                 {activeSubject.email && (
                   <div className="subject-detail-detail-row">
-                    <span className="subject-detail-detail-label">
-                      E-Mail
-                    </span>
+                    <span className="subject-detail-detail-label">E-Mail</span>
                     <a
                       href={`mailto:${activeSubject.email}`}
                       className="subject-detail-detail-value"
@@ -471,9 +456,7 @@ export default function SubjectDetailPage({
                 )}
                 {activeSubject.room && (
                   <div className="subject-detail-detail-row">
-                    <span className="subject-detail-detail-label">
-                      Raum
-                    </span>
+                    <span className="subject-detail-detail-label">Raum</span>
                     <span className="subject-detail-detail-value">
                       {activeSubject.room}
                     </span>
@@ -484,8 +467,12 @@ export default function SubjectDetailPage({
           )}
 
           <section className="home-section">
-            <h2 className="section-head no-padding">Noten</h2>
-            <p className="subject-detail-subheadline">Tippe auf eine Note, um diese zu bearbeiten</p>
+            <div className="home-section-header-main">
+              <h2 className="section-head no-padding">Noten</h2>
+              <p className="subject-detail-subheadline">
+                Tippe auf eine Note, um diese zu bearbeiten
+              </p>
+            </div>
             {sortedGrades.length === 0 ? (
               <p>Keine Noten vorhanden</p>
             ) : (
@@ -553,9 +540,9 @@ export default function SubjectDetailPage({
                                     onChange={(e) =>
                                       setEditedGrade({
                                         ...editedGrade,
-                                        halfYear: Number(
-                                          e.target.value
-                                        ) as 1 | 2,
+                                        halfYear: Number(e.target.value) as
+                                          | 1
+                                          | 2,
                                       })
                                     }
                                   >
@@ -622,8 +609,8 @@ export default function SubjectDetailPage({
                             )}
                           </div>
                         </div>
-                          <div className="subject-detail-grade-footer">
-                            <div className="subject-detail-grade-note">
+                        <div className="subject-detail-grade-footer">
+                          <div className="subject-detail-grade-note">
                             {grade.note ? (
                               <button
                                 type="button"
@@ -776,7 +763,8 @@ export default function SubjectDetailPage({
           <div className="modal">
             <h2 className="section-head no-padding">Note löschen?</h2>
             <p style={{ marginTop: "12px", fontSize: "14px" }}>
-              Möchtest du diese Note wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+              Möchtest du diese Note wirklich löschen? Diese Aktion kann nicht
+              rückgängig gemacht werden.
             </p>
             <div
               style={{

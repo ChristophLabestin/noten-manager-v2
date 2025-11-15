@@ -164,6 +164,8 @@ body.dark-mode .subject-detail-grade-pill.bad {
 
 body.scroll-disable {
   overflow-x: hidden;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
 }
 
 #root {
