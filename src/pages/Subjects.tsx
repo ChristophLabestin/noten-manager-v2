@@ -267,37 +267,37 @@ export default function SubjectsPage() {
       {isLoading && <Loading progress={progress} label={loadingLabel} />}
 
       <header className="home-header">
-        <BurgerMenu />
+        <BurgerMenu
+          isSmall
+          title="Fächerübersicht"
+          subtitle="Verwalte deine Fächer"
+        />
       </header>
 
       <main className="home-main">
         <div className="subjects-manage-wrapper">
           <header className="subjects-header-row">
             <div className="subjects-header-title">
-              <h2 className="subjects-page-title">Fächerübersicht</h2>
-              <p className="subjects-page-subtitle">
-                Verwalte Fächer, Lehrkräfte und Räume.
-              </p>
               <div className="subjects-manage-summary">
-                <div className="subjects-manage-summary-card">
-                  <span className="subjects-manage-summary-label">Fächer</span>
-                  <span className="subjects-manage-summary-value">
+                <div className="home-summary-card">
+                  <span className="home-summary-label">Fächer</span>
+                  <span className="subjects-manage-summary-value home-summary-value-pill">
                     {subjects.length}
                   </span>
                 </div>
-                <div className="subjects-manage-summary-card">
-                  <span className="subjects-manage-summary-label">
+                <div className="home-summary-card">
+                  <span className="home-summary-label">
                     Hauptfächer
                   </span>
-                  <span className="subjects-manage-summary-value">
+                  <span className="subjects-manage-summary-value home-summary-value-pill">
                     {mainSubjectsCount}
                   </span>
                 </div>
-                <div className="subjects-manage-summary-card">
-                  <span className="subjects-manage-summary-label">
+                <div className="home-summary-card">
+                  <span className="home-summary-label">
                     Nebenfächer
                   </span>
-                  <span className="subjects-manage-summary-value">
+                  <span className="subjects-manage-summary-value home-summary-value-pill">
                     {minorSubjectsCount}
                   </span>
                 </div>

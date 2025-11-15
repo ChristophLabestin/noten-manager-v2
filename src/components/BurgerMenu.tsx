@@ -11,9 +11,10 @@ interface BurgerMenuProps {
   isSmall?: boolean;
   title?: string;
   subjectType?: number;
+  subtitle?: string;
 }
 
-function BurgerMenu({ isSmall, title, subjectType }: BurgerMenuProps) {
+function BurgerMenu({ isSmall, title, subjectType, subtitle }: BurgerMenuProps) {
   const { user } = useAuth();
 
   const [greeting, setGreeting] = useState<string>("");
@@ -114,6 +115,15 @@ function BurgerMenu({ isSmall, title, subjectType }: BurgerMenuProps) {
           >
             {subjectType === 1 ? "Hauptfach" : "Nebenfach"}
           </span>
+        </div>
+      )}
+
+      {!isHome && title && typeof subjectType !== "number" && (
+        <div className="burger-menu-center">
+          <div className="burger-subject-name">{title}</div>
+          <p className="subjects-page-subtitle">
+            {subtitle}
+          </p>
         </div>
       )}
 

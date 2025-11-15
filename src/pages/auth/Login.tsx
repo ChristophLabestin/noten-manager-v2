@@ -124,6 +124,7 @@ const Login: React.FC = () => {
             <input
               className="form-input"
               type="email"
+              autoComplete="email"
               value={email}
               onChange={handleEmailChange}
               placeholder="example@email.com"
@@ -134,6 +135,8 @@ const Login: React.FC = () => {
             <input
               className="form-input"
               type="password"
+              name="password"
+              autoComplete="current-password"
               value={password}
               onChange={handlePasswordChange}
               placeholder="********"
@@ -151,7 +154,10 @@ const Login: React.FC = () => {
             <button
               type="button"
               className="login-forgot-link"
-              onClick={(event) => event.preventDefault()}
+              onClick={() => {
+                window.history.pushState({}, "", "/passwort-vergessen");
+                window.dispatchEvent(new PopStateEvent("popstate"));
+              }}
             >
               Passwort vergessen?
             </button>

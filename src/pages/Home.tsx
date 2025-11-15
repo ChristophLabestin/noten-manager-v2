@@ -343,13 +343,21 @@ export default function Home() {
         <section className="home-section">
           <div className="home-section-header">
             <div className="home-section-header-main">
-              <h2 className="home-section-title">
+              <h2 className="section-head no-padding">
                 Fächer &amp; Noten
               </h2>
-              <span className="home-section-subtitle">
+              <span className="subject-detail-subheadline">
                 Tippe auf ein Fach für Details
               </span>
             </div>
+          </div>
+          <div className="home-section-body">
+            <SubjectsTable
+              subjects={sortedSubjects}
+              subjectGrades={filteredSubjectGrades}
+              enableDrag={subjectSortMode === "custom"}
+              onReorder={handleReorderSubjects}
+            />
             {subjects.length > 0 && (
               <div className="home-sort-select">
                 <label
@@ -364,8 +372,8 @@ export default function Home() {
                   value={subjectSortMode}
                   onChange={handleSortModeChange}
                 >
-                  <option value="name">Name (A–Z)</option>
-                  <option value="name_desc">Name (Z–A)</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="name_desc">Name (Z-A)</option>
                   <option value="average">
                     Ø Note (beste zuerst)
                   </option>
@@ -376,14 +384,6 @@ export default function Home() {
                 </select>
               </div>
             )}
-          </div>
-          <div className="home-section-body">
-            <SubjectsTable
-              subjects={sortedSubjects}
-              subjectGrades={filteredSubjectGrades}
-              enableDrag={subjectSortMode === "custom"}
-              onReorder={handleReorderSubjects}
-            />
           </div>
         </section>
       </main>

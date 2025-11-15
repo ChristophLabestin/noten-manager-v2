@@ -98,6 +98,7 @@ const Register: React.FC = () => {
               placeholder="Name"
               required
               name="name"
+              autoComplete="name"
             />
           </div>
           <div className="form-group">
@@ -110,6 +111,7 @@ const Register: React.FC = () => {
               placeholder="example@email.com"
               required
               name="email"
+              autoComplete="email"
             />
           </div>
           <div className="form-group">
@@ -122,6 +124,7 @@ const Register: React.FC = () => {
               placeholder="********"
               required
               name="password"
+              autoComplete="new-password"
             />
           </div>
           <div className="form-group">
@@ -134,6 +137,7 @@ const Register: React.FC = () => {
               placeholder="********"
               required
               name="confirm-password"
+              autoComplete="new-password"
             />
           </div>
           <button

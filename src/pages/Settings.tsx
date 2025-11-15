@@ -155,17 +155,12 @@ export default function Settings() {
     return (
       <>
         <div className="home-layout">
-          <BurgerMenu />
+          <BurgerMenu
+            isSmall
+            title="Einstellungen"
+            subtitle="Name und App-Design anpassen"
+          />
           <div className="settings-head">
-            <div className="settings-top">
-              <h2 className="section-head no-padding">
-                Einstellungen
-              </h2>
-              <p className="login-header-subtitle">
-                Passe deinen Namen und das Design deines Noten Managers an.
-              </p>
-            </div>
-
             <form onSubmit={handleSaveName} className="settings-form">
               <div className="form-group">
                 <label htmlFor="name" className="form-label">

@@ -410,9 +410,9 @@ export default function SubjectDetailPage({
             </button>
           </div>
 
-          <section className="subject-detail-summary">
-            <div className="subject-detail-summary-card">
-              <span className="subject-detail-summary-label">
+          <section className="home-summary two-columns">
+            <div className="home-summary-card">
+              <span className="home-summary-label">
                 Durchschnitt
               </span>
               <div
@@ -421,8 +421,8 @@ export default function SubjectDetailPage({
                 {averageDisplay}
               </div>
             </div>
-            <div className="subject-detail-summary-card">
-              <span className="subject-detail-summary-label">Noten</span>
+            <div className="home-summary-card">
+              <span className="home-summary-label">Noten</span>
               <span className="subject-detail-summary-value home-summary-value-pill">
                 {subjectGrades.length}
               </span>
@@ -433,7 +433,7 @@ export default function SubjectDetailPage({
             activeSubject.alias ||
             activeSubject.email ||
             activeSubject.room) && (
-            <section className="subject-detail-details-section">
+            <section className="home-section">
               <h2 className="section-head no-padding">Details</h2>
               <div className="subject-detail-details-list">
                 {activeSubject.teacher && (
@@ -483,7 +483,7 @@ export default function SubjectDetailPage({
             </section>
           )}
 
-          <section className="subject-detail-grades-section">
+          <section className="home-section">
             <h2 className="section-head no-padding">Noten</h2>
             <p className="subject-detail-subheadline">Tippe auf eine Note, um diese zu bearbeiten</p>
             {sortedGrades.length === 0 ? (

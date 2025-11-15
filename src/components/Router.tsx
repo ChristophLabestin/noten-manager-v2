@@ -7,11 +7,15 @@ import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Settings from "../pages/Settings";
+import ResetPassword from "../pages/auth/ResetPassword";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
   "/register": () => <Register />,
   "/datenschutz": () => <PrivacyPolicy />,
+  "/__/auth/action": () => <ResetPassword />,
+  "/passwort-vergessen": () => <ForgotPassword />,
   "/": () => (
     <PrivateRoute>
       <Home />
