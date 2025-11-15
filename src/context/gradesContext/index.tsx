@@ -79,7 +79,9 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
           const mode = profile.subjectSortMode;
           if (
             mode === "name" ||
+            mode === "name_desc" ||
             mode === "average" ||
+            mode === "average_worst" ||
             mode === "custom"
           ) {
             setSubjectSortMode(mode);

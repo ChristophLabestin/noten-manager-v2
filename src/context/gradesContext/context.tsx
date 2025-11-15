@@ -2,7 +2,12 @@ import { createContext } from "react";
 import type { Subject } from "../../interfaces/Subject";
 import type { GradeWithId } from "../../interfaces/Grade";
 
-export type SubjectSortMode = "name" | "average" | "custom";
+export type SubjectSortMode =
+  | "name"
+  | "name_desc"
+  | "average"
+  | "average_worst"
+  | "custom";
 
 export interface GradesContextType {
   subjects: Subject[];

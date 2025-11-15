@@ -2480,44 +2480,183 @@ body.dark-mode .settings-form .form-input {
 }
 
 .loading-wrapper {
+  position: fixed;
+  inset: 0;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(214, 214, 214, 0.32);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(214, 214, 214, 0.28);
   z-index: 100;
-  font-size: 22px;
   opacity: 1;
-  transition: .3s all ease-in-out;
-  transition-delay: .2s;
+  pointer-events: all;
+  transition: opacity 0.3s ease-in-out;
+  transition-delay: 0.15s;
   &.finished {
     opacity: 0;
   }
 }
 
-.loading-progress-bar {
-  width: 80%;
-  height: 30px;
-  background: rgba(180, 180, 180, 0.4);
-  border: 1px ;
-  border-radius: 20px;
+.loading-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at top,
+      rgba(37, 99, 235, 0.18),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.loading-progress-handle {
-  height: 30px;
-  background: variables.$color-primary-hover;
-  border-radius: 20px;
+body.theme-feminine .loading-backdrop {
+  background: radial-gradient(
+      circle at top,
+      rgba(236, 72, 153, 0.24),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.65);
+}
+
+.loading-card {
+  position: relative;
+  z-index: 1;
+  max-width: 360px;
+  width: calc(100% - 48px);
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+body.dark-mode .loading-card {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(148, 163, 184, 0.65);
+}
+
+.loading-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 3px solid rgba(209, 213, 219, 0.8);
+  border-top-color: variables.$color-primary;
+  animation: loading-spin 0.9s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.theme-feminine .loading-spinner {
+  border-top-color: variables.$color-primary-feminine;
+}
+
+.loading-spinner-inner {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at top,
+    rgba(37, 99, 235, 0.24),
+    rgba(37, 99, 235, 0.05)
+  );
+}
+
+body.theme-feminine .loading-spinner-inner {
+  background: radial-gradient(
+    circle at top,
+    rgba(236, 72, 153, 0.3),
+    rgba(236, 72, 153, 0.08)
+  );
+}
+
+.loading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loading-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: variables.$color-text-dark;
+}
+
+.loading-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: variables.$color-text-medium;
+}
+
+body.dark-mode .loading-title {
+  color: variables.$color-text-dark-dark;
+}
+
+body.dark-mode .loading-subtitle {
+  color: variables.$color-text-medium-dark;
+}
+
+.loading-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.loading-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.9);
+  overflow: hidden;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    variables.$color-primary,
+    variables.$color-primary-hover
+  );
+  transition: width 0.25s ease-out;
+}
+
+body.theme-feminine .loading-progress-fill {
+  background: linear-gradient(
+    90deg,
+    variables.$color-primary-feminine,
+    variables.$color-primary-feminine-hover
+  );
+}
+
+.loading-progress-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: variables.$color-text-medium-dark;
+}
+
+body.dark-mode .loading-progress-bar {
+  background: rgba(31, 41, 55, 0.9);
+}
+
+body.dark-mode .loading-progress-label {
+  color: variables.$color-text-dark-dark;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Subject detail - dedicated layout

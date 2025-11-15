@@ -143,6 +143,14 @@ export default function Home() {
       );
     }
 
+    if (subjectSortMode === "name_desc") {
+      return [...subjects].sort((a, b) =>
+        b.name
+          .toLowerCase()
+          .localeCompare(a.name.toLowerCase(), "de")
+      );
+    }
+
     if (subjectSortMode === "average") {
       return [...subjects].sort((a, b) => {
         const avgA = getSubjectAverage(a);
@@ -157,6 +165,23 @@ export default function Home() {
         if (avgB === null) return -1;
 
         return avgB - avgA;
+      });
+    }
+
+    if (subjectSortMode === "average_worst") {
+      return [...subjects].sort((a, b) => {
+        const avgA = getSubjectAverage(a);
+        const avgB = getSubjectAverage(b);
+
+        if (avgA === null && avgB === null) {
+          return a.name
+            .toLowerCase()
+            .localeCompare(b.name.toLowerCase(), "de");
+        }
+        if (avgA === null) return -1;
+        if (avgB === null) return 1;
+
+        return avgA - avgB;
       });
     }
 
@@ -340,8 +365,12 @@ export default function Home() {
                   onChange={handleSortModeChange}
                 >
                   <option value="name">Name (A–Z)</option>
+                  <option value="name_desc">Name (Z–A)</option>
                   <option value="average">
                     Ø Note (beste zuerst)
+                  </option>
+                  <option value="average_worst">
+                    Ø Note (schlechteste zuerst)
                   </option>
                   <option value="custom">Eigene Reihenfolge</option>
                 </select>
