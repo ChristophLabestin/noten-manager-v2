@@ -1,14 +1,14 @@
-import backIcon from "../assets/back.svg";
+import { navigate } from "../services/navigation";
+import { BackIcon } from "./icons";
 
 export default function BackToHome() {
-    const navigateToHome = () => {
-        window.location.href = "/";
-    }
+  const navigateToHome = () => {
+    navigate("/");
+  };
 
-    return (
-        <div className="back-to-home-wrapper" onClick={navigateToHome}>
-            <img src={backIcon}/> 
-            <p className="back-to-home-text">zur Startseite</p>
-        </div>
-    )
+  return (
+    <div className="back-to-home-wrapper nav-circle" onClick={navigateToHome}>
+      <BackIcon size={24} />
+    </div>
+  );
 }

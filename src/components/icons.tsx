@@ -55,7 +55,7 @@ export const DownloadIcon: React.FC<Props> = ({
 );
 
 export const DeleteIcon: React.FC<Props> = ({
-  size = 18,
+  size = 22,
   className,
   style,
 }) => (
@@ -71,6 +71,66 @@ export const DeleteIcon: React.FC<Props> = ({
     focusable="false"
   >
     <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360Z" />
+  </svg>
+);
+
+export const EditIcon: React.FC<Props> = ({
+  size = 22,
+  className,
+  style,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 -960 960 960"
+    width={size}
+    height={size}
+    fill="currentColor"
+    className={className}
+    style={{ display: "inline-block", ...style }}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+  </svg>
+);
+
+export const SaveIcon: React.FC<Props> = ({
+  size = 22,
+  className,
+  style,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 -960 960 960"
+    width={size}
+    height={size}
+    fill="currentColor"
+    className={className}
+    style={{ display: "inline-block", ...style }}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z" />
+  </svg>
+);
+
+export const CancelIcon: React.FC<Props> = ({
+  size = 22,
+  className,
+  style,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 -960 960 960"
+    width={size}
+    height={size}
+    fill="currentColor"
+    className={className}
+    style={{ display: "inline-block", ...style }}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
   </svg>
 );
 
@@ -259,5 +319,27 @@ export const LogoutIcon: React.FC<Props> = ({
     focusable="false"
   >
     <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+  </svg>
+);
+
+export const BackIcon: React.FC<Props> = ({
+  size = 24,
+  className,
+  style,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 -960 960 960"
+    width={size}
+    height={size}
+    fill="currentColor"
+    className={className}
+    style={style}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <g transform="translate(244 0)">
+      <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
+    </g>
   </svg>
 );

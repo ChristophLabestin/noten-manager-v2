@@ -6,15 +6,16 @@ import { db } from "../firebase/firebaseConfig";
 import type { EncryptedGrade } from "../interfaces/Grade";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
-import backIcon from "../assets/back-black.svg";
+import backIcon from "../assets/back.svg";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // Fächer aus Home
   onAddGrade: (
     subjectId: string,
+    gradeId: string,
     grade: EncryptedGrade,
     encryptionKey: CryptoKey
-  ) => void; // Callback fuer neue Note
+  ) => void; // Callback für neue Note
   encryptionKeyProp: CryptoKey;
 }
 
@@ -116,10 +117,10 @@ export default function AddGrade({
         "grades"
       );
 
-      await addDoc(gradesRef, gradeToAdd);
+      const docRef = await addDoc(gradesRef, gradeToAdd);
 
       // Callback an Home
-      onAddGrade(selectedSubjectId, gradeToAdd, encryptionKeyProp);
+      onAddGrade(selectedSubjectId, docRef.id, gradeToAdd, encryptionKeyProp);
 
       setNewGradeInput("");
       setGradeNote("");

@@ -4,6 +4,10 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+// Simple in-memory cache so we don't derive the same key
+// (password + salt + iterations) on every page load.
+const keyCache = new Map<string, CryptoKey>();
+
 /* ---------- Helpers: base64 <-> ArrayBuffer ---------- */
 export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   const bytes = new Uint8Array(buffer);
@@ -36,6 +40,10 @@ export const deriveKeyFromPassword = async (
   saltBase64: string,
   iterations = 150000
 ): Promise<CryptoKey> => {
+  const cacheKey = `${password}:${saltBase64}:${iterations}`;
+  const cached = keyCache.get(cacheKey);
+  if (cached) return cached;
+
   const saltBuf = base64ToArrayBuffer(saltBase64);
   const pwKey = await crypto.subtle.importKey(
     "raw",
@@ -58,6 +66,7 @@ export const deriveKeyFromPassword = async (
     ["encrypt", "decrypt"]
   );
 
+  keyCache.set(cacheKey, key);
   return key;
 };
 

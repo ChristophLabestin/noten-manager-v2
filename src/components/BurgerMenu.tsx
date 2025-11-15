@@ -8,9 +8,11 @@ import BackToHome from "./BackToHome";
 
 interface BurgerMenuProps {
   isSmall?: boolean;
+  title?: string;
+  subjectType?: number;
 }
 
-function BurgerMenu({isSmall}: BurgerMenuProps) {
+function BurgerMenu({ isSmall, title, subjectType }: BurgerMenuProps) {
   const { user } = useAuth();
 
   const [greeting, setGreeting] = useState<string>("");
@@ -77,7 +79,7 @@ function BurgerMenu({isSmall}: BurgerMenuProps) {
         isSmall ? "burger-menu-wrapper with-back" : "burger-menu-wrapper"
       }
     >
-      {isHome && (
+      {isHome ? (
         <h1 className="nav-greeting">
           <span className="greeting-small">{greeting},</span>
           <br />{" "}
@@ -88,8 +90,23 @@ function BurgerMenu({isSmall}: BurgerMenuProps) {
             : ""}
           !
         </h1>
+      ) : (
+        <BackToHome />
       )}
-      {!isHome && <BackToHome />}
+
+      {!isHome && title && typeof subjectType === "number" && (
+        <div className="burger-menu-center">
+          <div className="burger-subject-name">{title}</div>
+          <span
+            className={`subject-tag ${
+              subjectType === 1 ? "subject-tag--main" : "subject-tag--minor"
+            }`}
+          >
+            {subjectType === 1 ? "Hauptfach" : "Nebenfach"}
+          </span>
+        </div>
+      )}
+
       <div className="burger-buttons">
         <Logout />
       </div>

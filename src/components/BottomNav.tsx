@@ -6,12 +6,14 @@ import AddGrade from "./AddGrade";
 import AddSubject from "./AddSubject";
 import closeIcon from "../assets/close.svg";
 import folderIcon from "../assets/folder.svg";
+import { navigate } from "../services/navigation";
 
 interface BottomNavProps {
   subjects: Subject[];
   encryptionKey: CryptoKey | null;
   onAddGradeToState: (
     subjectId: string,
+    gradeId: string,
     grade: EncryptedGrade,
     encryptionKey: CryptoKey
   ) => void;
@@ -47,6 +49,21 @@ export default function BottomNav({
     setIsOpen(false);
   };
 
+  const handleGradeAdded = (
+    subjectId: string,
+    gradeId: string,
+    grade: EncryptedGrade,
+    key: CryptoKey
+  ) => {
+    onAddGradeToState(subjectId, gradeId, grade, key);
+    setActiveModal("");
+  };
+
+  const handleSubjectAdded = (subject: Subject) => {
+    onAddSubjectToState(subject);
+    setActiveModal("");
+  };
+
   useEffect(() => {
     document.body.classList.toggle("scroll-disable", activeModal !== "");
     return () => {
@@ -66,7 +83,7 @@ export default function BottomNav({
           <button
             className="bottom-nav-item"
             type="button"
-            onClick={() => (window.location.href = "/")}
+            onClick={() => navigate("/")}
             aria-label="Home"
           >
             <span
@@ -83,7 +100,7 @@ export default function BottomNav({
           <button
             className="bottom-nav-item"
             type="button"
-            onClick={() => (window.location.href = "/fach")}
+            onClick={() => navigate("/fach")}
             aria-label={"F\u00e4cher"}
           >
             <span
@@ -108,7 +125,7 @@ export default function BottomNav({
             type="button"
             onClick={toggleOpen}
             aria-expanded={isOpen}
-            aria-label={"Schnelle Aktionen \u00f6ffnen"}
+            aria-label={"Schnelle Aktionen öffnen"}
           >
             <span className="bottom-nav-fab-icon">+</span>
           </button>
@@ -116,7 +133,7 @@ export default function BottomNav({
           <button
             className="bottom-nav-item"
             type="button"
-            onClick={() => (window.location.href = "/einstellungen")}
+            onClick={() => navigate("/datenschutz")}
             aria-label="Profil"
           >
             <span className="bottom-nav-dot">
@@ -127,7 +144,7 @@ export default function BottomNav({
           <button
             className="bottom-nav-item"
             type="button"
-            onClick={() => (window.location.href = "/einstellungen")}
+            onClick={() => navigate("/einstellungen")}
             aria-label="Einstellungen"
           >
             <span
@@ -179,12 +196,12 @@ export default function BottomNav({
             {activeModal === "grade" ? (
               <AddGrade
                 subjectsProp={subjects}
-                onAddGrade={onAddGradeToState}
+                onAddGrade={handleGradeAdded}
                 encryptionKeyProp={encryptionKey as CryptoKey}
               />
             ) : (
               <AddSubject
-                onAddSubject={onAddSubjectToState}
+                onAddSubject={handleSubjectAdded}
                 isFirstSubject={isFirstSubject}
               />
             )}

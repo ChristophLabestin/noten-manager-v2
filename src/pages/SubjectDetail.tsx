@@ -1,211 +1,184 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../context/authcontext/useAuth";
 import type { Subject } from "../interfaces/Subject";
-import type { EncryptedGrade, Grade } from "../interfaces/Grade";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
-  addDoc,
-} from "firebase/firestore";
+import type { EncryptedGrade, Grade, GradeWithId } from "../interfaces/Grade";
+import { deleteDoc, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import editIcon from "../assets/edit-black.svg";
-import deleteIcon from "../assets/delete-black.svg";
-import saveIcon from "../assets/save-black.svg";
-import cancelIcon from "../assets/cancel-black.svg";
-import { getAuth } from "firebase/auth";
 import {
-  decryptString,
-  deriveKeyFromPassword,
-  encryptString,
-} from "../services/cryptoService";
+  EditIcon,
+  DeleteIcon,
+  SaveIcon,
+  CancelIcon,
+} from "../components/icons";
 import Loading from "../components/Loading";
-import backIcon from "../assets/back-black.svg";
-import infoIcon from "../assets/info-black.svg";
 import BurgerMenu from "../components/BurgerMenu";
+import BottomNav from "../components/BottomNav";
+import { useGrades } from "../context/gradesContext/useGrades";
+import { decryptString, encryptString } from "../services/cryptoService";
 
 interface SubjectDetailPageProps {
   subjectId: string;
 }
 
-interface GradeWithId extends Grade {
-  id: string;
-}
+const calculateGradeWeightForSubject = (
+  subjectType: number,
+  grade: Grade
+): number => {
+  if (subjectType === 1) {
+    return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
+  }
+  if (subjectType === 0) {
+    return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
+  }
+  return 1;
+};
 
-// const pastelColors = [
-//   "#FFB3BA", // helles Rosa
-//   "#FFDFBA", // Pfirsich
-//   "#FFFFBA", // Hellgelb
-//   "#BAFFC9", // Mintgrün
-//   "#BAE1FF", // Hellblau
-//   "#E2BAFF", // Lavendel
-//   "#FFD6E8", // Blassrosa
-//   "#C7FFD8", // Mint
-//   "#FFF3B0", // Vanille
-//   "#D4E2FF", // Nebelblau
-// ];
+const calculateAverageForSubject = (
+  grades: GradeWithId[],
+  subjectType: number
+): number | null => {
+  if (!grades || grades.length === 0) return null;
+
+  let total = 0;
+  let totalWeight = 0;
+
+  for (const grade of grades) {
+    const weight = calculateGradeWeightForSubject(subjectType, grade);
+    total += grade.grade * weight;
+    totalWeight += weight;
+  }
+
+  if (totalWeight === 0) return null;
+  return total / totalWeight;
+};
+
+const formatAverage = (value: number | null): string =>
+  value === null ? "-" : value.toFixed(2);
+
+const getGradeClass = (value: number | null): string => {
+  if (value === null) return "";
+  if (value >= 7) return "good";
+  if (value >= 4) return "medium";
+  return "bad";
+};
 
 export default function SubjectDetailPage({
   subjectId,
 }: SubjectDetailPageProps) {
   const { user } = useAuth();
-  const [activeSubject, setActiveSubject] = useState<Subject>();
-  const [subjectGrades, setSubjectGrades] = useState<GradeWithId[]>([]);
-  const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
-  const [gradeWeight, setGradeWeight] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [infosExtended, setInfosExtended] = useState<boolean>(false);
-  const [gradeNote, setGradeNote] = useState<string>("");
-  const [loadingLabel, setLoadingLabel] = useState<string>("");
-  const [progress, setProgress] = useState<number>(0);
+  const {
+    subjects,
+    gradesBySubject,
+    encryptionKey,
+    isLoading,
+    loadingLabel,
+    progress,
+    addSubject,
+    addGrade,
+    updateGrade,
+    deleteGrade,
+  } = useGrades();
 
-  // State für editierbare Note
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedGrade, setEditedGrade] = useState<Grade>({
     grade: 0,
     weight: 1,
     date: Timestamp.fromDate(new Date()),
     note: "",
+    halfYear: 1,
   });
 
-  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+  const activeSubject = useMemo(
+    () => subjects.find((subject) => subject.name === subjectId),
+    [subjects, subjectId]
+  );
 
-  useEffect(() => {
-    if (!user) return;
-    const cancelled = false;
+  const subjectGrades = useMemo(
+    () => gradesBySubject[subjectId] || [],
+    [gradesBySubject, subjectId]
+  );
 
-    const setPct = (pct: number, label?: string) => {
-      if (cancelled) return;
-      const clamped = Math.max(0, Math.min(100, Math.round(pct)));
-      setProgress(clamped);
-      if (label !== undefined) setLoadingLabel(label);
+  const sortedGrades = useMemo(
+    () =>
+      [...subjectGrades].sort(
+        (a, b) => b.date.seconds - a.date.seconds
+      ),
+    [subjectGrades]
+  );
+
+  const averageValue = useMemo(() => {
+    if (!activeSubject) return null;
+    return calculateAverageForSubject(subjectGrades, activeSubject.type);
+  }, [activeSubject, subjectGrades]);
+
+  const averageDisplay = formatAverage(averageValue);
+  const averageClass = getGradeClass(averageValue);
+
+  const isFirstSubject = subjects.length === 0;
+
+  const disableAddGrade = useMemo(
+    () => !encryptionKey || subjects.length === 0,
+    [encryptionKey, subjects.length]
+  );
+
+  const addGradeTitle = useMemo(() => {
+    if (!encryptionKey) return "Lade Schlüssel...";
+    if (subjects.length === 0) return "Lege zuerst ein Fach an";
+    return "";
+  }, [encryptionKey, subjects.length]);
+
+  const handleAddSubjectToState = (newSubject: Subject) => {
+    addSubject(newSubject);
+  };
+
+  const handleAddGradeToState = async (
+    subjectIdParam: string,
+    gradeId: string,
+    grade: EncryptedGrade,
+    key: CryptoKey
+  ) => {
+    const decryptedGradeNumber = Number(await decryptString(grade.grade, key));
+    const gradeWithId: GradeWithId = {
+      id: gradeId,
+      grade: decryptedGradeNumber,
+      weight: grade.weight,
+      date: grade.date,
+      note: grade.note,
+      halfYear: grade.halfYear,
     };
 
-    setIsLoading(true);
-    setPct(0, "Starte …");
+    addGrade(subjectIdParam, gradeWithId);
+  };
 
-    const fetchKeyAndData = async () => {
-      try {
-        // User-Dokument
-        setPct(10, "Profil laden …");
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) throw new Error("UserDoc fehlt");
+  const handleEditClick = (index: number) => {
+    const grade = sortedGrades[index];
+    if (!grade) return;
 
-        const { encryptionSalt } = userSnap.data();
-        if (!encryptionSalt) throw new Error("Encryption Salt fehlt");
+    setEditingIndex(index);
+    setEditedGrade({
+      grade: grade.grade,
+      weight: grade.weight,
+      date: grade.date,
+      note: grade.note ?? "",
+      halfYear: grade.halfYear ?? 1,
+    });
+  };
 
-        // Key ableiten
-        setPct(20, "Schlüssel ableiten …");
-        const key = await deriveKeyFromPassword(user.uid, encryptionSalt);
-        setEncryptionKey(key);
-
-        // Fachdaten
-        setPct(35, "Fach laden …");
-        const subjectDocRef = doc(db, "users", user.uid, "subjects", subjectId);
-        const subjectDocSnap = await getDoc(subjectDocRef);
-        if (!subjectDocSnap.exists()) {
-          throw new Error("Fach nicht gefunden!");
-        }
-        const subjectData = subjectDocSnap.data() as Subject;
-        setActiveSubject({ ...subjectData, name: subjectDocSnap.id });
-
-        // Noten aus Firestore holen
-        setPct(50, "Noten ermitteln …");
-        const gradesRef = collection(
+  const handleDeleteClick = async (gradeId: string) => {
+    if (!user || !activeSubject) return;
+    try {
+      await deleteDoc(
+        doc(
           db,
           "users",
           user.uid,
           "subjects",
-          subjectId,
-          "grades"
-        );
-        const gradesSnapshot = await getDocs(gradesRef);
-
-        const gradesData: GradeWithId[] = [];
-        for (const gradeDoc of gradesSnapshot.docs) {
-          const encryptedGrade = gradeDoc.data() as EncryptedGrade;
-          // Note entschlüsseln
-          const decryptedGradeStr = await decryptString(
-            encryptedGrade.grade,
-            key
-          );
-          gradesData.push({
-            id: gradeDoc.id,
-            grade: Number(decryptedGradeStr),
-            weight: encryptedGrade.weight,
-            date: encryptedGrade.date,
-            note: encryptedGrade.note,
-            halfYear: encryptedGrade.halfYear,
-          });
-        }
-
-        setSubjectGrades(gradesData);
-      } catch (err) {
-        setSubjectGrades([]);
-        setPct(100, "Fertig");
-        throw new Error(
-          "Fehler beim Laden der Fachdaten: " +
-            (err instanceof Error ? err.message : String(err))
-        );
-      }
-    };
-
-    setSubjectGrades([]);
-    setPct(100, "Fertig");
-    fetchKeyAndData();
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  }, [user, subjectId]);
-
-  const calculateGradeWeight = (grade: Grade): number => {
-    if (!activeSubject) return 1; // Default
-
-    const type = activeSubject.type;
-
-    if (type === 1) {
-      // Hauptfach
-      return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1; // 2 bleibt 2, 1 oder 0 wird zu 1
-    }
-
-    if (type === 0) {
-      // Nebenfach
-      return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1; // 1 wird 2, 0 wird 1
-    }
-
-    return 1; // Default
-  };
-
-  const calculateAverageScore = (grades: GradeWithId[]): string => {
-    if (!grades || grades.length === 0) return "—";
-    const total = grades.reduce(
-      (acc, grade) => acc + grade.grade * calculateGradeWeight(grade),
-      0
-    );
-    const totalWeight = grades.reduce(
-      (acc, grade) => acc + calculateGradeWeight(grade),
-      0
-    );
-    return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
-  };
-
-  const handleEditClick = (index: number) => {
-    setEditingIndex(index);
-    setEditedGrade({ ...subjectGrades[index] }); // aktuelle Werte laden
-  };
-
-  const handleDeleteClick = async (gradeId: string) => {
-    if (!user) return;
-    try {
-      await deleteDoc(
-        doc(db, "users", user.uid, "subjects", subjectId, "grades", gradeId)
+          activeSubject.name,
+          "grades",
+          gradeId
+        )
       );
-      setSubjectGrades(subjectGrades.filter((g) => g.id !== gradeId));
+      deleteGrade(activeSubject.name, gradeId);
     } catch (err) {
       throw new Error(
         "Fehler beim Löschen der Note: " +
@@ -215,32 +188,44 @@ export default function SubjectDetailPage({
   };
 
   const handleSaveClick = async (gradeId: string) => {
-    if (!user || editingIndex === null || !encryptionKey) return;
+    if (!user || editingIndex === null || !encryptionKey || !activeSubject) {
+      return;
+    }
+
     try {
-      // Note verschlüsseln bevor speichern
       const encryptedGradeStr = await encryptString(
         editedGrade.grade.toString(),
         encryptionKey
       );
+
       const gradeDocRef = doc(
         db,
         "users",
         user.uid,
         "subjects",
-        subjectId,
+        activeSubject.name,
         "grades",
         gradeId
       );
+
       await updateDoc(gradeDocRef, {
         grade: encryptedGradeStr,
         weight: editedGrade.weight,
         date: editedGrade.date,
         note: editedGrade.note,
+        halfYear: editedGrade.halfYear ?? null,
       });
 
-      const updatedGrades = [...subjectGrades];
-      updatedGrades[editingIndex] = { ...editedGrade, id: gradeId };
-      setSubjectGrades(updatedGrades);
+      const updatedGrade: GradeWithId = {
+        id: gradeId,
+        grade: editedGrade.grade,
+        weight: editedGrade.weight,
+        date: editedGrade.date,
+        note: editedGrade.note,
+        halfYear: editedGrade.halfYear,
+      };
+
+      updateGrade(activeSubject.name, updatedGrade);
       setEditingIndex(null);
     } catch (err) {
       throw new Error(
@@ -250,352 +235,519 @@ export default function SubjectDetailPage({
     }
   };
 
-  const handleGradeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewGradeInput(e.target.value);
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteModalGradeId, setNoteModalGradeId] = useState<string | null>(null);
+  const [noteModalValue, setNoteModalValue] = useState("");
+
+  const openNoteModal = (gradeId: string) => {
+    const grade = subjectGrades.find((g) => g.id === gradeId);
+    if (!grade) return;
+    setNoteModalGradeId(gradeId);
+    setNoteModalValue(grade.note ?? "");
+    setNoteModalOpen(true);
+    document.body.classList.add("scroll-disable");
   };
 
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setGradeNote(e.target.value);
+  const closeNoteModal = () => {
+    setNoteModalOpen(false);
+    setNoteModalGradeId(null);
+    setNoteModalValue("");
+    document.body.classList.remove("scroll-disable");
   };
 
-  const handleWeightChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setGradeWeight(Number(e.target.value));
-  };
-
-  const handleAddGrade = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!encryptionKey || !activeSubject) return;
-
-    const gradeNumber = Number(newGradeInput);
-    if (isNaN(gradeNumber)) {
-      alert("Bitte eine gültige Zahl eingeben.");
-      return;
-    }
-
-    if (gradeNumber > 15 || gradeNumber < 0) {
-      alert("Bitte eine gültige Zahl eingeben im Bereich 0-15.");
-      return;
-    }
-
+  const handleSaveNote = async () => {
+    if (!user || !activeSubject || !noteModalGradeId) return;
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) throw new Error("Kein Benutzer angemeldet");
-      if (!activeSubject) throw new Error("Kein Fach ausgewählt");
-
-      const encryptedGradeStr = await encryptString(
-        gradeNumber.toString(),
-        encryptionKey
-      );
-
-      const gradeToAdd: EncryptedGrade = {
-        grade: encryptedGradeStr,
-        weight: gradeWeight,
-        date: Timestamp.fromDate(new Date()),
-        note: gradeNote,
-      };
-
-      const gradesRef = collection(
+      const gradeDocRef = doc(
         db,
         "users",
         user.uid,
         "subjects",
         activeSubject.name,
-        "grades"
+        "grades",
+        noteModalGradeId
       );
-      const docRef = await addDoc(gradesRef, gradeToAdd);
 
-      // State aktualisieren – Note gleich entschlüsseln für Anzeige
-      setSubjectGrades((prev) => [
-        ...prev,
-        {
-          id: docRef.id,
-          grade: gradeNumber,
-          weight: gradeWeight,
-          date: gradeToAdd.date,
-          note: gradeToAdd.note,
-        },
-      ]);
+      await updateDoc(gradeDocRef, {
+        note: noteModalValue || null,
+      });
 
-      setNewGradeInput("");
-      setGradeNote("");
-      setGradeWeight(activeSubject.type === 0 ? 1 : 2);
+      const existing = subjectGrades.find((g) => g.id === noteModalGradeId);
+      if (existing) {
+        const updatedGrade: GradeWithId = {
+          ...existing,
+          note: noteModalValue || undefined,
+        };
+        updateGrade(activeSubject.name, updatedGrade);
+      }
+
+      closeNoteModal();
     } catch (err) {
       throw new Error(
-        "Fehler beim Hinzufügen der Note: " +
+        "Fehler beim Speichern der Notiz: " +
           (err instanceof Error ? err.message : String(err))
       );
     }
   };
 
-  const showNote = (gradeId: string) => {
-    const _g = subjectGrades.find((g) => g.id === gradeId) as Grade;
-    if (_g === undefined && !_g) {
-      return null;
-    }
-    if (_g.note === "") {
-      return null;
-    }
-    return alert(_g.note);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalGradeId, setDeleteModalGradeId] = useState<string | null>(
+    null
+  );
+
+  const openDeleteModal = (gradeId: string) => {
+    setDeleteModalGradeId(gradeId);
+    setDeleteModalOpen(true);
+    document.body.classList.add("scroll-disable");
   };
 
-  // const randomColor =
-  //   pastelColors[Math.floor(Math.random() * pastelColors.length)];
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setDeleteModalGradeId(null);
+    document.body.classList.remove("scroll-disable");
+  };
 
-  if (activeSubject) {
+  const handleConfirmDelete = async () => {
+    if (deleteModalGradeId === null) return;
+    await handleDeleteClick(deleteModalGradeId);
+    closeDeleteModal();
+  };
+
+  if (!activeSubject) {
+    if (isLoading) {
+      return (
+        <div className="subject-detail-page">
+          <Loading progress={progress} label={loadingLabel} />
+          <header className="subject-detail-header">
+            <BurgerMenu isSmall />
+          </header>
+        </div>
+      );
+    }
+
     return (
-      <div className="home-layout">
-        {isLoading && <Loading progress={progress} label={loadingLabel} />}
-        <BurgerMenu />
-        <div className="subject-detail-head">
-          <div className="subject-detail-top">
-            <div className="">
-              <h1>{activeSubject.name}</h1>
-              <h2 className="subject-detail-subheadline">
-                {activeSubject.type === 0 ? "Nebenfach" : "Hauptfach"}
-              </h2>
-            </div>
-            <div className="subject-detail-grade">
-              <div
-                className={`grade-box ${
-                  Number(calculateAverageScore(subjectGrades)) >= 7
-                    ? "good"
-                    : Number(calculateAverageScore(subjectGrades)) >= 4
-                    ? "medium"
-                    : "bad"
-                }`}
-              >
-                {calculateAverageScore(subjectGrades)}
-              </div>
-            </div>
-          </div>
-          {(activeSubject.teacher ||
-            activeSubject.alias ||
-            activeSubject.email) && (
-            <div className="subject-detail-infos">
-              {activeSubject.teacher && <p>{activeSubject.teacher}</p>}
-              {activeSubject.alias && <p>{activeSubject.alias}</p>}
-              {activeSubject.email && (
-                <a
-                  className="register-link"
-                  href={`mailto:${activeSubject.email}`}
-                >
-                  {activeSubject.email}
-                </a>
-              )}
-            </div>
-          )}
-          {activeSubject.room && (
-            <div className="subject-detail-infos">
-              <p>Raum: {activeSubject.room}</p>
-            </div>
-          )}
+      <div className="subject-detail-page">
+        <header className="subject-detail-header">
+          <BurgerMenu isSmall />
+        </header>
+        <div className="subject-detail-content">
+          <p>Fach nicht gefunden.</p>
         </div>
-
-        {subjectGrades.length === 0 ? (
-          <p>Keine Noten vorhanden</p>
-        ) : (
-          <div className="grades-wrapper">
-            <h2 className="section-head">Notenliste</h2>
-            <div className="grades-list">
-              {subjectGrades
-                .sort((a, b) => b.date.seconds - a.date.seconds)
-                .map((grade, index) => (
-                  <div
-                    className="grade-entity"
-                    key={grade.id}
-                    style={{
-                      backgroundColor: "#ffffff",
-                    }}
-                  >
-                    {editingIndex === index ? (
-                      <>
-                        {/* <div className="grade-date">
-                        {grade.date.toDate().toLocaleDateString()}
-                        </div> */}
-                        <div>
-                          <input
-                            type="number"
-                            className="form-input small"
-                            value={editedGrade.grade}
-                            style={{ minWidth: "50px" }}
-                            min={0}
-                            max={15}
-                            onChange={(e) =>
-                              setEditedGrade({
-                                ...editedGrade,
-                                grade: Number(e.target.value),
-                              })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <select
-                            value={editedGrade.weight}
-                            className="form-input small"
-                            style={{ minWidth: "130px" }}
-                            onChange={(e) =>
-                              setEditedGrade({
-                                ...editedGrade,
-                                weight: Number(e.target.value),
-                              })
-                            }
-                          >
-                            {activeSubject.type === 0 ? (
-                              <>
-                                <option value={3}>Fachreferat</option>
-                                <option value={1}>Kurzarbeit</option>
-                                <option value={0}>Mündlich</option>
-                              </>
-                            ) : (
-                              <>
-                                <option value={3}>Fachreferat</option>
-                                <option value={2}>Schulaufgabe</option>
-                                <option value={1}>Kurzarbeit</option>
-                                <option value={0}>Mündlich</option>
-                              </>
-                            )}
-                          </select>
-                        </div>
-                        <div></div>
-                        <div>
-                          <button
-                            className="btn-small"
-                            onClick={() => handleSaveClick(grade.id)}
-                          >
-                            <img src={saveIcon}></img>
-                          </button>
-                          <button
-                            className="btn-small"
-                            onClick={() => setEditingIndex(null)}
-                          >
-                            <img src={cancelIcon}></img>
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="grade-detail-grade">
-                          <div
-                            className={`grade-box ${
-                              grade.grade >= 7
-                                ? "good"
-                                : grade.grade >= 4
-                                ? "medium"
-                                : "bad"
-                            }`}
-                          >
-                            {grade.grade}
-                          </div>
-                        </div>
-                        <div className="grade-detail-wrapper">
-                          <div>
-                            {grade.weight === 0
-                              ? "Mündlich"
-                              : grade.weight === 1
-                              ? "Kurzarbeit"
-                              : grade.weight === 2
-                              ? "Schulaufgabe"
-                              : "Fachreferat"}
-                          </div>
-                          <div>{grade.date.toDate().toLocaleDateString()}</div>
-                        </div>
-                        <div>
-                          <img
-                            src={infoIcon}
-                            className={`info-icon-details ${
-                              grade.note !== "" ? "active" : ""
-                            }`}
-                            onClick={() => showNote(grade.id)}
-                          />
-                        </div>
-                        <div>
-                          <button
-                            className="btn-small"
-                            onClick={() => handleEditClick(index)}
-                          >
-                            <img src={editIcon}></img>
-                          </button>
-                          <button
-                            className="btn-small"
-                            onClick={() => handleDeleteClick(grade.id)}
-                          >
-                            <img src={deleteIcon}></img>
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-        <div className="add-grade-row">
-          <div className="form-two-columns">
-            <div className="form-group">
-              <label className="form-label">Note:</label>
-              <input
-                className="form-input"
-                type="number"
-                value={newGradeInput}
-                onChange={handleGradeChange}
-                placeholder="15"
-                min={0}
-                max={15}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Art:</label>
-              <select
-                className="form-input"
-                value={gradeWeight}
-                onChange={handleWeightChange}
-              >
-                {activeSubject.type === 0 ? (
-                  <>
-                    <option value={3}>Fachreferat</option>
-                    <option value={1}>Kurzarbeit</option>
-                    <option value={0}>Mündlich / EX</option>
-                  </>
-                ) : (
-                  <>
-                    <option value={3}>Fachreferat</option>
-                    <option value={2}>Schulaufgabe</option>
-                    <option value={1}>Kurzarbeit</option>
-                    <option value={0}>Mündlich / EX</option>
-                  </>
-                )}
-              </select>
-            </div>
-          </div>
-          <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
-            <div className="form-group">
-              <label className="form-label">Notiz:</label>
-              <textarea
-                className="form-input hidden-textarea"
-                value={gradeNote}
-                onChange={handleNoteChange}
-                placeholder="Mitarbeitsnote vom Freitag..."
-              ></textarea>
-            </div>
-          </div>
-          <div
-            className="extend-button"
-            onClick={() => setInfosExtended(!infosExtended)}
-          >
-            <img
-              className={`extend-icon ${infosExtended ? "extended" : ""}`}
-              src={backIcon}
-            />
-            <p>Notiz hinzufügen</p>
-          </div>
-          <button className="btn-primary small" onClick={handleAddGrade}>
-            Hinzufügen
-          </button>
-        </div>
+        <BottomNav
+          subjects={subjects as Subject[]}
+          encryptionKey={encryptionKey}
+          onAddGradeToState={handleAddGradeToState}
+          onAddSubjectToState={handleAddSubjectToState}
+          isFirstSubject={isFirstSubject}
+          disableAddGrade={disableAddGrade}
+          addGradeTitle={addGradeTitle}
+        />
       </div>
     );
   }
+
+  return (
+    <div className="subject-detail-page">
+      {isLoading && (
+        <Loading progress={progress} label={loadingLabel} />
+      )}
+
+      <header className="subject-detail-header">
+        <BurgerMenu
+          isSmall
+          title={activeSubject.name}
+          subjectType={activeSubject.type}
+        />
+      </header>
+
+      <div className="subject-detail-content">
+        <div className="subject-detail-main">
+          <section className="subject-detail-summary">
+            <div className="subject-detail-summary-card">
+              <span className="subject-detail-summary-label">
+                Durchschnitt
+              </span>
+              <div
+                className={`subject-detail-summary-pill ${averageClass}`}
+              >
+                {averageDisplay}
+              </div>
+            </div>
+            <div className="subject-detail-summary-card">
+              <span className="subject-detail-summary-label">Noten</span>
+              <span className="subject-detail-summary-value home-summary-value-pill">
+                {subjectGrades.length}
+              </span>
+            </div>
+          </section>
+
+          {(activeSubject.teacher ||
+            activeSubject.alias ||
+            activeSubject.email ||
+            activeSubject.room) && (
+            <section className="subject-detail-details-section">
+              <h2 className="section-head no-padding">Details</h2>
+              <div className="subject-detail-details-list">
+                {activeSubject.teacher && (
+                  <div className="subject-detail-detail-row">
+                    <span className="subject-detail-detail-label">
+                      Lehrkraft
+                    </span>
+                    <span className="subject-detail-detail-value">
+                      {activeSubject.teacher}
+                    </span>
+                  </div>
+                )}
+                {activeSubject.alias && (
+                  <div className="subject-detail-detail-row">
+                    <span className="subject-detail-detail-label">
+                      Kürzel
+                    </span>
+                    <span className="subject-detail-detail-value">
+                      {activeSubject.alias}
+                    </span>
+                  </div>
+                )}
+                {activeSubject.email && (
+                  <div className="subject-detail-detail-row">
+                    <span className="subject-detail-detail-label">
+                      E-Mail
+                    </span>
+                    <a
+                      href={`mailto:${activeSubject.email}`}
+                      className="subject-detail-detail-value"
+                    >
+                      {activeSubject.email}
+                    </a>
+                  </div>
+                )}
+                {activeSubject.room && (
+                  <div className="subject-detail-detail-row">
+                    <span className="subject-detail-detail-label">
+                      Raum
+                    </span>
+                    <span className="subject-detail-detail-value">
+                      {activeSubject.room}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section className="subject-detail-grades-section">
+            <h2 className="section-head no-padding">Noten</h2>
+            <p className="subject-detail-subheadline">Tippe auf eine Note, um diese zu bearbeiten</p>
+            {sortedGrades.length === 0 ? (
+              <p>Keine Noten vorhanden</p>
+            ) : (
+              <div className="subject-detail-grades-list">
+                {sortedGrades.map((grade, index) => {
+                  const isEditing = editingIndex === index;
+                  return (
+                    <div
+                      key={grade.id}
+                      className={`subject-detail-grade-card ${
+                        isEditing ? "editing" : ""
+                      }`}
+                      onClick={() => handleEditClick(index)}
+                    >
+                      <div className="subject-detail-grade-main">
+                        <div className="subject-detail-grade-header">
+                          <div className="subject-detail-grade-meta">
+                            <div className="subject-detail-grade-type-row">
+                              <div className="subject-detail-grade-type">
+                                {isEditing ? (
+                                  <select
+                                    value={editedGrade.weight}
+                                    className="form-input small"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) =>
+                                      setEditedGrade({
+                                        ...editedGrade,
+                                        weight: Number(e.target.value),
+                                      })
+                                    }
+                                  >
+                                    {activeSubject.type === 0 ? (
+                                      <>
+                                        <option value={3}>Fachreferat</option>
+                                        <option value={1}>Kurzarbeit</option>
+                                        <option value={0}>Mündlich</option>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <option value={3}>Fachreferat</option>
+                                        <option value={2}>Schulaufgabe</option>
+                                        <option value={1}>Kurzarbeit</option>
+                                        <option value={0}>Mündlich</option>
+                                      </>
+                                    )}
+                                  </select>
+                                ) : (
+                                  <>
+                                    {grade.weight === 0
+                                      ? "Mündlich"
+                                      : grade.weight === 1
+                                      ? "Kurzarbeit"
+                                      : grade.weight === 2
+                                      ? "Schulaufgabe"
+                                      : "Fachreferat"}
+                                  </>
+                                )}
+                              </div>
+                              <div className="subject-detail-grade-halfyear">
+                                {isEditing ? (
+                                  <select
+                                    value={editedGrade.halfYear ?? 1}
+                                    className="form-input small"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) =>
+                                      setEditedGrade({
+                                        ...editedGrade,
+                                        halfYear: Number(
+                                          e.target.value
+                                        ) as 1 | 2,
+                                      })
+                                    }
+                                  >
+                                    <option value={1}>1. Hj</option>
+                                    <option value={2}>2. Hj</option>
+                                  </select>
+                                ) : (
+                                  typeof grade.halfYear === "number" && (
+                                    <span>
+                                      {grade.halfYear === 1 ? "1. Hj" : "2. Hj"}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                            <div className="subject-detail-grade-date">
+                              {isEditing ? (
+                                <input
+                                  type="date"
+                                  className="form-input small"
+                                  value={editedGrade.date
+                                    .toDate()
+                                    .toISOString()
+                                    .slice(0, 10)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onChange={(e) =>
+                                    setEditedGrade({
+                                      ...editedGrade,
+                                      date: Timestamp.fromDate(
+                                        new Date(e.target.value)
+                                      ),
+                                    })
+                                  }
+                                />
+                              ) : (
+                                grade.date.toDate().toLocaleDateString()
+                              )}
+                            </div>
+                          </div>
+                          <div className="subject-detail-grade-value">
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                className="form-input small"
+                                value={editedGrade.grade}
+                                min={0}
+                                max={15}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) =>
+                                  setEditedGrade({
+                                    ...editedGrade,
+                                    grade: Number(e.target.value),
+                                  })
+                                }
+                              />
+                            ) : (
+                              <span
+                                className={`subject-detail-grade-pill ${getGradeClass(
+                                  grade.grade
+                                )}`}
+                              >
+                                {grade.grade}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="subject-detail-grade-footer">
+                          <div className="subject-detail-grade-note">
+                            {grade.note ? (
+                              <button
+                                type="button"
+                                className="link-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openNoteModal(grade.id);
+                                }}
+                              >
+                                Notiz anzeigen
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="link-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openNoteModal(grade.id);
+                                }}
+                              >
+                                Notiz hinzufügen
+                              </button>
+                            )}
+                          </div>
+                          <div className="subject-detail-grade-actions">
+                            {isEditing ? (
+                              <>
+                                <button
+                                  className="btn-small"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSaveClick(grade.id);
+                                  }}
+                                >
+                                  <SaveIcon size={20} className="icon-save" />
+                                </button>
+                                <button
+                                  className="btn-small"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingIndex(null);
+                                  }}
+                                >
+                                  <CancelIcon size={20} className="icon-cancel" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="btn-small"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditClick(index);
+                                  }}
+                                >
+                                  <EditIcon size={20} className="icon-edit" />
+                                </button>
+                                <button
+                                  className="btn-small"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openDeleteModal(grade.id);
+                                  }}
+                                >
+                                  <DeleteIcon
+                                    size={20}
+                                    className="icon-delete"
+                                  />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+
+      <BottomNav
+        subjects={subjects as Subject[]}
+        encryptionKey={encryptionKey}
+        onAddGradeToState={handleAddGradeToState}
+        onAddSubjectToState={handleAddSubjectToState}
+        isFirstSubject={isFirstSubject}
+        disableAddGrade={disableAddGrade}
+        addGradeTitle={addGradeTitle}
+      />
+
+      {noteModalOpen && (
+        <div className="modal-wrapper">
+          <div className="modal-background" onClick={closeNoteModal}></div>
+          <div className="modal">
+            <h2 className="section-head no-padding">Notiz bearbeiten</h2>
+            <div className="form-group" style={{ marginTop: "12px" }}>
+              <label className="form-label">Notiz</label>
+              <textarea
+                className="form-input hidden-textarea"
+                value={noteModalValue}
+                onChange={(e) => setNoteModalValue(e.target.value)}
+                placeholder="Notiz zur Note eingeben ..."
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+                marginTop: "16px",
+              }}
+            >
+              <button
+                type="button"
+                className="btn-small btn-small--cancel"
+                onClick={closeNoteModal}
+              >
+                <CancelIcon size={18} /> Abbrechen
+              </button>
+              <button
+                type="button"
+                className="btn-small btn-small--save"
+                onClick={handleSaveNote}
+              >
+                <SaveIcon size={18} /> Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="modal-wrapper">
+          <div className="modal-background" onClick={closeDeleteModal}></div>
+          <div className="modal">
+            <h2 className="section-head no-padding">Note löschen?</h2>
+            <p style={{ marginTop: "12px", fontSize: "14px" }}>
+              Möchtest du diese Note wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+                marginTop: "18px",
+              }}
+            >
+              <button
+                type="button"
+                className="btn-small btn-small--cancel"
+                onClick={closeDeleteModal}
+              >
+                <CancelIcon size={18} /> Abbrechen
+              </button>
+              <button
+                type="button"
+                className="btn-small btn-small--delete"
+                onClick={handleConfirmDelete}
+              >
+                <DeleteIcon size={18} /> Löschen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-
-

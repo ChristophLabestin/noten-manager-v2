@@ -1,5 +1,6 @@
 import type { Grade } from "../interfaces/Grade";
 import type { Subject } from "../interfaces/Subject";
+import { navigate } from "../services/navigation";
 
 interface SubjectsTableProps {
   subjects: Subject[];
@@ -64,7 +65,7 @@ export default function SubjectsTable({
   };
 
   const goToSubjectPage = (subjectId: string) => {
-    window.location.href = `/fach/${subjectId}`;
+    navigate(`/fach/${subjectId}`);
   };
 
   return (
@@ -99,7 +100,7 @@ export default function SubjectsTable({
               </div>
             </div>
             <div className="subject-row-grade">
-              <div className={`grade-box ${getGradeClass(avg)}`}>
+              <div className={`subject-detail-summary-pill ${getGradeClass(avg)}`}>
                 {formatAverage(avg)}
               </div>
             </div>

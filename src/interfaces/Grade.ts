@@ -17,3 +17,7 @@ export interface Grade {
   // 1 = 1. Halbjahr, 2 = 2. Halbjahr
   halfYear?: 1 | 2;
 }
+
+export interface GradeWithId extends Grade {
+  id: string;
+}

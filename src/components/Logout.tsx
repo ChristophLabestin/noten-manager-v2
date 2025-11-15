@@ -11,7 +11,7 @@ export default function Logout() {
   };
 
   return (
-    <div className="logout-wrapper" onClick={handleLogout}>
+    <div className="logout-wrapper nav-circle" onClick={handleLogout}>
       <LogoutIcon size={24} />
     </div>
   );

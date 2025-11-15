@@ -1,6 +1,7 @@
 import Router from "./components/Router";
 import { AuthProvider } from "./context/authcontext";
 import { useAuth } from "./context/authcontext/useAuth";
+import { GradesProvider } from "./context/gradesContext";
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -24,7 +25,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent></AppContent>
+      <GradesProvider>
+        <AppContent />
+      </GradesProvider>
     </AuthProvider>
   );
 }

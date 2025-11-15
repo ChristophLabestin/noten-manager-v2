@@ -4,7 +4,7 @@ import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
-import backIcon from "../assets/back-black.svg";
+import backIcon from "../assets/back.svg";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
