@@ -4,16 +4,14 @@ import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
-import backIcon from "../assets/back.svg";
+import { BackIcon } from "./icons";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
-  isFirstSubject: boolean;
 }
 
 export default function AddSubject({
   onAddSubject,
-  isFirstSubject,
 }: AddSubjectProps) {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
@@ -113,13 +111,6 @@ export default function AddSubject({
             <p>Diese Einstellung lässt sich später nicht mehr ändern!</p>
           </div>
         </h2>
-        {isFirstSubject && (
-          <p>
-            Du hast scheinbar noch kein Fach angelegt. Fange damit an, ein Fach
-            anzulegen, um dann Noten einzutragen. Du kannst ein weiteres Fach
-            später jederzeit über die Schnellaktionen hinzufügen.
-          </p>
-        )}
         <div className="form-two-columns">
           <div className="form-group">
             <label className="form-label">Name</label>
@@ -193,10 +184,9 @@ export default function AddSubject({
           className="extend-button"
           onClick={() => setInfosExtended(!infosExtended)}
         >
-          <img
+          <BackIcon
+            size={18}
             className={`extend-icon ${infosExtended ? "extended" : ""}`}
-            src={backIcon}
-            alt="Weitere Felder ein-/ausklappen"
           />
           <p>Zusätzliche Infos hinzufügen</p>
         </div>

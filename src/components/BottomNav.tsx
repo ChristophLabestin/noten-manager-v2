@@ -120,15 +120,26 @@ export default function BottomNav({
             </span>
           </button>
 
-          <button
-            className="bottom-nav-fab"
-            type="button"
-            onClick={toggleOpen}
-            aria-expanded={isOpen}
-            aria-label={"Schnelle Aktionen öffnen"}
-          >
-            <span className="bottom-nav-fab-icon">+</span>
-          </button>
+          <div className="bottom-nav-fab-wrapper">
+            {isFirstSubject && !isOpen && (
+              <div className="bottom-nav-hint">
+                <div className="bottom-nav-hint-bubble">
+                  Du hast noch kein Fach angelegt. <br/> Tippe hier, um dein erstes
+                  Fach zu erstellen.
+                  <div className="bottom-nav-hint-arrow" />
+                </div>
+              </div>
+            )}
+            <button
+              className="bottom-nav-fab"
+              type="button"
+              onClick={toggleOpen}
+              aria-expanded={isOpen}
+              aria-label={"Schnelle Aktionen öffnen"}
+            >
+              <span className="bottom-nav-fab-icon">+</span>
+            </button>
+          </div>
 
           <button
             className="bottom-nav-item"
@@ -226,7 +237,6 @@ export default function BottomNav({
             ) : (
               <AddSubject
                 onAddSubject={handleSubjectAdded}
-                isFirstSubject={isFirstSubject}
               />
             )}
             <img

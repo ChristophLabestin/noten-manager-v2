@@ -574,8 +574,8 @@ export default function SubjectDetailPage({
                             )}
                           </div>
                         </div>
-                        <div className="subject-detail-grade-footer">
-                          <div className="subject-detail-grade-note">
+                          <div className="subject-detail-grade-footer">
+                            <div className="subject-detail-grade-note">
                             {grade.note ? (
                               <button
                                 type="button"
@@ -604,24 +604,29 @@ export default function SubjectDetailPage({
                             {isEditing ? (
                               <>
                                 <button
-                                  className="btn-small"
+                                  className="btn-small btn-small--save"
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleSaveClick(grade.id);
                                   }}
                                 >
-                                  <SaveIcon size={20} className="icon-save" />
+                                  <SaveIcon size={18} className="icon-save" />{" "}
+                                  Speichern
                                 </button>
                                 <button
-                                  className="btn-small"
+                                  className="btn-small btn-small--cancel"
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setEditingIndex(null);
                                   }}
                                 >
-                                  <CancelIcon size={20} className="icon-cancel" />
+                                  <CancelIcon
+                                    size={18}
+                                    className="icon-cancel"
+                                  />{" "}
+                                  Abbrechen
                                 </button>
                               </>
                             ) : (
@@ -634,10 +639,11 @@ export default function SubjectDetailPage({
                                     handleEditClick(index);
                                   }}
                                 >
-                                  <EditIcon size={20} className="icon-edit" />
+                                  <EditIcon size={18} className="icon-edit" />{" "}
+                                  Bearbeiten
                                 </button>
                                 <button
-                                  className="btn-small"
+                                  className="btn-small btn-small--delete"
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -645,9 +651,10 @@ export default function SubjectDetailPage({
                                   }}
                                 >
                                   <DeleteIcon
-                                    size={20}
+                                    size={18}
                                     className="icon-delete"
-                                  />
+                                  />{" "}
+                                  Löschen
                                 </button>
                               </>
                             )}

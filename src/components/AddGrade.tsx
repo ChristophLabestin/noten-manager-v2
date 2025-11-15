@@ -6,7 +6,7 @@ import { db } from "../firebase/firebaseConfig";
 import type { EncryptedGrade } from "../interfaces/Grade";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
-import backIcon from "../assets/back.svg";
+import { BackIcon } from "./icons";
 
 interface AddGradeProps {
   subjectsProp: Subject[]; // Fächer aus Home
@@ -244,10 +244,9 @@ export default function AddGrade({
         className="extend-button"
         onClick={() => setInfosExtended(!infosExtended)}
       >
-        <img
+        <BackIcon
+          size={18}
           className={`extend-icon ${infosExtended ? "extended" : ""}`}
-          src={backIcon}
-          alt="Weitere Felder ein-/ausklappen"
         />
         <p>Notiz hinzufügen</p>
       </div>
@@ -257,4 +256,3 @@ export default function AddGrade({
     </form>
   );
 }
-
