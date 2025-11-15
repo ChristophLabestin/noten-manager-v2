@@ -553,9 +553,9 @@ body.dark-mode .home-halfyear-toggle-button {
 }
 
 body.dark-mode .home-halfyear-toggle-button--active {
-  background: rgba(15, 23, 42, 1);
-  color: variables.$color-text-dark-dark;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 1);
+  background: #e5e7eb;
+  color: #020617;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.95);
 }
 
 body.theme-feminine .home-halfyear-toggle {
@@ -2230,6 +2230,11 @@ body.theme-feminine.dark-mode .extend-button {
   background: variables.$color-bg-light;
 }
 
+.settings-form .form-input {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
 .settings-name-row {
   display: flex;
   flex-direction: column;
@@ -2381,6 +2386,11 @@ body.theme-feminine .settings-checkbox input[type="checkbox"] {
 
 .success-msg {
   margin: 0 auto;
+}
+
+body.dark-mode .settings-form .form-input {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(148, 163, 184, 0.9);
 }
 
 .loading-wrapper {

@@ -168,13 +168,13 @@ export default function Settings() {
 
             <form onSubmit={handleSaveName} className="settings-form">
               <div className="form-group">
-                <label htmlFor="username" className="form-label">
+                <label htmlFor="name" className="form-label">
                   Anzeigename
                 </label>
                 <div className="settings-name-row">
                   <input
                     className="form-input"
-                    id="username"
+                    id="name"
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
