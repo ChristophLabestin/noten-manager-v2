@@ -4,14 +4,21 @@ import { GradesProvider } from "./context/gradesContext";
 import { useAuth } from "./context/authcontext/useAuth";
 import { useEffect } from "react";
 import { applyTheme, loadThemeFromStorage } from "./services/themeService";
+import { useGrades } from "./context/gradesContext/useGrades";
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
+  const { compactView } = useGrades();
 
   useEffect(() => {
     const { theme, darkMode } = loadThemeFromStorage();
     applyTheme(theme, darkMode);
   }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("compact-view", compactView);
+  }, [compactView]);
 
   useEffect(() => {
     const root = document.getElementById("root");

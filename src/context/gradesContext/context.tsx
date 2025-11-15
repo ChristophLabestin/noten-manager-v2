@@ -9,6 +9,7 @@ export interface GradesContextType {
   isLoading: boolean;
   loadingLabel: string;
   progress: number;
+  compactView: boolean;
   addSubject: (subject: Subject) => void;
   addGrade: (subjectId: string, grade: GradeWithId) => void;
   updateGrade: (subjectId: string, grade: GradeWithId) => void;
@@ -19,4 +20,3 @@ export interface GradesContextType {
 export const GradesContext = createContext<GradesContextType | undefined>(
   undefined
 );
-

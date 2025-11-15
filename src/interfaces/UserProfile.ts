@@ -7,5 +7,4 @@ export interface UserProfile {
     theme?: "default" | "feminine";
     darkMode?: boolean;
     compactView?: boolean;
-    showTips?: boolean;
 }

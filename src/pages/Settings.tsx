@@ -33,7 +33,6 @@ export default function Settings() {
   const [theme, setTheme] = useState<"default" | "feminine">("default");
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [compactView, setCompactView] = useState<boolean>(false);
-  const [showTips, setShowTips] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -62,13 +61,12 @@ export default function Settings() {
             typeof profile.compactView === "boolean"
               ? profile.compactView
               : false;
-          const profileShowTips =
-            typeof profile.showTips === "boolean" ? profile.showTips : true;
 
           setTheme(profileTheme);
           setDarkMode(profileDarkMode);
           setCompactView(profileCompact);
-          setShowTips(profileShowTips);
+          // showTips wird aktuell nur für ältere Profile gelesen,
+          // aber nicht mehr aktiv verwendet.
 
           applyTheme(profileTheme, profileDarkMode);
           saveThemeToStorage(profileTheme, profileDarkMode);
@@ -96,7 +94,6 @@ export default function Settings() {
     const nextTheme = options?.themeOverride ?? theme;
     const nextDark = options?.darkOverride ?? darkMode;
     const nextCompact = options?.compactOverride ?? compactView;
-    const nextShowTips = options?.tipsOverride ?? showTips;
 
     try {
       const userRef = doc(db, "users", user.uid);
@@ -104,7 +101,6 @@ export default function Settings() {
         theme: nextTheme,
         darkMode: nextDark,
         compactView: nextCompact,
-        showTips: nextShowTips,
       });
 
       applyTheme(nextTheme, nextDark);
@@ -221,7 +217,7 @@ export default function Settings() {
                     }`}
                     onClick={() => handleThemeChange("feminine")}
                   >
-                    Feminines Pink
+                    Pink
                   </button>
                 </div>
                 <p className="settings-help-text">
@@ -264,24 +260,16 @@ export default function Settings() {
                         const next = event.target.checked;
                         setCompactView(next);
                         void savePreferences({ compactOverride: next });
+                        if (typeof document !== "undefined") {
+                          document.body.classList.toggle(
+                            "compact-view",
+                            next
+                          );
+                        }
                       }}
                     />
                     <span>
                       Kompakte Tabellen-Ansicht
-                    </span>
-                  </label>
-                  <label className="settings-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={showTips}
-                      onChange={(event) => {
-                        const next = event.target.checked;
-                        setShowTips(next);
-                        void savePreferences({ tipsOverride: next });
-                      }}
-                    />
-                    <span>
-                      Tipps &amp; Hinweise im Dashboard anzeigen
                     </span>
                   </label>
                 </div>

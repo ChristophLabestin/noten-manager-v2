@@ -436,6 +436,10 @@ a {
   gap: 24px;
 }
 
+body.compact-view .home-layout {
+  gap: 16px;
+}
+
 .home-layout--home {
   min-height: calc(100vh - 80px);
   position: relative;
@@ -465,6 +469,10 @@ a {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+body.compact-view .home-summary-card {
+  padding: 8px 10px;
 }
 
 .home-summary-card--average {
@@ -582,6 +590,11 @@ body.theme-feminine.dark-mode .home-halfyear-toggle-button--active {
   }
 }
 
+body.compact-view .home-summary-value,
+body.compact-view .home-summary-value-pill {
+  font-size: 18px;
+}
+
 body.dark-mode .home-summary-value-pill {
   border-color: rgba(148, 163, 184, 0.85);
   background: rgba(15, 23, 42, 0.95);
@@ -601,6 +614,10 @@ body.theme-feminine.dark-mode .home-summary-value-pill {
 
 .home-section {
   margin-top: 24px;
+}
+
+body.compact-view .home-section {
+  margin-top: 16px;
 }
 
 .home-section-header {
@@ -1237,6 +1254,10 @@ body.theme-feminine.dark-mode .bottom-nav-actions-icon-circle {
   gap: 2px;
 }
 
+body.compact-view .subjects-manage-summary-card {
+  padding: 6px 8px;
+}
+
 .subjects-manage-summary-label {
   font-size: 11px;
   text-transform: uppercase;
@@ -1302,6 +1323,10 @@ body.dark-mode .subjects-manage-summary-value {
   text-align: left;
 }
 
+body.compact-view .subject-row {
+  padding: 8px 10px;
+}
+
 .subject-row-main {
   display: flex;
   flex-direction: column;
@@ -1347,6 +1372,10 @@ body.dark-mode .subject-row-count {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+body.compact-view .subject-card {
+  padding: 8px 10px;
 }
 
 .subject-card--editing {
@@ -2168,6 +2197,14 @@ body.dark-mode .extend-button {
   color: variables.$color-text-medium;
 }
 
+body.theme-feminine .settings-switch--on .settings-switch-slider {
+  background: variables.$color-primary-feminine;
+}
+
+body.theme-feminine.dark-mode .settings-switch--on .settings-switch-slider {
+  background: variables.$color-primary-feminine-hover;
+}
+
 .settings-checkbox-group {
   display: flex;
   flex-direction: column;
@@ -2186,6 +2223,11 @@ body.dark-mode .extend-button {
   width: 16px;
   height: 16px;
   border-radius: 4px;
+  accent-color: variables.$color-primary-dark;
+}
+
+body.theme-feminine .settings-checkbox input[type="checkbox"] {
+  accent-color: variables.$color-primary-feminine;
 }
 
 .success-msg {

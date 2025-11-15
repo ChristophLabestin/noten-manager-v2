@@ -25,6 +25,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     Record<string, GradeWithId[]>
   >({});
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+  const [compactView, setCompactView] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingLabel, setLoadingLabel] = useState<string>("");
@@ -39,6 +40,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       setLoadingLabel("");
       setProgress(0);
+      setCompactView(false);
       return;
     }
 
@@ -63,6 +65,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
         if (snap.exists()) {
           const profile = snap.data() as UserProfile;
           salt = profile.encryptionSalt;
+          setCompactView(profile.compactView ?? false);
         }
       } catch (err) {
         console.error("[GradesProvider] getDoc(users/uid) failed:", err);
@@ -235,6 +238,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     loadingLabel,
     progress,
+    compactView,
     addSubject,
     addGrade,
     updateGrade,
@@ -246,4 +250,3 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     <GradesContext.Provider value={value}>{children}</GradesContext.Provider>
   );
 }
-

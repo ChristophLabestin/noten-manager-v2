@@ -17,6 +17,16 @@ export function applyTheme(theme: ThemeChoice, darkMode: boolean): void {
   if (darkMode) {
     body.classList.add("dark-mode");
   }
+
+   const metaThemeColor = document.querySelector(
+     'meta[name="theme-color"]'
+   ) as HTMLMetaElement | null;
+
+   if (metaThemeColor) {
+     const lightColor = "#ffffff";
+     const darkColor = "#020617";
+     metaThemeColor.content = darkMode ? darkColor : lightColor;
+   }
 }
 
 export function saveThemeToStorage(
@@ -46,4 +56,3 @@ export function loadThemeFromStorage(): {
 
   return { theme, darkMode };
 }
-
