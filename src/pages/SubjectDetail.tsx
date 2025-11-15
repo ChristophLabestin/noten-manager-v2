@@ -87,6 +87,8 @@ export default function SubjectDetailPage({
     note: "",
     halfYear: 1,
   });
+  const [halfYearFilter, setHalfYearFilter] =
+    useState<"all" | 1 | 2>("all");
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.name === subjectId),
@@ -98,18 +100,28 @@ export default function SubjectDetailPage({
     [gradesBySubject, subjectId]
   );
 
+  const filteredGrades = useMemo(
+    () =>
+      subjectGrades.filter(
+        (grade) =>
+          halfYearFilter === "all" ||
+          grade.halfYear === halfYearFilter
+      ),
+    [subjectGrades, halfYearFilter]
+  );
+
   const sortedGrades = useMemo(
     () =>
-      [...subjectGrades].sort(
+      [...filteredGrades].sort(
         (a, b) => b.date.seconds - a.date.seconds
       ),
-    [subjectGrades]
+    [filteredGrades]
   );
 
   const averageValue = useMemo(() => {
     if (!activeSubject) return null;
-    return calculateAverageForSubject(subjectGrades, activeSubject.type);
-  }, [activeSubject, subjectGrades]);
+    return calculateAverageForSubject(filteredGrades, activeSubject.type);
+  }, [activeSubject, filteredGrades]);
 
   const averageDisplay = formatAverage(averageValue);
   const averageClass = getGradeClass(averageValue);
@@ -362,6 +374,42 @@ export default function SubjectDetailPage({
 
       <div className="subject-detail-content">
         <div className="subject-detail-main">
+          <div className="home-halfyear-toggle">
+            <button
+              type="button"
+              className={`home-halfyear-toggle-button ${
+                halfYearFilter === "all"
+                  ? "home-halfyear-toggle-button--active"
+                  : ""
+              }`}
+              onClick={() => setHalfYearFilter("all")}
+            >
+              Alle
+            </button>
+            <button
+              type="button"
+              className={`home-halfyear-toggle-button ${
+                halfYearFilter === 1
+                  ? "home-halfyear-toggle-button--active"
+                  : ""
+              }`}
+              onClick={() => setHalfYearFilter(1)}
+            >
+              1. Hj
+            </button>
+            <button
+              type="button"
+              className={`home-halfyear-toggle-button ${
+                halfYearFilter === 2
+                  ? "home-halfyear-toggle-button--active"
+                  : ""
+              }`}
+              onClick={() => setHalfYearFilter(2)}
+            >
+              2. Hj
+            </button>
+          </div>
+
           <section className="subject-detail-summary">
             <div className="subject-detail-summary-card">
               <span className="subject-detail-summary-label">
