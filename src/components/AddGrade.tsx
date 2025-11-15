@@ -17,6 +17,7 @@ interface AddGradeProps {
     encryptionKey: CryptoKey
   ) => void; // Callback für neue Note
   encryptionKeyProp: CryptoKey;
+  defaultSubjectId?: string;
 }
 
 const getDefaultHalfYear = (): 1 | 2 => {
@@ -30,9 +31,12 @@ export default function AddGrade({
   subjectsProp,
   onAddGrade,
   encryptionKeyProp,
+  defaultSubjectId,
 }: AddGradeProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>(
+    defaultSubjectId || ""
+  );
   const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
   const [gradeWeight, setGradeWeight] = useState<number>(0);
   const [helpActive, setHelpActive] = useState<boolean>(false);
@@ -44,6 +48,13 @@ export default function AddGrade({
   useEffect(() => {
     setSubjects(subjectsProp);
   }, [subjectsProp]);
+
+  // Fach vorauswählen, falls über Fach-Detailseite geöffnet
+  useEffect(() => {
+    if (defaultSubjectId) {
+      setSelectedSubjectId(defaultSubjectId);
+    }
+  }, [defaultSubjectId]);
 
   const findSubjectType = (subjectId: string) => {
     const subject = subjects.find((s) => s.name === subjectId);

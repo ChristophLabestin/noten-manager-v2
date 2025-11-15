@@ -21,6 +21,7 @@ interface BottomNavProps {
   isFirstSubject: boolean;
   disableAddGrade: boolean;
   addGradeTitle: string;
+  defaultSubjectId?: string;
 }
 
 export default function BottomNav({
@@ -31,6 +32,7 @@ export default function BottomNav({
   isFirstSubject,
   disableAddGrade,
   addGradeTitle,
+  defaultSubjectId,
 }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<"" | "grade" | "subject">("");
@@ -233,6 +235,7 @@ export default function BottomNav({
                 subjectsProp={subjects}
                 onAddGrade={handleGradeAdded}
                 encryptionKeyProp={encryptionKey as CryptoKey}
+                defaultSubjectId={defaultSubjectId}
               />
             ) : (
               <AddSubject

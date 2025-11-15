@@ -678,6 +678,7 @@ export default function SubjectDetailPage({
         isFirstSubject={isFirstSubject}
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
+        defaultSubjectId={subjectId}
       />
 
       {noteModalOpen && (
