@@ -4,4 +4,8 @@ export interface UserProfile {
     email: string;
     encryptionSalt: string;
     displayName?: string;
+    theme?: "default" | "feminine";
+    darkMode?: boolean;
+    compactView?: boolean;
+    showTips?: boolean;
 }

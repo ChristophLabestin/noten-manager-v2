@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import Logout from "./Logout";
 import BackToHome from "./BackToHome";
+import { applyTheme, saveThemeToStorage } from "../services/themeService";
 
 interface BurgerMenuProps {
   isSmall?: boolean;
@@ -41,8 +42,17 @@ function BurgerMenu({ isSmall, title, subjectType }: BurgerMenuProps) {
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-          const user = userDocSnap.data() as UserProfile;
-          setUserProfile(user);
+          const profile = userDocSnap.data() as UserProfile;
+          setUserProfile(profile);
+
+          const theme =
+            profile.theme === "feminine" || profile.theme === "default"
+              ? profile.theme
+              : "default";
+          const darkMode = !!profile.darkMode;
+
+          applyTheme(theme, darkMode);
+          saveThemeToStorage(theme, darkMode);
         } else {
           throw new Error("Keine Benutzerdaten gefunden");
         }

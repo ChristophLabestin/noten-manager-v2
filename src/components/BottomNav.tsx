@@ -162,26 +162,50 @@ export default function BottomNav({
 
       {isOpen && (
         <div className="bottom-nav-actions">
-          <div className="bottom-nav-actions-bar">
-            <button
-              className="bottom-nav-action-button"
-              type="button"
-              onClick={handleAddGradeClick}
-              disabled={disableAddGrade}
-              title={addGradeTitle}
-            >
-              <span className="bottom-nav-action-icon">+</span>
-              <span className="bottom-nav-action-label">Note</span>
-            </button>
+          <div
+            className="bottom-nav-actions-backdrop"
+            onClick={() => setIsOpen(false)}
+          ></div>
+          <div className="bottom-nav-actions-panel">
+            <div className="bottom-nav-actions-header">
+              <span className="bottom-nav-actions-title">
+                Schnelle Aktionen
+              </span>
+              <span className="bottom-nav-actions-subtitle">
+                Was möchtest du hinzufügen?
+              </span>
+            </div>
+            <div className="bottom-nav-actions-grid">
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
+                onClick={handleAddGradeClick}
+                disabled={disableAddGrade}
+                title={addGradeTitle}
+              >
+                <span className="bottom-nav-actions-icon-circle">+</span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">Note</span>
+                  <span className="bottom-nav-actions-description">
+                    Einzelne Leistung eintragen
+                  </span>
+                </div>
+              </button>
 
-            <button
-              className="bottom-nav-action-button"
-              type="button"
-              onClick={handleAddSubjectClick}
-            >
-              <span className="bottom-nav-action-icon">+</span>
-              <span className="bottom-nav-action-label">Fach</span>
-            </button>
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
+                onClick={handleAddSubjectClick}
+              >
+                <span className="bottom-nav-actions-icon-circle">+</span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">Fach</span>
+                  <span className="bottom-nav-actions-description">
+                    Neues Fach anlegen
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       )}

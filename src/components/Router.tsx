@@ -67,6 +67,10 @@ const Router: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPath]);
+
   const renderRoute = () => {
     const route = Object.keys(routes).find((route) => {
       // Wenn der Pfad eine dynamische Route ist, wie z.B. '/season/:seasonId/race/:id'

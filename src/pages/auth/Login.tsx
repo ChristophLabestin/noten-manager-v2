@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { loginUser, loginUserWithGoogle } from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
 import googleIcon from "../../assets/google-icon.svg";
-import logo from "../../assets/noten-manager-logo.png"
 
 const Login: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -10,6 +9,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,12 +20,16 @@ const Login: React.FC = () => {
     setPassword(e.target.value);
   };
 
+  const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRememberMe(e.target.checked);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await loginUser(email, password);
+        await loginUser(email, password, rememberMe);
         // Weiterleiten nach erfolgreichem Login
         window.history.pushState({}, "", "/");
         window.dispatchEvent(new PopStateEvent("popstate"));
@@ -55,7 +59,7 @@ const Login: React.FC = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await loginUserWithGoogle();
+        await loginUserWithGoogle(rememberMe);
         // Weiterleiten nach erfolgreichem Google-Login
         window.history.pushState({}, "", "/");
         window.dispatchEvent(new PopStateEvent("popstate"));
@@ -87,8 +91,31 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <img src={logo} className="login-logo" />
-        <h2 className="login-title">Login</h2>
+        <div className="login-header">
+          <div className="login-header-text">
+            <h1 className="login-header-title">
+              Account anmelden
+            </h1>
+            <p className="login-header-subtitle">
+              Melde dich mit deinen Zugangsdaten an.
+            </p>
+          </div>
+        </div>
+        <div className="login-tabs">
+          <button
+            type="button"
+            className="login-tab login-tab--active"
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className="login-tab"
+            onClick={redirectToRegister}
+          >
+            Registrieren
+          </button>
+        </div>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Email:</label>
@@ -110,35 +137,37 @@ const Login: React.FC = () => {
               placeholder="********"
             />
           </div>
+          <div className="login-form-footer">
+            <label className="login-remember">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={handleRememberMeChange}
+              />
+              Eingeloggt bleiben
+            </label>
+            <button
+              type="button"
+              className="login-forgot-link"
+              onClick={(event) => event.preventDefault()}
+            >
+              Passwort vergessen?
+            </button>
+          </div>
           <button className="btn-primary" type="submit">
             Login
           </button>
         </form>
+        {error && <p className="error-message">{error}</p>}
+        <div className="login-divider">
+          <span>oder weiter mit</span>
+        </div>
         <form className="google-login-form" onSubmit={onGoogleLogin}>
           <button className="google-login-button" type="submit">
             <img src={googleIcon} alt="Google Logo 24px" />
-            Login with Google
+            mit Google anmelden
           </button>
         </form>
-        <div className="login-divider"></div>
-        <div className="login-links-wrapper">
-          {/* <p>
-            <a className="forgot-password-link" href="/reset-password">
-              Passwort vergessen?
-            </a>
-          </p> */}
-          <p>
-            Noch keinen Account?{" "}
-            <a
-              className="register-link"
-              href="/register"
-              onClick={redirectToRegister}
-            >
-              Registrieren
-            </a>
-          </p>
-        </div>
-        {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );

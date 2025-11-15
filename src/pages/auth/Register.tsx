@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { registerUser } from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
-import logo from "../../assets/noten-manager-logo.png"
 
 const Register: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -63,8 +62,31 @@ const Register: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <img src={logo} className="login-logo" />
-        <h2 className="login-title">Register</h2>
+        <div className="login-header">
+          <div className="login-header-text">
+            <h1 className="login-header-title">
+              Konto erstellen
+            </h1>
+            <p className="login-header-subtitle">
+              Registriere dich für den Noten Manager.
+            </p>
+          </div>
+        </div>
+        <div className="login-tabs">
+          <button
+            type="button"
+            className="login-tab"
+            onClick={redirectToLogin}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className="login-tab login-tab--active"
+          >
+            Registrieren
+          </button>
+        </div>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Anzeigename:</label>
@@ -122,18 +144,6 @@ const Register: React.FC = () => {
             {isRegistering ? "Registriere..." : "Registrieren"}
           </button>
         </form>
-        <div className="login-links-wrapper">
-          <p>
-            Schon registriert?{" "}
-            <a
-              className="register-link"
-              href="/login"
-              onClick={redirectToLogin}
-            >
-              Login
-            </a>
-          </p>
-        </div>
         {error && <p>{error}</p>}
       </div>
     </div>
