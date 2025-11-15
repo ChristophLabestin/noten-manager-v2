@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  handleGoogleRedirectLogin,
-  loginUser,
-  loginUserWithGoogle,
-} from "../../firebase/auth";
+import { loginUser, loginUserWithGoogle } from "../../firebase/auth";
 import { useAuth } from "../../context/authcontext/useAuth";
 import googleIcon from "../../assets/google-icon.svg";
 
@@ -58,8 +54,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const onGoogleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onGoogleLogin = async () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
@@ -94,27 +89,6 @@ const Login: React.FC = () => {
       window.dispatchEvent(new PopStateEvent("popstate"));
     }
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    // Redirect-Ergebnis (z. B. iOS-PWA) auswerten
-    void (async () => {
-      try {
-        const result = await handleGoogleRedirectLogin();
-        if (result) {
-          window.history.pushState({}, "", "/");
-          window.dispatchEvent(new PopStateEvent("popstate"));
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setError(
-            "Fehler bei der Anmeldung mit Google. Bitte versuchen Sie es später erneut. " +
-              error.message
-          );
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="login-container">
