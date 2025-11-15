@@ -2,12 +2,15 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   type User,
+  type UserCredential,
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { db } from "./firebaseConfig";
@@ -93,7 +96,9 @@ export const loginUser = async (
 };
 
 // Benutzer mit Google anmelden
-export const loginUserWithGoogle = async (rememberMe: boolean) => {
+export const loginUserWithGoogle = async (
+  rememberMe: boolean
+): Promise<UserCredential | null> => {
   try {
     await setPersistence(
       auth,
@@ -101,13 +106,51 @@ export const loginUserWithGoogle = async (rememberMe: boolean) => {
     );
 
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    await ensureUserProfile(result.user);
+    try {
+      // Bevorzugt Popup-Flow (funktioniert in den meisten Browsern)
+      const result = await signInWithPopup(auth, provider);
+      await ensureUserProfile(result.user);
+      return result;
+    } catch (err) {
+      const errorCode =
+        err && typeof err === "object" && "code" in err
+          ? (err as { code?: string }).code
+          : undefined;
 
-    return result;
+      // In Umgebungen, in denen Popups nicht unterstützt oder blockiert werden
+      // (z. B. iOS-PWA vom Homescreen), auf Redirect-Flow zurückfallen.
+      if (
+        errorCode === "auth/operation-not-supported-in-this-environment" ||
+        errorCode === "auth/popup-blocked"
+      ) {
+        await signInWithRedirect(auth, provider);
+        // Nach Redirect übernimmt Firebase / onAuthStateChanged den weiteren Ablauf.
+        return null;
+      }
+
+      throw err;
+    }
   } catch (err) {
     throw new Error(
       "Fehler bei der Anmeldung mit Google: " +
+        (err instanceof Error ? err.message : String(err))
+    );
+  }
+};
+
+// Google Redirect-Flow (z. B. iOS-PWA) auswerten
+export const handleGoogleRedirectLogin = async (): Promise<
+  UserCredential | null
+> => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return null;
+
+    await ensureUserProfile(result.user);
+    return result;
+  } catch (err) {
+    throw new Error(
+      "Fehler bei der Anmeldung mit Google (Redirect): " +
         (err instanceof Error ? err.message : String(err))
     );
   }
