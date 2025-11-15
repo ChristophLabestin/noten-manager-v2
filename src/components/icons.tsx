@@ -226,6 +226,26 @@ export const OpenNewTabIcon: React.FC<Props> = ({
   </svg>
 );
 
+export const ShareIcon: React.FC<Props> = ({
+  size = 18,
+  className,
+  style,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 -960 960 960"
+    width={size}
+    height={size}
+    fill="currentColor"
+    className={className}
+    style={{ display: "inline-block", ...style }}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M240-40q-33 0-56.5-23.5T160-120v-440q0-33 23.5-56.5T240-640h120v80H240v440h480v-440H600v-80h120q33 0 56.5 23.5T800-560v440q0 33-23.5 56.5T720-40H240Zm200-280v-447l-64 64-56-57 160-160 160 160-56 57-64-64v447h-80Z" />
+  </svg>
+);
+
 export const HomeIcon: React.FC<Props> = ({ size = 24, className, style }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

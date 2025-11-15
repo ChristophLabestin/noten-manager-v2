@@ -1,23 +1,19 @@
 import { useEffect, useState } from "react";
-import Icon from "./Icon";
-import shareIcon from "../assets/share.svg";
+import { ShareIcon } from "./icons";
+import closeIcon from "../assets/close.svg";
 
 const STORAGE_KEY = "nm_hide_install_pwa_hint";
 
-const isIosSafariInBrowser = () => {
+const isMobileBrowserInWindow = () => {
   if (typeof window === "undefined") return false;
 
   const ua = window.navigator.userAgent || "";
-  const isIos = /iphone|ipad|ipod/i.test(ua);
+  const isMobile = /iphone|ipad|ipod|android/i.test(ua);
   const isStandalone =
     (window.navigator as unknown as { standalone?: boolean }).standalone ===
       true || window.matchMedia("(display-mode: standalone)").matches;
 
-  const isSafari =
-    /safari/i.test(ua) &&
-    !/crios|fxios|chrome|android/i.test(ua);
-
-  return isIos && isSafari && !isStandalone;
+  return isMobile && !isStandalone;
 };
 
 export default function InstallPwaModal() {
@@ -25,7 +21,7 @@ export default function InstallPwaModal() {
 
   useEffect(() => {
     const hasHidden = window.localStorage.getItem(STORAGE_KEY) === "true";
-    if (!hasHidden && isIosSafariInBrowser()) {
+    if (!hasHidden && isMobileBrowserInWindow()) {
       setVisible(true);
     }
   }, []);
@@ -41,14 +37,12 @@ export default function InstallPwaModal() {
     <div className="modal-wrapper">
       <div className="modal-background" onClick={handleClose}></div>
       <div className="modal">
-        <button
-          type="button"
+        <img
+          src={closeIcon}
           className="close-icon"
           onClick={handleClose}
-          aria-label="Hinweis schließen"
-        >
-          ×
-        </button>
+          alt="Hinweis schließen"
+        />
         <div className="install-pwa-modal">
           <h2 className="section-headline">
             App zum Home-Bildschirm hinzufügen
@@ -60,9 +54,9 @@ export default function InstallPwaModal() {
           </p>
           <ol className="install-pwa-steps">
             <li>
-              Tippe unten in Safari auf{" "}
+              Tippe in deinem Browser auf{" "}
               <span className="install-pwa-share-icon">
-                <Icon src={shareIcon} size={18} alt="Teilen-Symbol" />
+                <ShareIcon size={18} />
               </span>{" "}
               <span>Teilen</span>.
             </li>
@@ -78,4 +72,3 @@ export default function InstallPwaModal() {
     </div>
   );
 }
-
