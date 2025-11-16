@@ -20,6 +20,40 @@ function AppContent() {
     document.body.classList.toggle("compact-view", compactView);
   }, [compactView]);
 
+  // Fix mobile viewport height (iOS Safari keyboard / toolbar)
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
+
+    const setViewportVar = () => {
+      const vhSource =
+        window.visualViewport?.height ?? window.innerHeight ?? 0;
+      if (!vhSource) return;
+      const vh = vhSource * 0.01;
+      document.documentElement.style.setProperty(
+        "--app-vh",
+        `${vh}px`
+      );
+    };
+
+    setViewportVar();
+
+    window.addEventListener("resize", setViewportVar);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", setViewportVar);
+      window.visualViewport.addEventListener("scroll", setViewportVar);
+    }
+
+    return () => {
+      window.removeEventListener("resize", setViewportVar);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", setViewportVar);
+        window.visualViewport.removeEventListener("scroll", setViewportVar);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const root = document.getElementById("root");
     if (!root) return;

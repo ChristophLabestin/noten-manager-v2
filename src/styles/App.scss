@@ -16,7 +16,7 @@ body {
   overflow-x: hidden;
   font-family: "Roboto", sans-serif;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(var(--app-vh, 1vh) * 100);
 }
 
 body.theme-default {
@@ -173,7 +173,7 @@ body.scroll-disable,
 
 #root {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(var(--app-vh, 1vh) * 100);
   position: relative;
 }
 
@@ -224,7 +224,7 @@ a {
   align-items: center;
   flex-direction: column;
   min-height: 80vh;
-  min-height: 80dvh;
+  min-height: calc(var(--app-vh, 1vh) * 80);
 }
 
 .login-card {
@@ -517,7 +517,7 @@ body.compact-view .home-layout {
 
 .home-layout--home {
   min-height: calc(100vh - 80px);
-  min-height: calc(100dvh - 80px);
+  min-height: calc(var(--app-vh, 1vh) * 100 - 80px);
   position: relative;
 }
 
@@ -2719,7 +2719,7 @@ body.dark-mode .loading-progress-label {
 // Subject detail - dedicated layout
 .subject-detail-page {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(var(--app-vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
   gap: 24px;
