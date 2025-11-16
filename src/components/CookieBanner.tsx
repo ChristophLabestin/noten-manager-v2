@@ -94,7 +94,7 @@ const CookieBanner: React.FC = () => {
               Weitere Informationen darüber, wie wir Ihre Daten verwenden und
               wie Sie Ihre Cookie-Einstellungen jederzeit ändern können, finden
               Sie in unserer{" "}
-              <a href="/privacy-policy" className="hyperlink">
+              <a href="/datenschutz" className="hyperlink">
                 Datenschutzerklärung
               </a>
               .
@@ -107,7 +107,7 @@ const CookieBanner: React.FC = () => {
             und Ihnen personalisierte Inhalte sowie Werbung anzuzeigen. Sie
             haben die Möglichkeit, auszuwählen, welche Cookies Sie akzeptieren
             möchten. Bitte lesen Sie die Informationen auf unserer{" "}
-            <a href="/privacy-policy" className="hyperlink">
+            <a href="/datenschutz" className="hyperlink">
               Datenschutzerklärung
             </a>{" "}
             sorgfältig durch oder wählen Sie unten „Mehr Infos“, um eine

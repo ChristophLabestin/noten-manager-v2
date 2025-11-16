@@ -6,6 +6,7 @@ import SubjectsPage from "../pages/Subjects";
 import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import Imprint from "../pages/Imprint";
 import Settings from "../pages/Settings";
 import FinalGrade from "../pages/FinalGrade";
 import ResetPassword from "../pages/auth/ResetPassword";
@@ -16,6 +17,7 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
   "/register": () => <Register />,
   "/datenschutz": () => <PrivacyPolicy />,
+  "/impressum": () => <Imprint />,
   "/__/auth/action": () => <ResetPassword />,
   "/passwort-vergessen": () => <ForgotPassword />,
   "/": () => (

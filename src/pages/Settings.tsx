@@ -276,6 +276,15 @@ export default function Settings() {
               </button>
             </div>
             <div className="settings-privacy-link">
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => navigate("/impressum")}
+              >
+                Impressum anzeigen
+              </button>
+            </div>
+            <div className="settings-privacy-link">
               <p>App Version 1.3</p>
             </div>
           </div>
