@@ -126,14 +126,11 @@ export default function BottomNav({
   const isSubjects = path === "/fach";
   const isSettings = path === "/einstellungen";
 
-  if (hideForKeyboard) {
-    return null;
-  }
-
   return (
     <nav className="bottom-nav">
-      <div className="bottom-nav-bar">
-        <div className="bottom-nav-items">
+      {!hideForKeyboard && (
+        <div className="bottom-nav-bar">
+          <div className="bottom-nav-items">
           <button
             className="bottom-nav-item"
             type="button"
@@ -222,10 +219,11 @@ export default function BottomNav({
               <SettingsIcon size={26} className="bottom-nav-icon" />
             </span>
           </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {isOpen && (
+      {isOpen && !hideForKeyboard && (
         <div className="bottom-nav-actions">
           <div
             className="bottom-nav-actions-backdrop"
