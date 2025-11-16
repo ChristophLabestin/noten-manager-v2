@@ -27,6 +27,12 @@ const getDefaultHalfYear = (): 1 | 2 => {
   return today < switchDate ? 1 : 2;
 };
 
+const getGradeCategory = (points: number): "good" | "medium" | "bad" => {
+  if (points >= 7) return "good";
+  if (points >= 4) return "medium";
+  return "bad";
+};
+
 export default function AddGrade({
   subjectsProp,
   onAddGrade,
@@ -86,6 +92,11 @@ export default function AddGrade({
 
     if (!encryptionKeyProp) {
       alert("Encryption Key fehlt!");
+      return;
+    }
+
+    if (newGradeInput === "") {
+      alert("Bitte Notenpunkte auswählen.");
       return;
     }
 
@@ -193,18 +204,61 @@ export default function AddGrade({
       <div className="form-two-columns">
         <div className="form-group">
           <label className="form-label">Note</label>
+          <div className="grade-points-group">
+            {Array.from({ length: 16 }, (_, index) => {
+              const value = 15 - index;
+              const stringValue = String(value);
+              const isActive = newGradeInput === stringValue;
+              const category = getGradeCategory(value);
+              const classes = [
+                "grade-point-pill",
+                `grade-point-pill--${category}`,
+                isActive ? "grade-point-pill--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+              return (
+                <label
+                  key={value}
+                  className={classes}
+                >
+                  <input
+                    type="radio"
+                    name="grade-points"
+                    value={stringValue}
+                    checked={isActive}
+                    onChange={handleGradeChange}
+                  />
+                  {value}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Art &amp; Halbjahr</label>
           <div className="grade-halfyear-row">
-            <input
+            <select
               className="form-input"
-              type="number"
-              value={newGradeInput}
-              onChange={handleGradeChange}
-              placeholder="Notenpunkte"
-              min={0}
-              max={15}
-            />
+              value={gradeWeight}
+              onChange={handleWeightChange}
+            >
+              {findSubjectType(selectedSubjectId) === 0 ? (
+                <>
+                  <option value={3}>Fachreferat</option>
+                  <option value={1}>Kurzarbeit</option>
+                  <option value={0}>Mündlich / EX</option>
+                </>
+              ) : (
+                <>
+                  <option value={3}>Fachreferat</option>
+                  <option value={2}>Schulaufgabe</option>
+                  <option value={1}>Kurzarbeit</option>
+                  <option value={0}>Mündlich / EX</option>
+                </>
+              )}
+            </select>
             <div className="halfyear-field">
-              {/* <label className="form-label">Halbjahr</label> */}
               <select
                 className="form-input small"
                 value={halfYear}
@@ -215,29 +269,6 @@ export default function AddGrade({
               </select>
             </div>
           </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Art</label>
-          <select
-            className="form-input"
-            value={gradeWeight}
-            onChange={handleWeightChange}
-          >
-            {findSubjectType(selectedSubjectId) === 0 ? (
-              <>
-                <option value={3}>Fachreferat</option>
-                <option value={1}>Kurzarbeit</option>
-                <option value={0}>Mündlich / EX</option>
-              </>
-            ) : (
-              <>
-                <option value={3}>Fachreferat</option>
-                <option value={2}>Schulaufgabe</option>
-                <option value={1}>Kurzarbeit</option>
-                <option value={0}>Mündlich / EX</option>
-              </>
-            )}
-          </select>
         </div>
       </div>
       <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
