@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 import {
   collection,
@@ -315,7 +315,7 @@ export default function SubjectsPage() {
             <section className="subjects-manage-section">
               <h3 className="subjects-manage-section-title">Alle Fächer</h3>
               <div className="subjects-manage-list">
-                {sortedSubjects.map((subject) => {
+                {sortedSubjects.map((subject, index) => {
                   const gradesCount =
                     (gradesBySubject[subject.name] || []).length;
                   const isEditing = editingSubjectName === subject.name;
@@ -324,6 +324,9 @@ export default function SubjectsPage() {
                     !!subject.room ||
                     !!subject.email ||
                     !!subject.alias;
+                  const cardStyle: CSSProperties = {
+                    animationDelay: `${0.14 + index * 0.04}s`,
+                  };
 
                   return (
                     <article
@@ -333,6 +336,7 @@ export default function SubjectsPage() {
                           ? "subject-card subject-card--editing"
                           : "subject-card"
                       }
+                      style={cardStyle}
                     >
                       <div className="subject-card-header">
                         <div className="subject-card-title-row">

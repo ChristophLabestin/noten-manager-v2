@@ -120,8 +120,8 @@ export default function SubjectsTable({
 
   if (!enableDrag || !onReorder) {
     return (
-      <div className="subjects-list">
-        {subjects.map((subject) => {
+      <div className="subjects-list subjects-list--stack-animate">
+        {subjects.map((subject, index) => {
           const grades = subjectGrades[subject.name] || [];
           return (
             <SubjectRow
@@ -130,6 +130,7 @@ export default function SubjectsTable({
               grades={grades}
               onClick={() => goToSubjectPage(subject.name)}
               showHandle={false}
+              animationIndex={index}
             />
           );
         })}
@@ -145,8 +146,8 @@ export default function SubjectsTable({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={subjectIds}>
-        <div className="subjects-list">
-          {subjects.map((subject) => {
+        <div className="subjects-list subjects-list--stack-animate">
+          {subjects.map((subject, index) => {
             const grades = subjectGrades[subject.name] || [];
             return (
               <SortableSubjectRow
@@ -155,6 +156,7 @@ export default function SubjectsTable({
                 grades={grades}
                 onClick={() => goToSubjectPage(subject.name)}
                 activeId={activeId}
+                animationIndex={index}
               />
             );
           })}
@@ -169,6 +171,7 @@ interface SubjectRowProps {
   grades: Grade[];
   onClick: () => void;
   showHandle: boolean;
+  animationIndex?: number;
   isDragging?: boolean;
   dragHandleProps?: HTMLAttributes<HTMLDivElement>;
   style?: CSSProperties;
@@ -180,6 +183,7 @@ function SubjectRow({
   grades,
   onClick,
   showHandle,
+  animationIndex,
   isDragging = false,
   dragHandleProps,
   style,
@@ -187,6 +191,14 @@ function SubjectRow({
 }: SubjectRowProps) {
   const avg = calculateAverageScore(subject, grades);
   const gradesCount = grades.length;
+  const rowStyle: CSSProperties = {
+    ...style,
+    ...(typeof animationIndex === "number"
+      ? {
+          animationDelay: `${0.03 + animationIndex * 0.04}s`,
+        }
+      : {}),
+  };
 
   return (
     <button
@@ -196,7 +208,7 @@ function SubjectRow({
       }
       onClick={onClick}
       ref={innerRef}
-      style={style}
+      style={rowStyle}
     >
       <div className="subject-row-left">
         {showHandle && (
@@ -242,6 +254,7 @@ interface SortableSubjectRowProps {
   grades: Grade[];
   onClick: () => void;
   activeId: string | null;
+   animationIndex?: number;
 }
 
 function SortableSubjectRow({
@@ -249,6 +262,7 @@ function SortableSubjectRow({
   grades,
   onClick,
   activeId,
+  animationIndex,
 }: SortableSubjectRowProps) {
   const {
     attributes,
@@ -280,6 +294,7 @@ function SortableSubjectRow({
       dragHandleProps={handleProps}
       style={style}
       innerRef={setNodeRef}
+      animationIndex={animationIndex}
     />
   );
 }

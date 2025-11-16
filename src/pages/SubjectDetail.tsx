@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 import { useAuth } from "../context/authcontext/useAuth";
 import type { Subject } from "../interfaces/Subject";
@@ -403,7 +403,7 @@ export default function SubjectDetailPage({
             </button>
           </div>
 
-          <section className="home-summary two-columns">
+          <section className="home-summary two-columns subject-detail-summary">
             <div className="home-summary-card">
               <span className="home-summary-label">Durchschnitt</span>
               <div className={`subject-detail-summary-pill ${averageClass}`}>
@@ -422,7 +422,7 @@ export default function SubjectDetailPage({
             activeSubject.alias ||
             activeSubject.email ||
             activeSubject.room) && (
-            <section className="home-section">
+            <section className="home-section subject-detail-details-section">
               <h2 className="section-head no-padding">Details</h2>
               <div className="subject-detail-details-list">
                 {activeSubject.teacher && (
@@ -466,7 +466,7 @@ export default function SubjectDetailPage({
             </section>
           )}
 
-          <section className="home-section">
+          <section className="home-section subject-detail-grades-section">
             <div className="home-section-header-main">
               <h2 className="section-head no-padding">Noten</h2>
               <p className="subject-detail-subheadline">
@@ -479,12 +479,16 @@ export default function SubjectDetailPage({
               <div className="subject-detail-grades-list">
                 {sortedGrades.map((grade, index) => {
                   const isEditing = editingIndex === index;
+                  const cardStyle: CSSProperties = {
+                    animationDelay: `${0.14 + index * 0.04}s`,
+                  };
                   return (
                     <div
                       key={grade.id}
                       className={`subject-detail-grade-card ${
                         isEditing ? "editing" : ""
                       }`}
+                      style={cardStyle}
                       onClick={() => handleEditClick(index)}
                     >
                       <div className="subject-detail-grade-main">

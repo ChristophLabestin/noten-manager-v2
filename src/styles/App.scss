@@ -237,6 +237,10 @@ a {
   gap: 16px;
   width: 100%;
   max-width: 520px;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: home-fade-up-soft 0.45s ease-out forwards;
+  animation-delay: 0.08s;
 }
 
 .login-header {
@@ -521,10 +525,85 @@ body.compact-view .home-layout {
   position: relative;
 }
 
+.home-layout--home .home-header {
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: home-fade-down-soft 0.45s ease-out forwards;
+  animation-delay: 0.03s;
+}
+
+.home-layout--home .home-halfyear-toggle {
+  opacity: 0;
+  transform: translateY(-6px);
+  animation: home-fade-down-soft 0.45s ease-out forwards;
+  animation-delay: 0.08s;
+}
+
+.home-layout--home .home-summary-card {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+}
+
+.home-layout--home .home-summary-card:nth-child(1) {
+  animation-delay: 0.14s;
+}
+
+.home-layout--home .home-summary-card:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.home-layout--home .home-summary-card:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+.home-layout--home .home-section-header {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.24s;
+}
+
+.home-layout--home .home-section-body {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.28s;
+}
+
+@keyframes home-fade-down-soft {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-fade-up-soft {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .home-header {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.home-layout > .burger-menu-wrapper {
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: home-fade-down-soft 0.45s ease-out forwards;
+  animation-delay: 0.03s;
 }
 
 .home-main {
@@ -1211,6 +1290,8 @@ body.theme-feminine .bottom-nav-dot--active .bottom-nav-icon {
   inset: 0;
   background: rgba(15, 23, 42, 0.35);
   pointer-events: auto;
+  opacity: 0;
+  animation: bottom-nav-backdrop-in 0.28s ease-out forwards;
 }
 
 .bottom-nav-actions-panel {
@@ -1223,6 +1304,7 @@ body.theme-feminine .bottom-nav-dot--active .bottom-nav-icon {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
   padding: 14px 14px 12px;
   pointer-events: auto;
+  animation: home-fade-up-soft 0.32s ease-out forwards;
 }
 
 .bottom-nav-actions-header {
@@ -1499,11 +1581,56 @@ body.dark-mode .subjects-manage-summary-value {
   gap: 10px;
 }
 
+.home-layout--home .subjects-manage-section {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.22s;
+}
+
+.home-layout--home .subjects-manage-list .subject-card {
+  opacity: 0;
+  animation-name: subject-stack-in;
+  animation-duration: 0.45s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0.26s;
+}
+
 /* Fächerliste auf der Home-Seite (SubjectsTable) */
 .subjects-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.subjects-list--stack-animate .subject-row {
+  opacity: 0;
+  animation-name: subject-stack-in;
+  animation-duration: 0.45s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0s;
+}
+
+@keyframes subject-stack-in {
+  from {
+    opacity: 0;
+    margin-top: 12px;
+  }
+  to {
+    opacity: 1;
+    margin-top: 0;
+  }
+}
+
+@keyframes bottom-nav-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .subject-row {
@@ -2375,6 +2502,10 @@ body.theme-feminine.dark-mode .extend-button {
   box-shadow: variables.$box-shadow;
   border-radius: variables.$border-radius;
   background: variables.$color-bg-light;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.08s;
 }
 
 .settings-form .form-input {
@@ -2725,6 +2856,57 @@ body.dark-mode .loading-progress-label {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.subject-detail-page .subject-detail-header {
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: home-fade-down-soft 0.45s ease-out forwards;
+  animation-delay: 0.03s;
+}
+
+.subject-detail-page .home-halfyear-toggle {
+  opacity: 0;
+  transform: translateY(-6px);
+  animation: home-fade-down-soft 0.45s ease-out forwards;
+  animation-delay: 0.08s;
+}
+
+.subject-detail-page .subject-detail-summary .home-summary-card {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+}
+
+.subject-detail-page .subject-detail-summary .home-summary-card:nth-child(1) {
+  animation-delay: 0.14s;
+}
+
+.subject-detail-page .subject-detail-summary .home-summary-card:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.subject-detail-page .subject-detail-details-section {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.2s;
+}
+
+.subject-detail-page .subject-detail-grades-section {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.22s;
+}
+
+.subject-detail-page .subject-detail-grades-list .subject-detail-grade-card {
+  opacity: 0;
+  animation-name: subject-stack-in;
+  animation-duration: 0.45s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0.26s;
 }
 
 .subject-detail-content {
