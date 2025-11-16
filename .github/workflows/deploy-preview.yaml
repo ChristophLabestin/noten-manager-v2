@@ -22,7 +22,7 @@ jobs:
           node-version: '22.6.0'  # Wähle deine Node-Version
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
