@@ -2214,9 +2214,12 @@ body.dark-mode .close-icon {
 
 .add-subject-form .grade-points-group {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 6px;
+  &>:last-child {
+    grid-column: span 3;
+  }
 }
 
 .add-subject-form .grade-point-pill {
