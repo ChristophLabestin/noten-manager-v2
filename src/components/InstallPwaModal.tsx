@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ShareIcon } from "./icons";
 import closeIcon from "../assets/close.svg";
+import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
 
 const STORAGE_KEY = "nm_hide_install_pwa_hint";
 
@@ -20,14 +21,35 @@ export default function InstallPwaModal() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const hasHidden = window.localStorage.getItem(STORAGE_KEY) === "true";
-    if (!hasHidden && isMobileBrowserInWindow()) {
-      setVisible(true);
+    try {
+      const hasHidden = window.localStorage.getItem(STORAGE_KEY) === "true";
+      if (!hasHidden && isMobileBrowserInWindow()) {
+        setVisible(true);
+      }
+    } catch {
+      if (isMobileBrowserInWindow()) {
+        setVisible(true);
+      }
     }
   }, []);
 
+  useEffect(() => {
+    if (visible) {
+      lockBodyScroll();
+    } else {
+      unlockBodyScroll();
+    }
+    return () => {
+      unlockBodyScroll();
+    };
+  }, [visible]);
+
   const handleClose = () => {
-    window.localStorage.setItem(STORAGE_KEY, "true");
+    try {
+      window.localStorage.setItem(STORAGE_KEY, "true");
+    } catch {
+      // ignore storage errors (e.g. private mode)
+    }
     setVisible(false);
   };
 
