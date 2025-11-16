@@ -163,10 +163,14 @@ body.dark-mode .subject-detail-grade-pill.bad {
   color: variables.$color-text-dark-dark;
 }
 
-body.scroll-disable {
+html.scroll-disable,
+body.scroll-disable,
+#root.scroll-disable {
   overflow-x: hidden;
   overflow-y: hidden;
   overscroll-behavior: contain;
+  height: 100%;
+  min-height: 100%;
 }
 
 #root {
