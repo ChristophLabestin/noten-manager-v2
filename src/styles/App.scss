@@ -1063,7 +1063,8 @@ td {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  // bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  bottom: 20px;
   display: flex;
   justify-content: center;
   pointer-events: auto;
