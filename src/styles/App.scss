@@ -1714,9 +1714,13 @@ body.dark-mode .subject-tag--minor {
 }
 
 .subject-card-body {
+  margin-top: 8px;
+}
+
+.subject-card-details-grid {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
 }
 
 .subject-card-field {
@@ -2381,7 +2385,7 @@ body.theme-feminine.dark-mode .extend-button {
 .settings-name-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
@@ -2718,8 +2722,6 @@ body.dark-mode .loading-progress-label {
 
 // Subject detail - dedicated layout
 .subject-detail-page {
-  min-height: 100vh;
-  min-height: calc(var(--app-vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -2727,7 +2729,6 @@ body.dark-mode .loading-progress-label {
 
 .subject-detail-content {
   flex: 1;
-  padding: 0px 0px 96px;
   display: flex;
   flex-direction: column;
   gap: 20px;

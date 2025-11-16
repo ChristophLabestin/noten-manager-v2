@@ -319,6 +319,11 @@ export default function SubjectsPage() {
                   const gradesCount =
                     (gradesBySubject[subject.name] || []).length;
                   const isEditing = editingSubjectName === subject.name;
+                  const hasDetails =
+                    !!subject.teacher ||
+                    !!subject.room ||
+                    !!subject.email ||
+                    !!subject.alias;
 
                   return (
                     <article
@@ -361,93 +366,97 @@ export default function SubjectsPage() {
                       </div>
 
                       <div className="subject-card-body">
-                        {(isEditing || subject.teacher) && (
-                          <div className="subject-card-field">
-                            <span className="subject-card-label">
-                              Lehrkraft
-                            </span>
-                            {isEditing ? (
-                              <input
-                                className="form-input"
-                                type="text"
-                                value={editTeacher}
-                                onChange={(e) =>
-                                  setEditTeacher(e.target.value)
-                                }
-                              />
-                            ) : (
-                              <span className="subject-card-value">
-                                {subject.teacher}
-                              </span>
+                        {(isEditing || hasDetails) && (
+                          <div className="subject-card-details-grid">
+                            {(isEditing || subject.teacher) && (
+                              <div className="subject-card-field">
+                                <span className="subject-card-label">
+                                  Lehrkraft
+                                </span>
+                                {isEditing ? (
+                                  <input
+                                    className="form-input"
+                                    type="text"
+                                    value={editTeacher}
+                                    onChange={(e) =>
+                                      setEditTeacher(e.target.value)
+                                    }
+                                  />
+                                ) : (
+                                  <span className="subject-card-value">
+                                    {subject.teacher}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {(isEditing || subject.room) && (
+                              <div className="subject-card-field">
+                                <span className="subject-card-label">Raum</span>
+                                {isEditing ? (
+                                  <input
+                                    className="form-input"
+                                    type="text"
+                                    value={editRoom}
+                                    onChange={(e) =>
+                                      setEditRoom(e.target.value)
+                                    }
+                                  />
+                                ) : (
+                                  <span className="subject-card-value">
+                                    {subject.room}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {(isEditing || subject.alias) && (
+                              <div className="subject-card-field">
+                                <span className="subject-card-label">
+                                  Kürzel
+                                </span>
+                                {isEditing ? (
+                                  <input
+                                  className="form-input"
+                                  type="text"
+                                  value={editAlias}
+                                  onChange={(e) =>
+                                    setEditAlias(e.target.value)
+                                  }
+                                  />
+                                ) : (
+                                  <span className="subject-card-value">
+                                    {subject.alias}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {(isEditing || subject.email) && (
+                              <div className="subject-card-field">
+                                <span className="subject-card-label">
+                                  E-Mail
+                                </span>
+                                {isEditing ? (
+                                  <input
+                                    className="form-input"
+                                    type="email"
+                                    value={editEmail}
+                                    onChange={(e) =>
+                                      setEditEmail(e.target.value)
+                                    }
+                                  />
+                                ) : (
+                                  <span className="subject-card-value">
+                                    {subject.email}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-                        {(isEditing || subject.room) && (
-                          <div className="subject-card-field">
-                            <span className="subject-card-label">Raum</span>
-                            {isEditing ? (
-                              <input
-                                className="form-input"
-                                type="text"
-                                value={editRoom}
-                                onChange={(e) =>
-                                  setEditRoom(e.target.value)
-                                }
-                              />
-                            ) : (
-                              <span className="subject-card-value">
-                                {subject.room}
-                              </span>
-                            )}
-                          </div>
+                        {!isEditing && !hasDetails && (
+                          <span className="subject-card-value subject-card-value--empty">
+                            Keine Details hinzugefügt
+                          </span>
                         )}
-                        {(isEditing || subject.email) && (
-                          <div className="subject-card-field">
-                            <span className="subject-card-label">E-Mail</span>
-                            {isEditing ? (
-                              <input
-                                className="form-input"
-                                type="email"
-                                value={editEmail}
-                                onChange={(e) =>
-                                  setEditEmail(e.target.value)
-                                }
-                              />
-                            ) : (
-                              <span className="subject-card-value">
-                                {subject.email}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {(isEditing || subject.alias) && (
-                          <div className="subject-card-field">
-                            <span className="subject-card-label">Kürzel</span>
-                            {isEditing ? (
-                              <input
-                                className="form-input"
-                                type="text"
-                                value={editAlias}
-                                onChange={(e) =>
-                                  setEditAlias(e.target.value)
-                                }
-                              />
-                            ) : (
-                              <span className="subject-card-value">
-                                {subject.alias}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {!isEditing &&
-                          !subject.teacher &&
-                          !subject.room &&
-                          !subject.email &&
-                          !subject.alias && (
-                            <span className="subject-card-value subject-card-value--empty">
-                              Keine Details hinzugefügt
-                            </span>
-                          )}
                       </div>
 
                       <div className="subject-card-footer">
@@ -558,3 +567,4 @@ export default function SubjectsPage() {
     </div>
   );
 }
+
