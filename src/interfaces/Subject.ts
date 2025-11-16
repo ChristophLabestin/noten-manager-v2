@@ -1,3 +1,5 @@
+export type ExamType = "written" | "oral" | "presentation";
+
 export interface Subject {
     name: string;
     type: number;
@@ -8,4 +10,7 @@ export interface Subject {
     email?: string;
     alias?: string;
     droppedHalfYear?: 1 | 2;
+    examSubject?: boolean;
+    examType?: ExamType;
+    examPointsEncrypted?: string;
 }

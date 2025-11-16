@@ -9,6 +9,7 @@ import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Imprint from "../pages/Imprint";
 import Settings from "../pages/Settings";
 import FinalGrade from "../pages/FinalGrade";
+import Abitur from "../pages/Abitur";
 import ResetPassword from "../pages/auth/ResetPassword";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import { unlockBodyScroll } from "../services/scrollLock";
@@ -23,6 +24,11 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/": () => (
     <PrivateRoute>
       <Home />
+    </PrivateRoute>
+  ),
+  "/abitur": () => (
+    <PrivateRoute>
+      <Abitur />
     </PrivateRoute>
   ),
   "/abschlussnote": () => (

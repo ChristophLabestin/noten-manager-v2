@@ -231,6 +231,12 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     setSubjects((prev) => [...prev, subject]);
   };
 
+  const updateSubject = (subject: Subject) => {
+    setSubjects((prev) =>
+      prev.map((s) => (s.name === subject.name ? subject : s))
+    );
+  };
+
   const addGrade = (subjectId: string, grade: GradeWithId) => {
     setGradesBySubject((prev) => ({
       ...prev,
@@ -294,6 +300,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     subjectSortMode,
     subjectSortOrder,
     addSubject,
+    updateSubject,
     addGrade,
     updateGrade,
     deleteGrade,

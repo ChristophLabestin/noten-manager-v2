@@ -20,6 +20,7 @@ export interface GradesContextType {
    subjectSortMode: SubjectSortMode;
    subjectSortOrder: string[];
   addSubject: (subject: Subject) => void;
+  updateSubject: (subject: Subject) => void;
   addGrade: (subjectId: string, grade: GradeWithId) => void;
   updateGrade: (subjectId: string, grade: GradeWithId) => void;
   deleteGrade: (subjectId: string, gradeId: string) => void;

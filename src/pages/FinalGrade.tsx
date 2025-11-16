@@ -9,6 +9,7 @@ import type { EncryptedGrade, Grade, GradeWithId } from "../interfaces/Grade";
 import { decryptString } from "../services/cryptoService";
 import { db } from "../firebase/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
+import { navigate } from "../services/navigation";
 
 type HalfYearDropOption = "none" | 1 | 2;
 
@@ -379,6 +380,21 @@ export default function FinalGrade() {
           >
             {formatAverage(finalAverage)}
           </div>
+        </div>
+        <div className="home-summary-card home-summary-card--row">
+          <div className="home-summary-card-text">
+            <span className="home-summary-label">Abitur (FOS/BOS)</span>
+            <span className="subject-detail-subheadline">
+              Prüfungsfächer wählen und Abiturpunkte berechnen.
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-primary small"
+            onClick={() => navigate("/abitur")}
+          >
+            Abitur-Rechner
+          </button>
         </div>
       </div>
 
