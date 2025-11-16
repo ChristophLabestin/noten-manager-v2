@@ -20,6 +20,22 @@ function AppContent() {
     document.body.classList.toggle("compact-view", compactView);
   }, [compactView]);
 
+  // iOS Safari: use inline bottom nav instead of fixed
+  useEffect(() => {
+    if (typeof document === "undefined" || typeof navigator === "undefined") {
+      return;
+    }
+
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isChromeIOS = /CriOS/i.test(ua);
+    const isFirefoxIOS = /FxiOS/i.test(ua);
+    const isEdgeIOS = /EdgiOS/i.test(ua);
+    const isSafariLike = isIOS && !isChromeIOS && !isFirefoxIOS && !isEdgeIOS;
+
+    document.documentElement.classList.toggle("inline-bottom-nav", isSafariLike);
+  }, []);
+
   // Fix mobile viewport height (iOS Safari keyboard / toolbar)
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") {

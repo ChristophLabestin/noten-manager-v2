@@ -37,7 +37,6 @@ export default function BottomNav({
 }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<"" | "grade" | "subject">("");
-  const [hideForKeyboard, setHideForKeyboard] = useState(false);
 
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
@@ -79,48 +78,6 @@ export default function BottomNav({
     };
   }, [activeModal]);
 
-  // iOS Safari / PWA: Keyboard-Workaround
-  // Blendet die BottomNav aus, solange die Tastatur geöffnet ist,
-  // damit das fehlerhafte Fixed-Layout von iOS sie nicht verschiebt.
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") {
-      return;
-    }
-
-    const ua = navigator.userAgent || "";
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isChromeIOS = /CriOS/i.test(ua);
-    const isFirefoxIOS = /FxiOS/i.test(ua);
-    const isEdgeIOS = /EdgiOS/i.test(ua);
-    const isSafariLike = isIOS && !isChromeIOS && !isFirefoxIOS && !isEdgeIOS;
-
-    if (!isSafariLike || !window.visualViewport) {
-      return;
-    }
-
-    const viewport = window.visualViewport;
-    let maxHeight = viewport.height;
-
-    const handleViewportChange = () => {
-      const h = viewport.height;
-      if (h > maxHeight) {
-        maxHeight = h;
-      }
-
-      const keyboardOpen = maxHeight - h > 160;
-      setHideForKeyboard(keyboardOpen);
-    };
-
-    handleViewportChange();
-    viewport.addEventListener("resize", handleViewportChange);
-    viewport.addEventListener("scroll", handleViewportChange);
-
-    return () => {
-      viewport.removeEventListener("resize", handleViewportChange);
-      viewport.removeEventListener("scroll", handleViewportChange);
-    };
-  }, []);
-
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const isHome = path === "/" || path === "/index.html";
   const isSubjects = path === "/fach";
@@ -128,9 +85,8 @@ export default function BottomNav({
 
   return (
     <nav className="bottom-nav">
-      {!hideForKeyboard && (
-        <div className="bottom-nav-bar">
-          <div className="bottom-nav-items">
+      <div className="bottom-nav-bar">
+        <div className="bottom-nav-items">
           <button
             className="bottom-nav-item"
             type="button"
@@ -219,11 +175,10 @@ export default function BottomNav({
               <SettingsIcon size={26} className="bottom-nav-icon" />
             </span>
           </button>
-          </div>
         </div>
-      )}
+      </div>
 
-      {isOpen && !hideForKeyboard && (
+      {isOpen && (
         <div className="bottom-nav-actions">
           <div
             className="bottom-nav-actions-backdrop"
