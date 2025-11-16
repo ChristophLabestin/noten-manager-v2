@@ -7,6 +7,7 @@ import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Settings from "../pages/Settings";
+import FinalGrade from "../pages/FinalGrade";
 import ResetPassword from "../pages/auth/ResetPassword";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import { unlockBodyScroll } from "../services/scrollLock";
@@ -20,6 +21,11 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/": () => (
     <PrivateRoute>
       <Home />
+    </PrivateRoute>
+  ),
+  "/abschlussnote": () => (
+    <PrivateRoute>
+      <FinalGrade />
     </PrivateRoute>
   ),
   "/fach": () => (

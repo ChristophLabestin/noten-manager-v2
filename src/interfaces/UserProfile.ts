@@ -9,4 +9,6 @@ export interface UserProfile {
     compactView?: boolean;
     subjectSortMode?: "name" | "name_desc" | "average" | "average_worst" | "custom";
     subjectSortOrder?: string[];
+    hideInstallPwaHint?: boolean;
+    seenFeaturesVersion?: string;
 }

@@ -9,6 +9,7 @@ import { useGrades } from "../context/gradesContext/useGrades";
 import type { SubjectSortMode } from "../context/gradesContext/context";
 import { decryptString } from "../services/cryptoService";
 import InstallPwaModal from "../components/InstallPwaModal";
+import NewFeaturesModal from "../components/NewFeaturesModal";
 
 export default function Home() {
   const {
@@ -273,6 +274,7 @@ export default function Home() {
       )}
 
       <InstallPwaModal />
+      <NewFeaturesModal />
 
       <header className="home-header">
         <BurgerMenu />

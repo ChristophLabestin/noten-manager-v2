@@ -610,12 +610,33 @@ body.compact-view .home-layout {
   flex: 1;
 }
 
+.final-grade-page .home-summary-card {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+}
+
+.final-grade-page .home-summary.single-column .home-summary-card {
+  animation-delay: 0.08s;
+}
+
+.final-grade-page .home-summary.two-columns .home-summary-card:nth-child(1) {
+  animation-delay: 0.12s;
+}
+
+.final-grade-page .home-summary.two-columns .home-summary-card:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
 .home-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   &.two-columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  &.single-column {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -629,6 +650,12 @@ body.compact-view .home-layout {
   gap: 8px;
 }
 
+.home-summary-card--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 body.compact-view .home-summary-card {
   padding: 8px 10px;
 }
@@ -640,6 +667,25 @@ body.compact-view .home-summary-card {
     variables.$color-primary-hover
   );
   color: variables.$color-text-dark-dark;
+}
+
+.final-grade-page .home-summary-card--row {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.final-grade-page .home-section-header {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.18s;
+}
+
+.final-grade-page .home-section-body {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: home-fade-up-soft 0.4s ease-out forwards;
+  animation-delay: 0.22s;
 }
 
 body.theme-feminine .home-summary-card--average {
@@ -717,6 +763,10 @@ body.theme-feminine.dark-mode .home-halfyear-toggle-button--active {
 .home-sort-label {
   font-size: 16px;
   color: variables.$color-text-medium;
+}
+
+.final-grade-label {
+  font-size: 20px;
 }
 
 .home-summary-card--average .home-summary-label {
@@ -899,6 +949,113 @@ tr {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.final-grade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.final-grade-card {
+  padding: 12px 14px;
+}
+
+.final-grade-card-body {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.final-grade-average {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.final-grade-options {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.final-grade-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.final-grade-halfyear-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.final-grade-halfyear-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.final-grade-switch {
+  cursor: pointer;
+}
+
+.final-grade-switch--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.final-grade-page .final-grade-pill {
+  font-size: 14px;
+  padding: 2px 10px;
+}
+
+.final-grade-halfyear-pill--dropped {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.final-grade-dropped-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.final-grade-dropped-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.final-grade-dropped-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.final-grade-dropped-subject {
+  font-weight: 500;
+}
+
+.final-grade-dropped-halfyear-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  color: variables.$color-text-medium;
 }
 
 .grade-entity {
@@ -1513,6 +1670,7 @@ body.theme-feminine.dark-mode .bottom-nav-actions-icon-circle {
   font-size: 13px;
   color: variables.$color-text-medium;
   margin: 0;
+  text-align: center;
 }
 
 .subjects-manage-summary {
@@ -2075,6 +2233,27 @@ body.dark-mode .add-subject-form .form-label {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.new-features-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.new-features-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  color: variables.$color-text-medium-dark;
+}
+
+.new-features-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .install-pwa-modal p {
@@ -2657,6 +2836,12 @@ body.theme-feminine.dark-mode .settings-switch--on .settings-switch-slider {
   height: 16px;
   border-radius: 4px;
   accent-color: variables.$color-primary-dark;
+}
+
+.settings-privacy-link {
+  margin: 32px auto 0;
+  display: flex;
+  justify-content: center;
 }
 
 body.theme-feminine .settings-checkbox input[type="checkbox"] {

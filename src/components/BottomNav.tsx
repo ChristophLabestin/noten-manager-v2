@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Subject } from "../interfaces/Subject";
 import type { EncryptedGrade } from "../interfaces/Grade";
-import { HomeIcon, ProfileIcon, SettingsIcon } from "./icons";
+import { HomeIcon, BookIcon, SettingsIcon } from "./icons";
 import AddGrade from "./AddGrade";
 import AddSubject from "./AddSubject";
 import closeIcon from "../assets/close.svg";
@@ -81,6 +81,7 @@ export default function BottomNav({
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const isHome = path === "/" || path === "/index.html";
   const isSubjects = path === "/fach";
+  const isFinalGrade = path === "/abschlussnote";
   const isSettings = path === "/einstellungen";
 
   return (
@@ -151,11 +152,17 @@ export default function BottomNav({
           <button
             className="bottom-nav-item"
             type="button"
-            onClick={() => navigate("/datenschutz")}
-            aria-label="Profil"
+            onClick={() => navigate("/abschlussnote")}
+            aria-label="Abschlussnote"
           >
-            <span className="bottom-nav-dot">
-              <ProfileIcon size={26} className="bottom-nav-icon" />
+            <span
+              className={
+                isFinalGrade
+                  ? "bottom-nav-dot bottom-nav-dot--active"
+                  : "bottom-nav-dot"
+              }
+            >
+              <BookIcon size={26} className="bottom-nav-icon" />
             </span>
           </button>
 

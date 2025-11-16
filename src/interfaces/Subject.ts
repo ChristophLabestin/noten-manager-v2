@@ -7,4 +7,5 @@ export interface Subject {
     room?: string;
     email?: string;
     alias?: string;
+    droppedHalfYear?: 1 | 2;
 }

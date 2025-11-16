@@ -9,7 +9,6 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import BurgerMenu from "../components/BurgerMenu";
 import type { UserProfile } from "../interfaces/UserProfile";
-import Loading from "../components/Loading";
 import {
   applyTheme,
   loadThemeFromStorage,
@@ -17,6 +16,7 @@ import {
 } from "../services/themeService";
 import BottomNav from "../components/BottomNav";
 import { useGrades } from "../context/gradesContext/useGrades";
+import { navigate } from "../services/navigation";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -28,7 +28,6 @@ export default function Settings() {
   const [newName, setNewName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [theme, setTheme] = useState<"default" | "feminine">("default");
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -38,7 +37,6 @@ export default function Settings() {
     const fetchUserProfile = async () => {
       if (!user) return;
 
-      setIsLoading(true);
       try {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
@@ -75,8 +73,6 @@ export default function Settings() {
         }
       } catch (error) {
         console.error("Fehler beim Laden des Profils:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -147,11 +143,13 @@ export default function Settings() {
     }
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (user) {
+    const displayNamePlaceholder =
+      userProfile?.displayName ||
+      userProfile?.name ||
+      user.displayName ||
+      "Dein Name";
 
-  if (userProfile && user) {
     return (
       <>
         <div className="home-layout">
@@ -173,9 +171,7 @@ export default function Settings() {
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    placeholder={
-                      userProfile.displayName || userProfile.name || "Dein Name"
-                    }
+                    placeholder={displayNamePlaceholder}
                   />
                   <button
                     type="submit"
@@ -270,6 +266,18 @@ export default function Settings() {
                 </div>
               </div>
             </form>
+            <div className="settings-privacy-link">
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => navigate("/datenschutz")}
+              >
+                Datenschutzerkl&auml;rung anzeigen
+              </button>
+            </div>
+            <div className="settings-privacy-link">
+              <p>App Version 1.3</p>
+            </div>
           </div>
         </div>
         <BottomNav

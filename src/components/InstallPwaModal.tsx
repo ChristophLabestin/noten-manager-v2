@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { ShareIcon } from "./icons";
 import closeIcon from "../assets/close.svg";
 import { lockBodyScroll, unlockBodyScroll } from "../services/scrollLock";
+import { useAuth } from "../context/authcontext/useAuth";
+import { db } from "../firebase/firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import type { UserProfile } from "../interfaces/UserProfile";
 
 const STORAGE_KEY = "nm_hide_install_pwa_hint";
 
@@ -18,20 +22,48 @@ const isMobileBrowserInWindow = () => {
 };
 
 export default function InstallPwaModal() {
+  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      const hasHidden = window.localStorage.getItem(STORAGE_KEY) === "true";
-      if (!hasHidden && isMobileBrowserInWindow()) {
-        setVisible(true);
+    const checkVisibility = async () => {
+      const shouldShowForDevice = isMobileBrowserInWindow();
+      if (!shouldShowForDevice) return;
+
+      let hasHiddenLocal = false;
+      try {
+        hasHiddenLocal = window.localStorage.getItem(STORAGE_KEY) === "true";
+      } catch {
+        hasHiddenLocal = false;
       }
-    } catch {
-      if (isMobileBrowserInWindow()) {
-        setVisible(true);
+
+      if (!user) {
+        if (!hasHiddenLocal) {
+          setVisible(true);
+        }
+        return;
       }
-    }
-  }, []);
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userDocRef);
+        const profile = snap.exists()
+          ? (snap.data() as UserProfile)
+          : undefined;
+        const hasHiddenRemote = profile?.hideInstallPwaHint === true;
+
+        if (!hasHiddenLocal && !hasHiddenRemote) {
+          setVisible(true);
+        }
+      } catch {
+        if (!hasHiddenLocal) {
+          setVisible(true);
+        }
+      }
+    };
+
+    void checkVisibility();
+  }, [user]);
 
   useEffect(() => {
     if (visible) {
@@ -50,6 +82,16 @@ export default function InstallPwaModal() {
     } catch {
       // ignore storage errors (e.g. private mode)
     }
+
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      void updateDoc(userDocRef, {
+        hideInstallPwaHint: true,
+      }).catch(() => {
+        // ignore firestore write errors for this hint
+      });
+    }
+
     setVisible(false);
   };
 
