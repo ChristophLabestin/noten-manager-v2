@@ -31,6 +31,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
   >({});
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
   const [compactView, setCompactView] = useState<boolean>(false);
+  const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(true);
   const [subjectSortMode, setSubjectSortMode] =
     useState<SubjectSortMode>("name");
   const [subjectSortOrder, setSubjectSortOrder] = useState<string[]>([]);
@@ -45,12 +46,16 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
       setSubjects([]);
       setGradesBySubject({});
       setEncryptionKey(null);
+      setAnimationsEnabled(true);
       setIsLoading(false);
       setLoadingLabel("");
       setProgress(0);
       setCompactView(false);
       setSubjectSortMode("name");
       setSubjectSortOrder([]);
+      if (typeof document !== "undefined") {
+        document.body.classList.remove("no-animations");
+      }
       return;
     }
 
@@ -76,6 +81,14 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
           const profile = snap.data() as UserProfile;
           salt = profile.encryptionSalt;
           setCompactView(profile.compactView ?? false);
+          const animationsPref =
+            typeof profile.animationsEnabled === "boolean"
+              ? profile.animationsEnabled
+              : true;
+          setAnimationsEnabled(animationsPref);
+          if (typeof document !== "undefined") {
+            document.body.classList.toggle("no-animations", !animationsPref);
+          }
           const mode = profile.subjectSortMode;
           if (
             mode === "name" ||
@@ -297,6 +310,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     loadingLabel,
     progress,
     compactView,
+    animationsEnabled,
     subjectSortMode,
     subjectSortOrder,
     addSubject,

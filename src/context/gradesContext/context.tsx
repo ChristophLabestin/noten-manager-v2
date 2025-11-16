@@ -17,6 +17,7 @@ export interface GradesContextType {
   loadingLabel: string;
   progress: number;
   compactView: boolean;
+  animationsEnabled: boolean;
    subjectSortMode: SubjectSortMode;
    subjectSortOrder: string[];
   addSubject: (subject: Subject) => void;

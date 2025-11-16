@@ -8,8 +8,8 @@ import type { Subject } from "../interfaces/Subject";
 import type { EncryptedGrade, Grade, GradeWithId } from "../interfaces/Grade";
 import { decryptString } from "../services/cryptoService";
 import { db } from "../firebase/firebaseConfig";
-import { doc, updateDoc } from "firebase/firestore";
-import { navigate } from "../services/navigation";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import type { UserProfile } from "../interfaces/UserProfile";
 
 type HalfYearDropOption = "none" | 1 | 2;
 
@@ -76,6 +76,10 @@ export default function FinalGrade() {
   const [dropSelections, setDropSelections] = useState<
     Record<string, HalfYearDropOption>
   >({});
+  const [maxDroppedHalfYears, setMaxDroppedHalfYears] = useState<number>(3);
+  const [examPointsBySubject, setExamPointsBySubject] = useState<
+    Record<string, number | null>
+  >({});
 
   useEffect(() => {
     setDropSelections((prev) => {
@@ -91,6 +95,76 @@ export default function FinalGrade() {
       return next;
     });
   }, [subjects]);
+
+  useEffect(() => {
+    const fetchUserConfig = async () => {
+      if (!user) return;
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userDocRef);
+        if (snap.exists()) {
+          const profile = snap.data() as UserProfile;
+          if (typeof profile.maxDroppedHalfYears === "number") {
+            setMaxDroppedHalfYears(profile.maxDroppedHalfYears);
+          } else {
+            setMaxDroppedHalfYears(3);
+          }
+        }
+      } catch (err) {
+        console.error("[FinalGrade] Failed to load user config:", err);
+      }
+    };
+
+    void fetchUserConfig();
+  }, [user]);
+
+  useEffect(() => {
+    if (!encryptionKey) {
+      setExamPointsBySubject({});
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadExamPoints = async () => {
+      const next: Record<string, number | null> = {};
+
+      for (const subject of subjects) {
+        let examPoints: number | null = null;
+
+        if (subject.examPointsEncrypted) {
+          try {
+            const decrypted = await decryptString(
+              subject.examPointsEncrypted,
+              encryptionKey
+            );
+            const num = Number(decrypted);
+            examPoints = Number.isFinite(num) ? num : null;
+          } catch (err) {
+            console.error(
+              "[FinalGrade] Failed to decrypt examPoints for subject:",
+              subject.name,
+              err
+            );
+            examPoints = null;
+          }
+        }
+
+        next[subject.name] = examPoints;
+      }
+
+      if (!cancelled) {
+        setExamPointsBySubject(next);
+      }
+    };
+
+    void loadExamPoints();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [subjects, encryptionKey]);
 
   const persistDroppedHalfYear = async (
     subjectName: string,
@@ -128,7 +202,11 @@ export default function FinalGrade() {
         const currentlyHasDrop = current === 1 || current === 2;
         const willAddNewDrop = !currentlyHasDrop;
 
-        if (willAddNewDrop && currentSelectedCount >= 3) {
+        if (
+          willAddNewDrop &&
+          maxDroppedHalfYears > 0 &&
+          currentSelectedCount >= maxDroppedHalfYears
+        ) {
           return prev;
         }
 
@@ -188,6 +266,11 @@ export default function FinalGrade() {
             entry.halfYear === 1 || entry.halfYear === 2
         ),
     [subjects, dropSelections]
+  );
+
+  const examSubjects = useMemo(
+    () => subjects.filter((subject) => subject.examSubject === true),
+    [subjects]
   );
 
   const subjectAverages = useMemo(() => {
@@ -306,7 +389,7 @@ export default function FinalGrade() {
     return subjects;
   }, [subjects, filteredSubjectGrades, subjectSortMode, subjectSortOrder]);
 
-  const finalAverage = useMemo(() => {
+  const gradesOnlyFinalAverage = useMemo(() => {
     if (subjects.length === 0) return null;
 
     let total = 0;
@@ -325,6 +408,89 @@ export default function FinalGrade() {
     return total / totalWeight;
   }, [subjects, filteredSubjectGrades]);
 
+  const abiturFinalAverage = useMemo(() => {
+    if (!examSubjects.length) return null;
+
+    const subjectFinals: number[] = [];
+
+    for (const subject of examSubjects) {
+      const examPoints = examPointsBySubject[subject.name];
+      if (examPoints === null || examPoints === undefined) continue;
+
+      const subjectGrades = gradesBySubject[subject.name] || [];
+      const dropOption = dropSelections[subject.name];
+
+      const isHalfYear1Dropped = dropOption === 1;
+      const isHalfYear2Dropped = dropOption === 2;
+
+      const firstHalfYearAverage = isHalfYear1Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 1);
+
+      const secondHalfYearAverage = isHalfYear2Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 2);
+
+      const components: { value: number; weight: number }[] = [];
+
+      if (firstHalfYearAverage !== null) {
+        components.push({ value: firstHalfYearAverage, weight: 1 });
+      }
+
+      if (secondHalfYearAverage !== null) {
+        components.push({ value: secondHalfYearAverage, weight: 1 });
+      }
+
+      components.push({ value: examPoints, weight: 2 });
+
+      const totalWeight = components.reduce(
+        (sum, item) => sum + item.weight,
+        0
+      );
+      if (totalWeight === 0) continue;
+
+      const totalValue = components.reduce(
+        (sum, item) => sum + item.value * item.weight,
+        0
+      );
+
+      subjectFinals.push(totalValue / totalWeight);
+    }
+
+    if (!subjectFinals.length) return null;
+
+    const sum = subjectFinals.reduce((acc, value) => acc + value, 0);
+    return sum / subjectFinals.length;
+  }, [
+    examSubjects,
+    examPointsBySubject,
+    gradesBySubject,
+    dropSelections,
+  ]);
+
+  const finalAverage = abiturFinalAverage ?? gradesOnlyFinalAverage;
+
+  const examSubjectsWithPoints = useMemo(
+    () =>
+      examSubjects.filter((subject) => {
+        const value = examPointsBySubject[subject.name];
+        return value !== null && value !== undefined;
+      }),
+    [examSubjects, examPointsBySubject]
+  );
+
+  const examSubjectFinals = useMemo(
+    () =>
+      examSubjectsWithPoints.map((subject) => {
+        const examPoints = examPointsBySubject[subject.name];
+        return {
+          subject,
+          final: typeof examPoints === "number" ? examPoints : null,
+        };
+      }),
+    [examSubjectsWithPoints, examPointsBySubject]
+  );
+
   const isFirstSubject = subjects.length === 0;
 
   const disableAddGrade = useMemo(
@@ -333,7 +499,7 @@ export default function FinalGrade() {
   );
 
   const addGradeTitle = useMemo(() => {
-    if (!encryptionKey) return "Lade Schlüssel...";
+    if (!encryptionKey) return "Lade Schl&uuml;ssel...";
     if (subjects.length === 0) return "Lege zuerst ein Fach an";
     return "";
   }, [encryptionKey, subjects.length]);
@@ -361,6 +527,9 @@ export default function FinalGrade() {
     addGrade(subjectId, gradeWithId);
   };
 
+  const limitReached =
+    maxDroppedHalfYears > 0 && selectedDropCount >= maxDroppedHalfYears;
+
   return (
     <div className="home-layout final-grade-page">
       {isLoading && <Loading progress={progress} label={loadingLabel} />}
@@ -381,26 +550,47 @@ export default function FinalGrade() {
             {formatAverage(finalAverage)}
           </div>
         </div>
-        <div className="home-summary-card home-summary-card--row">
+        <div className="home-summary-card">
           <div className="home-summary-card-text">
-            <span className="home-summary-label">Abitur (FOS/BOS)</span>
+            <span className="home-summary-label">Abiturnoten</span> <br/>
             <span className="subject-detail-subheadline">
-              Prüfungsfächer wählen und Abiturpunkte berechnen.
+              Punkte deiner Abiturpr&uuml;fungen pro Fach.
             </span>
           </div>
-          <button
-            type="button"
-            className="btn-primary small"
-            onClick={() => navigate("/abitur")}
-          >
-            Abitur-Rechner
-          </button>
+          {examSubjectFinals.length === 0 ? (
+            <p className="info-message" style={{ marginTop: 8 }}>
+              Trage deine Abiturnoten im Abitur-Bereich ein, um hier eine
+              &Uuml;bersicht zu sehen.
+            </p>
+          ) : (
+            <ul className="final-grade-dropped-list" style={{ marginTop: 8 }}>
+              {examSubjectFinals.map(({ subject, final }) => (
+                <li
+                  key={`abitur-summary-${subject.name}`}
+                  className="final-grade-dropped-item"
+                >
+                  <div className="final-grade-dropped-main">
+                    <span className="final-grade-dropped-subject">
+                      {subject.name}
+                    </span>
+                  </div>
+                  <div
+                    className={`subject-detail-summary-pill final-grade-pill final-grade-halfyear-pill ${getGradeClass(
+                      final
+                    )}`}
+                  >
+                    {formatAverage(final)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
       <div className="home-summary two-columns">
         <div className="home-summary-card">
-          <span className="home-summary-label">Fächer</span>
+          <span className="home-summary-label">F&auml;cher</span>
           <span className="home-summary-value home-summary-value-pill">
             {subjects.length}
           </span>
@@ -408,7 +598,9 @@ export default function FinalGrade() {
         <div className="home-summary-card">
           <span className="home-summary-label">Halbjahre</span>
           <span className="home-summary-value home-summary-value-pill">
-            {selectedDropCount} / 3
+            {maxDroppedHalfYears > 0
+              ? `${selectedDropCount} / ${maxDroppedHalfYears}`
+              : selectedDropCount}
           </span>
         </div>
       </div>
@@ -418,7 +610,9 @@ export default function FinalGrade() {
           <div className="home-section-header-main">
             <h2 className="section-head no-padding">Gestrichene Halbjahre</h2>
             <span className="subject-detail-subheadline">
-              Maximal drei Halbjahre können gestrichen werden.
+              {maxDroppedHalfYears > 0
+                ? `Du kannst insgesamt bis zu ${maxDroppedHalfYears} Halbjahre streichen.`
+                : "Das Streichen von Halbjahren ist derzeit deaktiviert."}
             </span>
           </div>
         </div>
@@ -469,16 +663,16 @@ export default function FinalGrade() {
       <section className="home-section" style={{ marginTop: 0 }}>
         <div className="home-section-header">
           <div className="home-section-header-main">
-            <h2 className="section-head no-padding">Fächer</h2>
+            <h2 className="section-head no-padding">F&auml;cher</h2>
             <span className="subject-detail-subheadline">
-              Streiche die Noten des gewählten Halbjahres.
+              Streiche die Noten des gew&auml;hlten Halbjahres.
             </span>
           </div>
         </div>
         <div className="home-section-body">
           {subjects.length === 0 ? (
             <p className="info-message">
-              Lege zuerst Fächer und Noten an, um deine Abschlussnote zu
+              Lege zuerst F&auml;cher und Noten an, um deine Abschlussnote zu
               berechnen.
             </p>
           ) : (
@@ -489,10 +683,12 @@ export default function FinalGrade() {
                 const isHalfYear2Selected = dropOption === 2;
 
                 const disableHalfYear1 =
-                  (selectedDropCount >= 3 && !isHalfYear1Selected) ||
+                  ((limitReached || maxDroppedHalfYears <= 0) &&
+                    !isHalfYear1Selected) ||
                   isHalfYear2Selected;
                 const disableHalfYear2 =
-                  (selectedDropCount >= 3 && !isHalfYear2Selected) ||
+                  ((limitReached || maxDroppedHalfYears <= 0) &&
+                    !isHalfYear2Selected) ||
                   isHalfYear1Selected;
 
                 const subjectAverageEntry = subjectAverages.find(
@@ -624,11 +820,11 @@ export default function FinalGrade() {
             </div>
           )}
 
-          {selectedDropCount >= 3 && (
+          {maxDroppedHalfYears > 0 && limitReached && (
             <p className="info-message">
-              Du hast bereits drei Fächer mit gestrichenem Halbjahr ausgewählt.
-              Entferne zuerst eine Auswahl, um ein weiteres Halbjahr zu
-              streichen.
+              Du hast bereits die maximal erlaubte Anzahl an gestrichenen
+              Halbjahren ausgew&auml;hlt. Entferne zuerst eine Auswahl, um ein
+              weiteres Halbjahr zu streichen.
             </p>
           )}
         </div>

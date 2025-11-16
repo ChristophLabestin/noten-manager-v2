@@ -7,8 +7,11 @@ export interface UserProfile {
     theme?: "default" | "feminine";
     darkMode?: boolean;
     compactView?: boolean;
+    animationsEnabled?: boolean;
     subjectSortMode?: "name" | "name_desc" | "average" | "average_worst" | "custom";
     subjectSortOrder?: string[];
     hideInstallPwaHint?: boolean;
     seenFeaturesVersion?: string;
+    maxDroppedHalfYears?: number;
+    hasConfiguredExamSubjects?: boolean;
 }

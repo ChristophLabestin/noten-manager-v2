@@ -13,4 +13,6 @@ export interface Subject {
     examSubject?: boolean;
     examType?: ExamType;
     examPointsEncrypted?: string;
+    writtenExamPointsEncrypted?: string;
+    oralExamPointsEncrypted?: string;
 }

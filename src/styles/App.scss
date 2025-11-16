@@ -19,6 +19,18 @@ body {
   min-height: calc(var(--app-vh, 1vh) * 100);
 }
 
+body.no-animations {
+  scroll-behavior: auto !important;
+}
+
+body.no-animations *,
+body.no-animations *::before,
+body.no-animations *::after {
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+
 body.theme-default {
   background: linear-gradient(180deg, #eef2ff 0%, #f9fafb 40%, #f7f7f7 100%);
 }
@@ -76,7 +88,7 @@ body.dark-mode .subject-detail-summary-card,
 body.dark-mode .subject-detail-details-list,
 body.dark-mode .subject-detail-grade-card,
 body.dark-mode .settings-top,
-body.dark-mode .settings-form {
+body.dark-mode .settings-card {
   background: variables.$color-bg-light-dark;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.7);
   color: variables.$color-text-dark-dark;
@@ -201,19 +213,36 @@ a {
 .btn-primary {
   background: variables.$color-primary-dark;
   border-radius: 100px;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border: none;
   color: variables.$color-text-dark-dark;
-  font-size: 20px;
+  font-size: 16px;
   transition: all 0.3s ease;
   &:hover {
     background: variables.$color-primary-hover-dark;
   }
   &.small {
-    padding: 10px 26px;
-    font-size: 16px;
-    width: max-content;
-    margin: 0 auto;
+    padding: 8px 14px;
+    font-size: 14px;
+    width: auto;
+    margin: 0;
+  }
+}
+
+.btn-secondary {
+  background: transparent;
+  border-radius: 100px;
+  padding: 8px 18px;
+  border: 1px solid rgba(148, 163, 184, 0.9);
+  color: variables.$color-text-medium;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  &.small {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  &:hover {
+    background: rgba(148, 163, 184, 0.06);
   }
 }
 
@@ -642,12 +671,12 @@ body.compact-view .home-layout {
 
 .home-summary-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 10px 12px;
+  border-radius: 14px;
+  padding: 8px 10px;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .home-summary-card--row {
@@ -657,7 +686,7 @@ body.compact-view .home-layout {
 }
 
 body.compact-view .home-summary-card {
-  padding: 8px 10px;
+  padding: 6px 8px;
 }
 
 .home-summary-card--average {
@@ -958,14 +987,14 @@ tr {
 }
 
 .final-grade-card {
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .final-grade-card-body {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .final-grade-average {
@@ -996,6 +1025,7 @@ tr {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .final-grade-halfyear-main {
@@ -1879,16 +1909,16 @@ body.dark-mode .subject-row-count {
 
 .subject-card {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 10px 12px;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 body.compact-view .subject-card {
-  padding: 8px 10px;
+  padding: 6px 8px;
 }
 
 .subject-card--editing {
@@ -2365,6 +2395,11 @@ body.dark-mode .add-subject-form .form-label {
   color: variables.$color-text-medium;
 }
 
+.exam-subjects-modal-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
 .install-pwa-share-icon {
   display: inline-flex;
   vertical-align: middle;
@@ -2763,14 +2798,20 @@ body.theme-feminine.dark-mode .extend-button {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 30px 30px 30px;
-  box-shadow: variables.$box-shadow;
-  border-radius: variables.$border-radius;
-  background: variables.$color-bg-light;
   opacity: 0;
   transform: translateY(12px);
   animation: home-fade-up-soft 0.4s ease-out forwards;
   animation-delay: 0.08s;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  box-shadow: variables.$box-shadow;
+  border-radius: variables.$border-radius;
+  background: variables.$color-bg-light;
 }
 
 .settings-form .form-input {
@@ -3580,6 +3621,8 @@ body.theme-feminine .icon-edit {
   color: variables.$color-primary-hover;
   cursor: pointer;
   font-size: 13px;
+  display: flex;
+  justify-content: center;
 }
 
 body.dark-mode .link-button {
@@ -3592,6 +3635,22 @@ body.theme-feminine .link-button {
 
 body.theme-feminine.dark-mode .link-button {
   color: variables.$color-primary-feminine-hover;
+}
+
+.link-button--danger {
+  color: variables.$color-error;
+  font-weight: 500;
+}
+
+body.dark-mode .link-button--danger {
+  color: #f87171;
+}
+
+.link-button--danger-spacing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 /* Icons in kleinen Aktions-Buttons (Subjects, SubjectDetail, Modals) */

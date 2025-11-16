@@ -52,6 +52,11 @@ export default function BottomNav({
     setIsOpen(false);
   };
 
+  const handleAbiturClick = () => {
+    setIsOpen(false);
+    navigate("/abitur");
+  };
+
   const handleGradeAdded = (
     subjectId: string,
     gradeId: string,
@@ -227,6 +232,20 @@ export default function BottomNav({
                   <span className="bottom-nav-actions-label">Fach</span>
                   <span className="bottom-nav-actions-description">
                     Neues Fach anlegen
+                  </span>
+                </div>
+              </button>
+
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
+                onClick={handleAbiturClick}
+              >
+                <span className="bottom-nav-actions-icon-circle">+</span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">Abitur</span>
+                  <span className="bottom-nav-actions-description">
+                    Abschlusspr&uuml;fung eintragen
                   </span>
                 </div>
               </button>
