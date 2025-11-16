@@ -4,6 +4,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  type UserCredential,
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { db } from "./firebaseConfig";
@@ -40,7 +41,11 @@ export const registerUser = async (
 };
 
 // Benutzer anmelden
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string,
+  _rememberMe?: boolean
+): Promise<UserCredential> => {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -57,7 +62,9 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Benutzer mit Google anmelden
-export const loginUserWithGoogle = async () => {
+export const loginUserWithGoogle = async (
+  _rememberMe?: boolean
+): Promise<UserCredential> => {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
@@ -79,9 +86,8 @@ export const loginUserWithGoogle = async () => {
     await setDoc(
       userRef,
       {
-        displayName: user.displayName || "",
+        name: user.displayName || "",
         email: user.email || "",
-        photoURL: user.photoURL || "",
         encryptionSalt: salt,
       },
       { merge: true }

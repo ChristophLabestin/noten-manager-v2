@@ -1,203 +1,300 @@
-import { useState, useEffect } from "react";
+import { useState, type CSSProperties, type HTMLAttributes } from "react";
 import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  type DropResult,
-  type DraggableProvided,
-  type DraggableStateSnapshot,
-  type DroppableProvided,
-} from "react-beautiful-dnd";
-import { doc, updateDoc } from "firebase/firestore";
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { Grade } from "../interfaces/Grade";
 import type { Subject } from "../interfaces/Subject";
-import { db } from "../firebase/firebaseConfig";
+import { navigate } from "../services/navigation";
 
 interface SubjectsTableProps {
   subjects: Subject[];
-  subjectGrades: { [key: string]: Grade[] };
-  userId: string;
+  subjectGrades: { [key: string]: Grade[] }; // kommt direkt aus Home
+  enableDrag?: boolean;
+  onReorder?: (newOrder: string[]) => void;
 }
+
+const calculateGradeWeight = (subject: Subject, grade: Grade): number => {
+  if (!subject) return 1; // Default
+
+  const type = subject.type;
+
+  if (type === 1) {
+    // Hauptfach
+    return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
+  }
+
+  if (type === 0) {
+    // Nebenfach
+    return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
+  }
+
+  return 1; // Default
+};
+
+const calculateAverageScore = (
+  subject: Subject,
+  grades: Grade[]
+): number | null => {
+  if (!grades || grades.length === 0) return null;
+
+  const total = grades.reduce(
+    (acc, grade) => acc + grade.grade * calculateGradeWeight(subject, grade),
+    0
+  );
+  const totalWeight = grades.reduce(
+    (acc, grade) => acc + calculateGradeWeight(subject, grade),
+    0
+  );
+
+  if (totalWeight === 0) return null;
+  return total / totalWeight;
+};
+
+const formatAverage = (value: number | null): string =>
+  value === null ? "–" : value.toFixed(2);
+
+const getGradeClass = (value: number | null): string => {
+  if (value === null) return "";
+  if (value >= 7) return "good";
+  if (value >= 4) return "medium";
+  return "bad";
+};
 
 export default function SubjectsTable({
   subjects,
   subjectGrades,
-  userId,
+  enableDrag = false,
+  onReorder,
 }: SubjectsTableProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [sortedSubjects, setSortedSubjects] = useState<Subject[]>([]);
-
-  useEffect(() => {
-    setSortedSubjects(
-      [...subjects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    );
-  }, [subjects]);
-
-  const calculateGradeWeight = (subject: Subject, grade: Grade): number => {
-    if (!subject) return 1;
-    const type = subject.type;
-    if (type === 1) return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
-    if (type === 0) return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
-    return 1;
-  };
-
-  const calculateAverageScore = (subject: Subject, grades: Grade[]): string => {
-    if (!grades || grades.length === 0) return "—";
-    const total = grades.reduce(
-      (acc, grade) => acc + grade.grade * calculateGradeWeight(subject, grade),
-      0
-    );
-    const totalWeight = grades.reduce(
-      (acc, grade) => acc + calculateGradeWeight(subject, grade),
-      0
-    );
-    return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
-  };
-
-  const calculateOverallAverageScore = (): string => {
-    let total = 0;
-    let totalWeight = 0;
-    for (const subject of sortedSubjects) {
-      const grades = subjectGrades[subject.name] || [];
-      for (const grade of grades) {
-        const weight = calculateGradeWeight(subject, grade);
-        total += grade.grade * weight;
-        totalWeight += weight;
-      }
-    }
-    return totalWeight === 0 ? "—" : (total / totalWeight).toFixed(2);
-  };
-
   const goToSubjectPage = (subjectId: string) => {
-    if (!isEditing) window.location.href = `/fach/${subjectId}`;
+    navigate(`/fach/${subjectId}`);
   };
 
-  const onDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-    const reordered = Array.from(sortedSubjects);
-    const [moved] = reordered.splice(result.source.index, 1);
-    reordered.splice(result.destination.index, 0, moved);
-    setSortedSubjects(reordered);
+  const subjectIds = subjects.map((subject) => subject.name);
 
-    for (let index = 0; index < reordered.length; index++) {
-      const subject = reordered[index];
-      const ref = doc(db, "users", userId, "subjects", subject.name);
-      await updateDoc(ref, { order: index });
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = subjectIds.indexOf(active.id as string);
+    const newIndex = subjectIds.indexOf(over.id as string);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+    const newOrder = arrayMove(subjectIds, oldIndex, newIndex);
+    if (onReorder) {
+      onReorder(newOrder);
     }
+  };
+
+  if (!enableDrag || !onReorder) {
+    return (
+      <div className="subjects-list subjects-list--stack-animate">
+        {subjects.map((subject, index) => {
+          const grades = subjectGrades[subject.name] || [];
+          return (
+            <SubjectRow
+              key={subject.name}
+              subject={subject}
+              grades={grades}
+              onClick={() => goToSubjectPage(subject.name)}
+              showHandle={false}
+              animationIndex={index}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={subjectIds}>
+        <div className="subjects-list subjects-list--stack-animate">
+          {subjects.map((subject, index) => {
+            const grades = subjectGrades[subject.name] || [];
+            return (
+              <SortableSubjectRow
+                key={subject.name}
+                subject={subject}
+                grades={grades}
+                onClick={() => goToSubjectPage(subject.name)}
+                activeId={activeId}
+                animationIndex={index}
+              />
+            );
+          })}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+interface SubjectRowProps {
+  subject: Subject;
+  grades: Grade[];
+  onClick: () => void;
+  showHandle: boolean;
+  animationIndex?: number;
+  isDragging?: boolean;
+  dragHandleProps?: HTMLAttributes<HTMLDivElement>;
+  style?: CSSProperties;
+  innerRef?: (node: HTMLButtonElement | null) => void;
+}
+
+function SubjectRow({
+  subject,
+  grades,
+  onClick,
+  showHandle,
+  animationIndex,
+  isDragging = false,
+  dragHandleProps,
+  style,
+  innerRef,
+}: SubjectRowProps) {
+  const avg = calculateAverageScore(subject, grades);
+  const gradesCount = grades.length;
+  const rowStyle: CSSProperties = {
+    ...style,
+    ...(typeof animationIndex === "number"
+      ? {
+          animationDelay: `${0.03 + animationIndex * 0.04}s`,
+        }
+      : {}),
   };
 
   return (
-    <div>
-      <div className="flex justify-end mb-3">
-        <button onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Fertig" : "Sortierung bearbeiten"}
-        </button>
-      </div>
-
-      <DragDropContext onDragEnd={onDragEnd}>
-        <table className="home-table">
-          <thead className="home-thead">
-            <tr className="home-tr">
-              <th className="home-th">Fach</th>
-              <th className="home-th">Durchschnitt</th>
-            </tr>
-          </thead>
-          <Droppable
-            droppableId="subjects"
-            type="subject"
-            isDropDisabled={isEditing}
-            isCombineEnabled={false}
-            ignoreContainerClipping={false}
+    <button
+      type="button"
+      className={
+        isDragging ? "subject-row subject-row--dragging" : "subject-row"
+      }
+      onClick={onClick}
+      ref={innerRef}
+      style={rowStyle}
+    >
+      <div className="subject-row-left">
+        {showHandle && (
+          <div
+            className="subject-row-drag-handle"
+            {...dragHandleProps}
+            onClick={(event) => event.stopPropagation()}
           >
-            {(provided: DroppableProvided) => (
-              <tbody
-                className="home-tbody"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {sortedSubjects.map((subject, index) => (
-                  <Draggable
-                    key={subject.name}
-                    draggableId={subject.name}
-                    index={index}
-                    isDragDisabled={!isEditing}
-                  >
-                    {(
-                      provided: DraggableProvided,
-                      snapshot: DraggableStateSnapshot
-                    ) => (
-                      <tr
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`home-tr ${
-                          snapshot.isDragging ? "dragging" : ""
-                        }`}
-                        style={{
-                          cursor: isEditing ? "grab" : "pointer",
-                          ...provided.draggableProps.style,
-                        }}
-                        onClick={() => goToSubjectPage(subject.name)}
-                      >
-                        <td className="home-td">
-                          {subject.name}
-                          <br />
-                          <span className="subject-type">
-                            {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
-                          </span>
-                        </td>
-                        <td className="home-td grade">
-                          <div
-                            className={`grade-box ${
-                              Number(
-                                calculateAverageScore(
-                                  subject,
-                                  subjectGrades[subject.name] || []
-                                )
-                              ) >= 7
-                                ? "good"
-                                : Number(
-                                    calculateAverageScore(
-                                      subject,
-                                      subjectGrades[subject.name] || []
-                                    )
-                                  ) >= 4
-                                ? "medium"
-                                : "bad"
-                            }`}
-                          >
-                            {calculateAverageScore(
-                              subject,
-                              subjectGrades[subject.name] || []
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-                <tr className="total-score-row">
-                  <td className="home-td bold">Gesamt</td>
-                  <td className="home-td grade bold">
-                    <div
-                      className={`grade-box ${
-                        Number(calculateOverallAverageScore()) >= 7
-                          ? "good"
-                          : Number(calculateOverallAverageScore()) >= 4
-                          ? "medium"
-                          : "bad"
-                      }`}
-                    >
-                      {calculateOverallAverageScore()}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            )}
-          </Droppable>
-        </table>
-      </DragDropContext>
-    </div>
+            ⋮⋮
+          </div>
+        )}
+        <div className="subject-row-main">
+          <div className="subject-row-name">{subject.name}</div>
+          <div className="subject-row-meta">
+            <span
+              className={`subject-tag ${
+                subject.type === 1
+                  ? "subject-tag--main"
+                  : "subject-tag--minor"
+              }`}
+            >
+              {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
+            </span>
+            <span className="subject-row-count">
+              {gradesCount} {gradesCount === 1 ? "Note" : "Noten"}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="subject-row-grade">
+        <div
+          className={`subject-detail-summary-pill ${getGradeClass(avg)}`}
+        >
+          {formatAverage(avg)}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+interface SortableSubjectRowProps {
+  subject: Subject;
+  grades: Grade[];
+  onClick: () => void;
+  activeId: string | null;
+   animationIndex?: number;
+}
+
+function SortableSubjectRow({
+  subject,
+  grades,
+  onClick,
+  activeId,
+  animationIndex,
+}: SortableSubjectRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: subject.name });
+
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 2 : 1,
+  };
+
+  const handleProps: HTMLAttributes<HTMLDivElement> = {
+    ...attributes,
+    ...listeners,
+  };
+
+  return (
+    <SubjectRow
+      subject={subject}
+      grades={grades}
+      onClick={onClick}
+      showHandle
+      isDragging={isDragging || activeId === subject.name}
+      dragHandleProps={handleProps}
+      style={style}
+      innerRef={setNodeRef}
+      animationIndex={animationIndex}
+    />
   );
 }

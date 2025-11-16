@@ -62,7 +62,31 @@ const Register: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2 className="login-title">Register</h2>
+        <div className="login-header">
+          <div className="login-header-text">
+            <h1 className="login-header-title">
+              Konto erstellen
+            </h1>
+            <p className="login-header-subtitle">
+              Registriere dich für den Noten Manager.
+            </p>
+          </div>
+        </div>
+        <div className="login-tabs">
+          <button
+            type="button"
+            className="login-tab"
+            onClick={redirectToLogin}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className="login-tab login-tab--active"
+          >
+            Registrieren
+          </button>
+        </div>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Anzeigename:</label>
@@ -74,6 +98,7 @@ const Register: React.FC = () => {
               placeholder="Name"
               required
               name="name"
+              autoComplete="name"
             />
           </div>
           <div className="form-group">
@@ -86,6 +111,7 @@ const Register: React.FC = () => {
               placeholder="example@email.com"
               required
               name="email"
+              autoComplete="email"
             />
           </div>
           <div className="form-group">
@@ -98,6 +124,7 @@ const Register: React.FC = () => {
               placeholder="********"
               required
               name="password"
+              autoComplete="new-password"
             />
           </div>
           <div className="form-group">
@@ -110,6 +137,7 @@ const Register: React.FC = () => {
               placeholder="********"
               required
               name="confirm-password"
+              autoComplete="new-password"
             />
           </div>
           <button
@@ -120,18 +148,6 @@ const Register: React.FC = () => {
             {isRegistering ? "Registriere..." : "Registrieren"}
           </button>
         </form>
-        <div className="login-links-wrapper">
-          <p>
-            Schon registriert?{" "}
-            <a
-              className="register-link"
-              href="/login"
-              onClick={redirectToLogin}
-            >
-              Login
-            </a>
-          </p>
-        </div>
         {error && <p>{error}</p>}
       </div>
     </div>

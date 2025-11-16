@@ -1,0 +1,15 @@
+    () => !encryptionKey || subjects.length === 0,
+    [encryptionKey, subjects.length]
+  );
+
+  const addGradeTitle = useMemo(() => {
+    if (!encryptionKey) return "Lade Schlüssel…";
+    if (subjects.length === 0) return "Lege zuerst ein Fach an";
+    return "";
+  }, [encryptionKey, subjects.length]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    const setPct = (pct: number, label?: string) => {

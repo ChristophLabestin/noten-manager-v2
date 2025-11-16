@@ -1,18 +1,18 @@
 import { getAuth } from "firebase/auth";
 import { doc, setDoc, collection } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import type { Subject } from "../interfaces/Subject";
 import helpIcon from "../assets/help.svg";
-import backIcon from "../assets/back.svg";
+import { BackIcon } from "./icons";
 
 interface AddSubjectProps {
   onAddSubject: (subject: Subject) => void;
-  subjectsProps: Subject[]
 }
 
-export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectProps) {
-  const [subjects, setSubjects] = useState<Subject[]>()
+export default function AddSubject({
+  onAddSubject,
+}: AddSubjectProps) {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectType, setSubjectType] = useState<number>(1);
   const [teacherName, setTeacherName] = useState<string>("");
@@ -21,10 +21,6 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
   const [infosExtended, setInfosExtended] = useState<boolean>(false);
   const [teacherEmail, setTeacherEmail] = useState<string>("");
   const [teacherAlias, setTeacherAlias] = useState<string>("");
-
-  useEffect(() => {
-    setSubjects(subjectsProps)
-  }, [subjectsProps])
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSubjectName(e.target.value);
@@ -46,14 +42,6 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
     setSubjectType(Number(e.target.value));
   };
 
-  const countSubjects = () => {
-    if(subjects) {
-      const subjectsCount = subjects.length
-      return subjectsCount
-    }
-    return 0
-  }
-
   const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectName.trim()) return;
@@ -70,7 +58,6 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
         name: subjectName,
         type: subjectType,
         date: new Date(),
-        order: countSubjects() + 1,
         teacher: teacherName,
         room: roomName,
         email: teacherEmail,
@@ -84,10 +71,10 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
 
       setSubjectName("");
       setSubjectType(1);
-      setTeacherName("")
-      setRoomName("")
-      setTeacherEmail("")
-      setTeacherAlias("")
+      setTeacherName("");
+      setRoomName("");
+      setTeacherEmail("");
+      setTeacherAlias("");
     } catch (err) {
       throw new Error(
         "Fehler beim Hinzufügen des Fachs: " +
@@ -101,11 +88,13 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
       <form className="add-subject-form" onSubmit={handleAddSubject}>
         <h2 className="section-headline">
           Fach hinzufügen
-          <img
-            src={helpIcon}
+          <span
+            className="help-icon-wrapper"
             onMouseEnter={() => setHelpActive(true)}
             onMouseLeave={() => setHelpActive(false)}
-          />
+          >
+            <img src={helpIcon} alt="Hilfe" />
+          </span>
           <div className={`help-box ${helpActive ? "active" : ""}`}>
             <p>
               Hier kannst du ein Fach hinzufügen. Der Typ wird unterschieden
@@ -116,15 +105,15 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
               geschrieben.
             </p>
             <p>
-              In einem Nebenfach werden keine Schulaufgaben geschrieben sondern
-              nur Kurzarbeiten.
+              In einem Nebenfach werden keine Schulaufgaben geschrieben,
+              sondern nur Kurzarbeiten.
             </p>
             <p>Diese Einstellung lässt sich später nicht mehr ändern!</p>
           </div>
         </h2>
         <div className="form-two-columns">
           <div className="form-group">
-            <label className="form-label">Name:</label>
+            <label className="form-label">Name</label>
             <input
               className="form-input"
               type="text"
@@ -134,7 +123,7 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Fach Typ:</label>
+            <label className="form-label">Fachtyp</label>
             <select
               className="form-input"
               value={subjectType}
@@ -148,7 +137,7 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
         <div className={`form-hidden ${infosExtended ? "extended" : ""}`}>
           <div className="form-two-columns">
             <div className="form-group">
-              <label className="form-label">Lehrer:</label>
+              <label className="form-label">Lehrer</label>
               <input
                 className="form-input"
                 type="text"
@@ -158,7 +147,7 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Raum:</label>
+              <label className="form-label">Raum</label>
               <input
                 className="form-input"
                 type="text"
@@ -170,7 +159,7 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
           </div>
           <div className="form-two-columns">
             <div className="form-group">
-              <label className="form-label">E-Mail:</label>
+              <label className="form-label">E-Mail</label>
               <input
                 className="form-input"
                 type="text"
@@ -180,7 +169,7 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Kürzel:</label>
+              <label className="form-label">Kürzel</label>
               <input
                 className="form-input"
                 type="text"
@@ -195,11 +184,11 @@ export default function AddSubject({ onAddSubject, subjectsProps }: AddSubjectPr
           className="extend-button"
           onClick={() => setInfosExtended(!infosExtended)}
         >
-          <img
+          <BackIcon
+            size={18}
             className={`extend-icon ${infosExtended ? "extended" : ""}`}
-            src={backIcon}
           />
-          <p>zusätzliche Infos hinzufügen</p>
+          <p>Zusätzliche Infos hinzufügen</p>
         </div>
         <button className="btn-primary small" type="submit">
           Hinzufügen

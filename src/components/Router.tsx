@@ -6,11 +6,17 @@ import SubjectsPage from "../pages/Subjects";
 import SubjectDetailPage from "../pages/SubjectDetail";
 import Register from "../pages/auth/Register";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import Settings from "../pages/Settings";
+import ResetPassword from "../pages/auth/ResetPassword";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import { unlockBodyScroll } from "../services/scrollLock";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
   "/register": () => <Register />,
   "/datenschutz": () => <PrivacyPolicy />,
+  "/__/auth/action": () => <ResetPassword />,
+  "/passwort-vergessen": () => <ForgotPassword />,
   "/": () => (
     <PrivateRoute>
       <Home />
@@ -29,6 +35,13 @@ const routes: { [key: string]: () => React.JSX.Element } = {
       </PrivateRoute>
     );
   },
+  "/einstellungen": () => {
+    return (
+      <PrivateRoute>
+        <Settings/>
+      </PrivateRoute>
+    )
+  }
 };
 
 const PrivateRoute = ({ children }: { children: React.JSX.Element }) => {
@@ -58,6 +71,14 @@ const Router: React.FC = () => {
       window.removeEventListener("popstate", handleLocationChange);
     };
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPath]);
+
+  useEffect(() => {
+    unlockBodyScroll();
+  }, [currentPath]);
 
   const renderRoute = () => {
     const route = Object.keys(routes).find((route) => {
