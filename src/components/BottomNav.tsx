@@ -37,7 +37,6 @@ export default function BottomNav({
 }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<"" | "grade" | "subject">("");
-  const [viewportOffset, setViewportOffset] = useState(0);
 
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
@@ -79,39 +78,13 @@ export default function BottomNav({
     };
   }, [activeModal]);
 
-  // iOS Safari keyboard / dynamic toolbar fix:
-  // keep bottom nav visually pinned to the bottom of the visible area
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.visualViewport) return;
-
-    const viewport = window.visualViewport;
-
-    const updateOffset = () => {
-      const innerHeight = window.innerHeight || viewport.height;
-      const offset = Math.max(0, innerHeight - viewport.height);
-      setViewportOffset(offset);
-    };
-
-    updateOffset();
-    viewport.addEventListener("resize", updateOffset);
-    viewport.addEventListener("scroll", updateOffset);
-
-    return () => {
-      viewport.removeEventListener("resize", updateOffset);
-      viewport.removeEventListener("scroll", updateOffset);
-    };
-  }, []);
-
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const isHome = path === "/" || path === "/index.html";
   const isSubjects = path === "/fach";
   const isSettings = path === "/einstellungen";
 
   return (
-    <nav
-      className="bottom-nav"
-      style={viewportOffset ? { transform: `translateY(-${viewportOffset}px)` } : undefined}
-    >
+    <nav className="bottom-nav">
       <div className="bottom-nav-bar">
         <div className="bottom-nav-items">
           <button
