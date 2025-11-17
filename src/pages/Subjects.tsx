@@ -31,6 +31,7 @@ export default function SubjectsPage() {
     addSubject,
     addGrade,
     refresh,
+    fachreferat,
   } = useGrades();
 
   const [editingSubjectName, setEditingSubjectName] = useState<string | null>(
@@ -54,8 +55,7 @@ export default function SubjectsPage() {
     [subjects]
   );
 
-  const hasFachreferat =
-    (gradesBySubject["Fachreferat"] || []).length > 0;
+  const hasFachreferat = !!fachreferat;
 
   const sortedSubjects = useMemo(
     () =>

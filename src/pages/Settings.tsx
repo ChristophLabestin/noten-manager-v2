@@ -16,7 +16,7 @@ import type { Subject, ExamType } from "../interfaces/Subject";
 
 export default function Settings() {
   const { user } = useAuth();
-  const { subjects, gradesBySubject, encryptionKey, addSubject, updateSubject } =
+  const { subjects, encryptionKey, addSubject, updateSubject, fachreferat } =
     useGrades();
   const [newName, setNewName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -26,10 +26,9 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [compactView, setCompactView] = useState<boolean>(false);
   const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(true);
-  const [maxDroppedHalfYears, setMaxDroppedHalfYears] = useState<number>(3);
+  const [gradeYear, setGradeYear] = useState<12 | 13 | null>(null);
 
-  const hasFachreferat =
-    (gradesBySubject["Fachreferat"] || []).length > 0;
+  const hasFachreferat = !!fachreferat;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -61,16 +60,16 @@ export default function Settings() {
             typeof profile.animationsEnabled === "boolean"
               ? profile.animationsEnabled
               : true;
-          const profileMaxDropped =
-            typeof profile.maxDroppedHalfYears === "number"
-              ? profile.maxDroppedHalfYears
-              : 3;
+          const profileGradeYear =
+            profile.gradeYear === 12 || profile.gradeYear === 13
+              ? profile.gradeYear
+              : null;
 
           setTheme(profileTheme);
           setDarkMode(profileDarkMode);
           setCompactView(profileCompact);
           setAnimationsEnabled(profileAnimationsEnabled);
-          setMaxDroppedHalfYears(profileMaxDropped);
+          setGradeYear(profileGradeYear);
           // showTips wird aktuell nur für ältere Profile gelesen,
           // aber nicht mehr aktiv verwendet.
 
@@ -147,22 +146,22 @@ export default function Settings() {
     void savePreferences({ animationsOverride: next });
   };
 
-  const handleMaxDroppedHalfYearsChange = async (
+  const handleGradeYearChange = async (
     event: ChangeEvent<HTMLSelectElement>
   ) => {
     if (!user) return;
 
-    const value = Number(event.target.value);
-    setMaxDroppedHalfYears(value);
+    const value = Number(event.target.value) as 12 | 13;
+    setGradeYear(value);
 
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
-        maxDroppedHalfYears: value,
+        gradeYear: value,
       });
     } catch (error) {
       console.error(
-        "[Settings] Fehler beim Speichern der maximal streichbaren Halbjahre:",
+        "[Settings] Fehler beim Speichern der Jahrgangsstufe:",
         error
       );
     }
@@ -383,27 +382,29 @@ export default function Settings() {
                   </span>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Streichbare Halbjahre</label>
+                  <label className="form-label">Jahrgangsstufe</label>
                   <p className="settings-help-text">
-                    Lege fest, wie viele Halbjahre du in der
-                    Abschlussnoten-Ansicht maximal streichen m&ouml;chtest.
+                    Wähle, in welcher Jahrgangsstufe du deine Abiturprüfung
+                    machst. Daraus wird automatisch berechnet, wie viele
+                    Halbjahresergebnisse eingebracht und damit maximal
+                    gestrichen werden können.
                   </p>
                   <select
                     className="form-input small"
-                    value={maxDroppedHalfYears}
-                    onChange={handleMaxDroppedHalfYearsChange}
+                    value={gradeYear ?? ""}
+                    onChange={handleGradeYearChange}
                   >
-                    <option value={0}>0 Halbjahre</option>
-                    <option value={1}>1 Halbjahr</option>
-                    <option value={2}>2 Halbjahre</option>
-                    <option value={3}>3 Halbjahre</option>
+                    <option value="">Bitte auswählen</option>
+                    <option value={12}>12. Jahrgang</option>
+                    <option value={13}>13. Jahrgang</option>
                   </select>
                 </div>
               <div className="form-group">
                 <label className="form-label">Pr&uuml;fungsf&auml;cher</label>
                 <p className="settings-help-text">
                   Hier kannst du die F&auml;cher anpassen, in denen du deine
-                  Abschlusspr&uuml;fung schreibst.
+                  Abschlusspr&uuml;fung schreibst. Du kannst maximal 4
+                  Prüfungsfächer auswählen.
                 </p>
                 {subjects.length === 0 ? (
                   <p className="info-message">
@@ -411,55 +412,89 @@ export default function Settings() {
                     w&auml;hlen.
                   </p>
                 ) : (
-                  <div className="final-grade-list">
-                    {subjects.map((subject) => {
-                      const isExamSubject = subject.examSubject === true;
+                  <>
+                    {(() => {
+                      const maxExamSubjects = 4;
+                      const currentExamSubjectsCount = subjects.filter(
+                        (s) => s.examSubject === true
+                      ).length;
                       return (
-                        <article
-                          key={subject.name}
-                          className="subject-card final-grade-card"
-                        >
-                          <header className="subject-card-header">
-                            <h3 className="subject-card-title">
-                              {subject.name}
-                            </h3>
-                            <span
-                              className={`subject-tag ${
-                                subject.type === 1
-                                  ? "subject-tag--main"
-                                  : "subject-tag--minor"
-                              }`}
-                            >
-                              {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
-                            </span>
-                          </header>
-                          <div className="final-grade-card-body">
-                            <div className="final-grade-halfyear-row">
-                              <div className="final-grade-halfyear-main">
-                                <label
-                                  className={`settings-switch final-grade-switch ${
-                                    isExamSubject ? "settings-switch--on" : ""
-                                  }`}
+                        <>
+                          <div className="final-grade-list">
+                            {subjects.map((subject) => {
+                              const isExamSubject = subject.examSubject === true;
+                              const disableToggle =
+                                !isExamSubject &&
+                                currentExamSubjectsCount >= maxExamSubjects;
+
+                              return (
+                                <article
+                                  key={subject.name}
+                                  className="subject-card final-grade-card"
                                 >
-                                  <input
-                                    type="checkbox"
-                                    checked={isExamSubject}
-                                    onChange={() =>
-                                      void handleToggleExamSubject(subject)
-                                    }
-                                  />
-                                  <span className="settings-switch-slider" />
-                                </label>
-                                <span className="home-summary-label">
-                                  Pr&uuml;fungsfach
-                                </span>
-                              </div>
-                            </div>
+                                  <header className="subject-card-header">
+                                    <h3 className="subject-card-title">
+                                      {subject.name}
+                                    </h3>
+                                    <span
+                                      className={`subject-tag ${
+                                        subject.type === 1
+                                          ? "subject-tag--main"
+                                          : "subject-tag--minor"
+                                      }`}
+                                    >
+                                      {subject.type === 1
+                                        ? "Hauptfach"
+                                        : "Nebenfach"}
+                                    </span>
+                                  </header>
+                                  <div className="final-grade-card-body">
+                                    <div className="final-grade-halfyear-row">
+                                      <div className="final-grade-halfyear-main">
+                                        <label
+                                          className={`settings-switch final-grade-switch ${
+                                            isExamSubject
+                                              ? "settings-switch--on"
+                                              : ""
+                                          } ${
+                                            disableToggle
+                                              ? "settings-switch--disabled"
+                                              : ""
+                                          }`}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={isExamSubject}
+                                            disabled={disableToggle}
+                                            onChange={() =>
+                                              void handleToggleExamSubject(
+                                                subject
+                                              )
+                                            }
+                                          />
+                                          <span className="settings-switch-slider" />
+                                        </label>
+                                        <span className="home-summary-label">
+                                          Pr&uuml;fungsfach
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </article>
+                              );
+                            })}
                           </div>
-                        </article>
+                          {currentExamSubjectsCount >= maxExamSubjects && (
+                            <p className="info-message" style={{ marginTop: 8 }}>
+                              Du hast bereits 4 Prüfungsfächer ausgewählt. Entferne
+                              eines, um ein anderes Fach als Prüfungsfach zu
+                              markieren.
+                            </p>
+                          )}
+                        </>
                       );
-                    })}
-                  </div>
+                    })()}
+                  </>
                 )}
               </div>
               

@@ -13,5 +13,6 @@ export interface UserProfile {
     hideInstallPwaHint?: boolean;
     seenFeaturesVersion?: string;
     maxDroppedHalfYears?: number;
+    gradeYear?: 12 | 13;
     hasConfiguredExamSubjects?: boolean;
 }

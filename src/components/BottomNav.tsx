@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Subject } from "../interfaces/Subject";
 import type { EncryptedGrade } from "../interfaces/Grade";
-import { HomeIcon, BookIcon, SettingsIcon } from "./icons";
+import { HomeIcon, BookIcon, SettingsIcon, EditIcon } from "./icons";
 import AddGrade from "./AddGrade";
 import AddSubject from "./AddSubject";
 import AddFachreferat from "./AddFachreferat";
@@ -240,22 +240,6 @@ export default function BottomNav({
               <button
                 className="bottom-nav-actions-button"
                 type="button"
-                onClick={handleAddFachreferatClick}
-                disabled={!encryptionKey}
-                title={!encryptionKey ? "Lade Schl\u00fcssel..." : ""}
-              >
-                <span className="bottom-nav-actions-icon-circle">+</span>
-                <div className="bottom-nav-actions-text">
-                  <span className="bottom-nav-actions-label">Fachreferat</span>
-                  <span className="bottom-nav-actions-description">
-                    Fachreferatsnote eintragen
-                  </span>
-                </div>
-              </button>
-
-              <button
-                className="bottom-nav-actions-button"
-                type="button"
                 onClick={handleAddSubjectClick}
               >
                 <span className="bottom-nav-actions-icon-circle">+</span>
@@ -277,6 +261,32 @@ export default function BottomNav({
                   <span className="bottom-nav-actions-label">Abitur</span>
                   <span className="bottom-nav-actions-description">
                     Abschlusspr&uuml;fung eintragen
+                  </span>
+                </div>
+              </button>
+
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
+                onClick={handleAddFachreferatClick}
+                disabled={!encryptionKey}
+                title={!encryptionKey ? "Lade Schl\u00fcssel..." : ""}
+              >
+                <span className="bottom-nav-actions-icon-circle">
+                  {hasFachreferat ? (
+                    <EditIcon size={18} className="bottom-nav-actions-icon" />
+                  ) : (
+                    "+"
+                  )}
+                </span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">
+                    {hasFachreferat ? "Fachreferat bearbeiten" : "Fachreferat"}
+                  </span>
+                  <span className="bottom-nav-actions-description">
+                    {hasFachreferat
+                      ? "Bestehendes Fachreferat bearbeiten"
+                      : "Fachreferatsnote eintragen"}
                   </span>
                 </div>
               </button>
@@ -307,8 +317,6 @@ export default function BottomNav({
               <AddFachreferat
                 subjects={subjects}
                 encryptionKeyProp={encryptionKey as CryptoKey}
-                onAddGrade={handleGradeAdded}
-                onAddSubjectToState={onAddSubjectToState}
               />
             )}
             <img

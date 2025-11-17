@@ -29,7 +29,7 @@ const Login: React.FC = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await loginUser(email, password, rememberMe);
+        await loginUser(email, password);
         // Weiterleiten nach erfolgreichem Login
         window.history.pushState({}, "", "/");
         window.dispatchEvent(new PopStateEvent("popstate"));
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        const result = await loginUserWithGoogle(rememberMe);
+        const result = await loginUserWithGoogle();
         // Bei Popup-Flow direkt weiterleiten, beim Redirect-Flow übernimmt Firebase
         if (result) {
           window.history.pushState({}, "", "/");

@@ -28,21 +28,23 @@ interface SubjectsTableProps {
 }
 
 const calculateGradeWeight = (subject: Subject, grade: Grade): number => {
-  if (!subject) return 1; // Default
+  if (!subject) return 1;
+
+  if (subject.name === "Fachreferat") {
+    return 3;
+  }
 
   const type = subject.type;
 
   if (type === 1) {
-    // Hauptfach
     return grade.weight === 3 ? 2 : grade.weight === 2 ? 2 : 1;
   }
 
   if (type === 0) {
-    // Nebenfach
     return grade.weight === 3 ? 2 : grade.weight === 1 ? 2 : 1;
   }
 
-  return 1; // Default
+  return 1;
 };
 
 const calculateAverageScore = (
@@ -227,15 +229,21 @@ function SubjectRow({
         <div className="subject-row-main">
           <div className="subject-row-name">{subject.name}</div>
           <div className="subject-row-meta">
-            <span
-              className={`subject-tag ${
-                subject.type === 1
-                  ? "subject-tag--main"
-                  : "subject-tag--minor"
-              }`}
-            >
-              {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
-            </span>
+            {subject.name === "Fachreferat" ? (
+              <span className="subject-tag subject-tag--minor">
+                Fachreferat
+              </span>
+            ) : (
+              <span
+                className={`subject-tag ${
+                  subject.type === 1
+                    ? "subject-tag--main"
+                    : "subject-tag--minor"
+                }`}
+              >
+                {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
+              </span>
+            )}
             <span className="subject-row-count">
               {gradesCount} {gradesCount === 1 ? "Note" : "Noten"}
             </span>

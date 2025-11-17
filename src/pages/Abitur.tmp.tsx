@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BurgerMenu from "../components/BurgerMenu";
 import BottomNav from "../components/BottomNav";
 import Loading from "../components/Loading";
@@ -86,6 +86,7 @@ export default function Abitur() {
   const { user } = useAuth();
   const {
     subjects,
+    gradesBySubject,
     encryptionKey,
     isLoading,
     loadingLabel,
@@ -93,11 +94,10 @@ export default function Abitur() {
     addSubject,
     addGrade,
     updateSubject,
-    gradesBySubject,
-    fachreferat,
   } = useGrades();
 
-  const hasFachreferat = !!fachreferat;
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
 
   const [examState, setExamState] = useState<ExamState>({});
   const [activeModal, setActiveModal] = useState<
@@ -438,9 +438,6 @@ export default function Abitur() {
       let count = 0;
 
       for (const subject of subjects) {
-        // Fachreferat als eigenes Halbjahr behandeln, nicht als Fach
-        if (subject.name === "Fachreferat") continue;
-
         const subjectGrades = gradesBySubject[subject.name] || [];
         const dropOption = subject.droppedHalfYear;
 
@@ -479,8 +476,7 @@ export default function Abitur() {
     [subjects, gradesBySubject]
   );
 
-  const totalYearPoints =
-    halfYearSummary.totalPoints + (fachreferat ? fachreferat.grade : 0);
+  const totalYearPoints = halfYearSummary.totalPoints;
 
   const examSubjects = useMemo(
     () => subjects.filter((subject) => subject.examSubject === true),
@@ -510,8 +506,7 @@ export default function Abitur() {
     [examSubjects, examState]
   );
 
-  const maxYearPoints =
-    halfYearSummary.count * 15 + (fachreferat ? 15 : 0);
+  const maxYearPoints = halfYearSummary.count * 15;
   const maxExamPoints = examSubjects.length * 30;
   const totalPoints = totalYearPoints + totalExamPoints;
   const maxTotalPoints = maxYearPoints + maxExamPoints;
@@ -743,13 +738,12 @@ export default function Abitur() {
                         <div className="final-grade-halfyear-main">
                           <button
                             type="button"
-                            className="btn-small"
-                            disabled={oralPoints === null && oralLimitReached}
+                            className="btn-small" disabled={oralPoints === null && oralLimitReached}
                             onClick={() => handleOpenOralModal(subject)}
                           >
                             {oralPoints !== null
-                              ? "MÃ¼ndliche Note anpassen"
-                              : "MÃ¼ndliche Note eintragen"}
+                              ? "Mündliche Note anpassen"
+                              : "Mündliche Note eintragen"}
                           </button>
                         </div>
                         <span className="home-summary-label">
@@ -821,7 +815,7 @@ export default function Abitur() {
               <h2 className="section-headline">
                 {activeModal.type === "written"
                   ? `Schriftliche Note in ${activeModal.subject.name}`
-                  : `MÃ¼ndliche Note in ${activeModal.subject.name}`}
+                  : `Mündliche Note in ${activeModal.subject.name}`}
               </h2>
               <div className="form-group">
                 <label className="form-label">Punkte (0-15)</label>
@@ -892,8 +886,8 @@ export default function Abitur() {
                       }}
                     >
                       {activeModal.type === "written"
-                        ? "Eingetragene schriftliche Note lÃ¶schen"
-                        : "Eingetragene mÃ¼ndliche Note lÃ¶schen"}
+                        ? "Eingetragene schriftliche Note löschen"
+                        : "Eingetragene mündliche Note löschen"}
                     </button>
                   );
                 })()}

@@ -25,18 +25,18 @@ export default function Home() {
     subjectSortMode,
     subjectSortOrder,
     updateSubjectSortPreferences,
+    fachreferat,
   } = useGrades();
 
   const [halfYearFilter, setHalfYearFilter] =
     useState<"all" | 1 | 2>("all");
 
+  const hasFachreferat = !!fachreferat;
+
   const subjectsWithoutFachreferat = useMemo(
     () => subjects.filter((s) => s.name !== "Fachreferat"),
     [subjects]
   );
-
-  const hasFachreferat =
-    (gradesBySubject["Fachreferat"] || []).length > 0;
 
   const isFirstSubject = subjectsWithoutFachreferat.length === 0;
 
@@ -120,13 +120,38 @@ export default function Home() {
         result[subject.name] = filtered;
       }
 
+      if (fachreferat) {
+        result["Fachreferat"] = [
+          {
+            grade: fachreferat.grade,
+            weight: 3,
+            date: fachreferat.date,
+            note: fachreferat.note ?? undefined,
+            halfYear: undefined,
+          },
+        ];
+      }
+
       return result;
     },
-    [subjects, gradesBySubject, halfYearFilter]
+    [subjects, gradesBySubject, halfYearFilter, fachreferat]
   );
 
   const sortedSubjects = useMemo(() => {
-    if (subjects.length === 0) return [];
+    const baseSubjects = [...subjectsWithoutFachreferat];
+    const list =
+      hasFachreferat
+        ? [
+            ...baseSubjects,
+            {
+              name: "Fachreferat",
+              type: 0,
+              date: new Date(),
+            } as Subject,
+          ]
+        : baseSubjects;
+
+    if (list.length === 0) return [];
 
     const getSubjectAverage = (subject: Subject): number | null => {
       const grades = filteredSubjectGrades[subject.name] || [];
@@ -146,7 +171,7 @@ export default function Home() {
     };
 
     if (subjectSortMode === "name") {
-      return [...subjects].sort((a, b) =>
+      return [...list].sort((a, b) =>
         a.name
           .toLowerCase()
           .localeCompare(b.name.toLowerCase(), "de")
@@ -154,7 +179,7 @@ export default function Home() {
     }
 
     if (subjectSortMode === "name_desc") {
-      return [...subjects].sort((a, b) =>
+      return [...list].sort((a, b) =>
         b.name
           .toLowerCase()
           .localeCompare(a.name.toLowerCase(), "de")
@@ -162,7 +187,7 @@ export default function Home() {
     }
 
     if (subjectSortMode === "average") {
-      return [...subjects].sort((a, b) => {
+      return [...list].sort((a, b) => {
         const avgA = getSubjectAverage(a);
         const avgB = getSubjectAverage(b);
 
@@ -179,7 +204,7 @@ export default function Home() {
     }
 
     if (subjectSortMode === "average_worst") {
-      return [...subjects].sort((a, b) => {
+      return [...list].sort((a, b) => {
         const avgA = getSubjectAverage(a);
         const avgB = getSubjectAverage(b);
 
@@ -197,7 +222,7 @@ export default function Home() {
 
     if (subjectSortMode === "custom") {
       if (!subjectSortOrder.length) {
-        return [...subjects].sort((a, b) =>
+        return [...list].sort((a, b) =>
           a.name
             .toLowerCase()
             .localeCompare(b.name.toLowerCase(), "de")
@@ -209,7 +234,7 @@ export default function Home() {
         orderMap.set(name, index);
       });
 
-      return [...subjects].sort((a, b) => {
+      return [...list].sort((a, b) => {
         const indexA = orderMap.get(a.name);
         const indexB = orderMap.get(b.name);
 
@@ -225,8 +250,14 @@ export default function Home() {
       });
     }
 
-    return subjects;
-  }, [subjects, filteredSubjectGrades, subjectSortMode, subjectSortOrder]);
+    return list;
+  }, [
+    subjectsWithoutFachreferat,
+    hasFachreferat,
+    filteredSubjectGrades,
+    subjectSortMode,
+    subjectSortOrder,
+  ]);
 
   const overallAverage = useMemo(() => {
     if (subjects.length === 0) return null;

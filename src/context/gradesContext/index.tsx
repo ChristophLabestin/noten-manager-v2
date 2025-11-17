@@ -11,6 +11,10 @@ import { db } from "../../firebase/firebaseConfig";
 import type { UserProfile } from "../../interfaces/UserProfile";
 import type { Subject } from "../../interfaces/Subject";
 import type { EncryptedGrade, GradeWithId } from "../../interfaces/Grade";
+import type {
+  EncryptedFachreferat,
+  Fachreferat,
+} from "../../interfaces/Fachreferat";
 import {
   decryptString,
   deriveKeyFromPassword,
@@ -35,6 +39,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
   const [subjectSortMode, setSubjectSortMode] =
     useState<SubjectSortMode>("name");
   const [subjectSortOrder, setSubjectSortOrder] = useState<string[]>([]);
+  const [fachreferat, setFachreferat] = useState<Fachreferat | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingLabel, setLoadingLabel] = useState<string>("");
@@ -53,6 +58,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
       setCompactView(false);
       setSubjectSortMode("name");
       setSubjectSortOrder([]);
+      setFachreferat(null);
       if (typeof document !== "undefined") {
         document.body.classList.remove("no-animations");
       }
@@ -189,6 +195,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
           empty[subjectId] = [];
         }
         setGradesBySubject(empty);
+        setFachreferat(null);
         setPct(100, "Fertig");
         return;
       }
@@ -220,6 +227,52 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
       }
 
       setGradesBySubject(gradesData);
+
+      // 7) Fachreferat laden (separate Collection)
+      try {
+        const fachreferatDocRef = doc(
+          db,
+          "users",
+          user.uid,
+          "fachreferat",
+          "current"
+        );
+        const fachreferatSnap = await getDoc(fachreferatDocRef);
+        if (fachreferatSnap.exists()) {
+          const data = fachreferatSnap.data() as EncryptedFachreferat;
+          try {
+            const num = Number(
+              await decryptString(data.grade, activeKey as CryptoKey)
+            );
+            if (Number.isFinite(num)) {
+              setFachreferat({
+                id: fachreferatSnap.id,
+                grade: num,
+                subjectName: data.subjectName,
+                note: data.note ?? undefined,
+                date: data.date,
+              });
+            } else {
+              setFachreferat(null);
+            }
+          } catch (err) {
+            console.error(
+              "[GradesProvider] decryptString(fachreferat) failed:",
+              err
+            );
+            setFachreferat(null);
+          }
+        } else {
+          setFachreferat(null);
+        }
+      } catch (err) {
+        console.error(
+          "[GradesProvider] getDoc(users/uid/fachreferat/current) failed:",
+          err
+        );
+        setFachreferat(null);
+      }
+
       setPct(100, "Fertig");
     } finally {
       setTimeout(() => {
@@ -313,6 +366,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     animationsEnabled,
     subjectSortMode,
     subjectSortOrder,
+    fachreferat,
     addSubject,
     updateSubject,
     addGrade,
@@ -320,6 +374,7 @@ export function GradesProvider({ children }: { children: React.ReactNode }) {
     deleteGrade,
     refresh,
     updateSubjectSortPreferences,
+    setFachreferat,
   };
 
   return (

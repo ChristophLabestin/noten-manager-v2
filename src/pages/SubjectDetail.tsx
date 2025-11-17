@@ -69,7 +69,6 @@ export default function SubjectDetailPage({
   const { user } = useAuth();
   const {
     subjects,
-    gradesBySubject,
     encryptionKey,
     isLoading,
     loadingLabel,
@@ -78,6 +77,8 @@ export default function SubjectDetailPage({
     addGrade,
     updateGrade,
     deleteGrade,
+    gradesBySubject,
+    fachreferat,
   } = useGrades();
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -90,8 +91,7 @@ export default function SubjectDetailPage({
   });
   const [halfYearFilter, setHalfYearFilter] = useState<"all" | 1 | 2>("all");
 
-  const hasFachreferat =
-    (gradesBySubject["Fachreferat"] || []).length > 0;
+  const hasFachreferat = !!fachreferat;
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.name === subjectId),

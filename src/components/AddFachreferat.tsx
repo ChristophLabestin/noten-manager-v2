@@ -1,29 +1,16 @@
 import { useState } from "react";
 import { getAuth } from "firebase/auth";
-import {
-  Timestamp,
-  addDoc,
-  collection,
-  doc,
-  setDoc,
-} from "firebase/firestore";
-import type { EncryptedGrade } from "../interfaces/Grade";
+import { Timestamp, doc, setDoc } from "firebase/firestore";
 import type { Subject } from "../interfaces/Subject";
 import { db } from "../firebase/firebaseConfig";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
 import { BackIcon } from "./icons";
+import { useGrades } from "../context/gradesContext/useGrades";
 
 interface AddFachreferatProps {
   subjects: Subject[];
   encryptionKeyProp: CryptoKey;
-  onAddGrade: (
-    subjectId: string,
-    gradeId: string,
-    grade: EncryptedGrade,
-    encryptionKey: CryptoKey
-  ) => void;
-  onAddSubjectToState: (subject: Subject) => void;
 }
 
 const getGradeCategory = (points: number): "good" | "medium" | "bad" => {
@@ -35,9 +22,8 @@ const getGradeCategory = (points: number): "good" | "medium" | "bad" => {
 export default function AddFachreferat({
   subjects,
   encryptionKeyProp,
-  onAddGrade,
-  onAddSubjectToState,
 }: AddFachreferatProps) {
+  const { setFachreferat } = useGrades();
   const [newGradeInput, setNewGradeInput] = useState<string>("");
   const [gradeNote, setGradeNote] = useState<string>("");
   const [selectedSubjectName, setSelectedSubjectName] =
@@ -78,11 +64,11 @@ export default function AddFachreferat({
     }
 
     if (gradeNumber > 15 || gradeNumber < 0) {
-      alert("Bitte eine gültige Zahl im Bereich 0-15 eingeben.");
+      alert("Bitte eine gültige Zahl im Bereich 0–15 eingeben.");
       return;
     }
 
-    if (!selectedSubjectName && subjects.length > 0) {
+    if (!selectedSubjectName) {
       alert(
         "Bitte wähle das Fach aus, in dem du das Fachreferat gehalten hast."
       );
@@ -92,27 +78,6 @@ export default function AddFachreferat({
     try {
       setIsSaving(true);
 
-      const encryptedGrade = await encryptString(
-        gradeNumber.toString(),
-        encryptionKeyProp
-      );
-
-      const notePrefix = selectedSubjectName
-        ? `Fachreferat in ${selectedSubjectName}`
-        : "Fachreferat";
-      const fullNote =
-        gradeNote.trim().length > 0
-          ? `${notePrefix} – ${gradeNote.trim()}`
-          : notePrefix;
-
-      const gradeToAdd: EncryptedGrade = {
-        grade: encryptedGrade,
-        weight: 3,
-        date: Timestamp.fromDate(new Date()),
-        note: fullNote,
-        halfYear: 1,
-      };
-
       const auth = getAuth();
       const user = auth.currentUser;
 
@@ -121,48 +86,46 @@ export default function AddFachreferat({
         return;
       }
 
-      const subjectName = "Fachreferat";
+      const notePrefix = `Fachreferat in ${selectedSubjectName}`;
+      const fullNote =
+        gradeNote.trim().length > 0
+          ? `${notePrefix} – ${gradeNote.trim()}`
+          : notePrefix;
 
-      const existingSubject = subjects.find(
-        (subject) => subject.name === subjectName
+      const encryptedGrade = await encryptString(
+        gradeNumber.toString(),
+        encryptionKeyProp
       );
 
-      let subjectToUse: Subject;
+      const now = Timestamp.fromDate(new Date());
 
-      if (existingSubject) {
-        subjectToUse = existingSubject;
-      } else {
-        const subjectsRef = collection(db, "users", user.uid, "subjects");
-        const subjectDocRef = doc(subjectsRef, subjectName);
-
-        subjectToUse = {
-          name: subjectName,
-          type: 1,
-          date: new Date(),
-        };
-
-        await setDoc(subjectDocRef, subjectToUse);
-        onAddSubjectToState(subjectToUse);
-      }
-
-      const gradesRef = collection(
+      const fachreferatDocRef = doc(
         db,
         "users",
         user.uid,
-        "subjects",
-        subjectToUse.name,
-        "grades"
+        "fachreferat",
+        "current"
       );
 
-      const docRef = await addDoc(gradesRef, gradeToAdd);
+      await setDoc(fachreferatDocRef, {
+        grade: encryptedGrade,
+        subjectName: selectedSubjectName,
+        note: fullNote,
+        date: now,
+      });
 
-      onAddGrade(subjectToUse.name, docRef.id, gradeToAdd, encryptionKeyProp);
+      setFachreferat({
+        id: fachreferatDocRef.id,
+        grade: gradeNumber,
+        subjectName: selectedSubjectName,
+        note: fullNote,
+        date: now,
+      });
 
       setNewGradeInput("");
       setGradeNote("");
       setSelectedSubjectName("");
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("Fehler beim Hinzufügen der Fachreferatsnote:", err);
       alert("Fehler beim Hinzufügen der Fachreferatsnote.");
     } finally {
@@ -202,13 +165,11 @@ export default function AddFachreferat({
           onChange={handleSubjectChange}
         >
           <option value="">- Fach auswählen -</option>
-          {subjects
-            .filter((subject) => subject.name !== "Fachreferat")
-            .map((subject) => (
-              <option key={subject.name} value={subject.name}>
-                {subject.name}
-              </option>
-            ))}
+          {subjects.map((subject) => (
+            <option key={subject.name} value={subject.name}>
+              {subject.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -272,3 +233,4 @@ export default function AddFachreferat({
     </form>
   );
 }
+

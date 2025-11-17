@@ -149,6 +149,11 @@ body.dark-mode .form-input.small {
   border: 1px solid rgba(148, 163, 184, 0.8);
 }
 
+body.dark-mode .form-input option {
+  color: variables.$color-text-dark-dark !important;
+  background: rgba(15, 23, 42, 0.96);
+}
+
 body.dark-mode .grade-box.good {
   background-color: rgba(34, 197, 94, 0.45);
 }
@@ -914,6 +919,11 @@ body.dark-mode .home-sort-select-input {
   background: rgba(15, 23, 42, 0.96);
   color: variables.$color-text-dark-dark;
   border-color: rgba(148, 163, 184, 0.9);
+}
+
+body.dark-mode .home-sort-select-input option {
+  color: variables.$color-text-dark-dark !important;
+  background: rgba(15, 23, 42, 0.96);
 }
 
 .table-wrapper {
@@ -2481,6 +2491,11 @@ body.dark-mode .add-subject-form .form-input {
   padding: 4px 6px;
 }
 
+.btn-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-small.btn-small--save {
   background: rgba(22, 163, 74, 0.32);
   color: variables.$color-text-dark;
@@ -3480,6 +3495,9 @@ body.dark-mode .subject-detail-detail-value {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  &.fachreferat {
+    gap: 16px;
+  }
 }
 
 .subject-detail-grade-value {

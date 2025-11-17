@@ -43,8 +43,7 @@ export const registerUser = async (
 // Benutzer anmelden
 export const loginUser = async (
   email: string,
-  password: string,
-  _rememberMe?: boolean
+  password: string
 ): Promise<UserCredential> => {
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -62,9 +61,7 @@ export const loginUser = async (
 };
 
 // Benutzer mit Google anmelden
-export const loginUserWithGoogle = async (
-  _rememberMe?: boolean
-): Promise<UserCredential> => {
+export const loginUserWithGoogle = async (): Promise<UserCredential> => {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);

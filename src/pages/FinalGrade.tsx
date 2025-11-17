@@ -62,7 +62,6 @@ export default function FinalGrade() {
   const { user } = useAuth();
   const {
     subjects,
-    gradesBySubject,
     encryptionKey,
     isLoading,
     loadingLabel,
@@ -71,6 +70,8 @@ export default function FinalGrade() {
     addGrade,
     subjectSortMode,
     subjectSortOrder,
+    gradesBySubject,
+    fachreferat,
   } = useGrades();
 
   const [dropSelections, setDropSelections] = useState<
@@ -81,7 +82,7 @@ export default function FinalGrade() {
     Record<string, number | null>
   >({});
 
-  const hasFachreferat = (gradesBySubject["Fachreferat"] || []).length > 0;
+  const hasFachreferat = !!fachreferat;
 
   const subjectsWithoutFachreferat = useMemo(
     () => subjects.filter((s) => s.name !== "Fachreferat"),
@@ -112,11 +113,37 @@ export default function FinalGrade() {
         const snap = await getDoc(userDocRef);
         if (snap.exists()) {
           const profile = snap.data() as UserProfile;
-          if (typeof profile.maxDroppedHalfYears === "number") {
-            setMaxDroppedHalfYears(profile.maxDroppedHalfYears);
-          } else {
-            setMaxDroppedHalfYears(3);
+
+          const gradeYear =
+            profile.gradeYear === 12 || profile.gradeYear === 13
+              ? profile.gradeYear
+              : null;
+
+          if (!gradeYear) {
+            // Fallback: alte Einstellung oder Standardwert
+            if (typeof profile.maxDroppedHalfYears === "number") {
+              setMaxDroppedHalfYears(profile.maxDroppedHalfYears);
+            } else {
+              setMaxDroppedHalfYears(3);
+            }
+            return;
           }
+
+          // Anzahl der Fächer ohne Fachreferat
+          const subjectsWithoutFachreferatLocal = subjects.filter(
+            (s) => s.name !== "Fachreferat"
+          );
+
+          // Anzahl einzubringender Halbjahresergebnisse
+          const requiredHalfYears = gradeYear === 12 ? 17 : 16;
+          const totalHalfYears = subjectsWithoutFachreferatLocal.length * 2;
+
+          const computedMaxDropped = Math.max(
+            0,
+            totalHalfYears - requiredHalfYears
+          );
+
+          setMaxDroppedHalfYears(computedMaxDropped);
         }
       } catch (err) {
         console.error("[FinalGrade] Failed to load user config:", err);
@@ -124,7 +151,7 @@ export default function FinalGrade() {
     };
 
     void fetchUserConfig();
-  }, [user]);
+  }, [user, subjects]);
 
   useEffect(() => {
     if (!encryptionKey) {
@@ -528,50 +555,19 @@ export default function FinalGrade() {
     return { totalPoints, count };
   }, [subjects, gradesBySubject, dropSelections]);
 
-  const fachreferatHalfYearSummary = useMemo(() => {
-    const subject = subjects.find((s) => s.name === "Fachreferat");
-    if (!subject) {
+  const fachreferatHalfYearSummary = useMemo(
+    () => {
+      if (!fachreferat) {
+        return { totalPoints: 0, count: 0 };
+      }
+
       return {
-        totalPoints: 0,
-        count: 0,
+        totalPoints: fachreferat.grade,
+        count: 1,
       };
-    }
-
-    const subjectGrades = gradesBySubject[subject.name] || [];
-    if (!subjectGrades.length) {
-      return {
-        totalPoints: 0,
-        count: 0,
-      };
-    }
-
-    const dropOption = dropSelections[subject.name];
-    const isHalfYear1Dropped = dropOption === 1;
-    const isHalfYear2Dropped = dropOption === 2;
-
-    const firstHalfYearAverage = isHalfYear1Dropped
-      ? null
-      : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 1);
-
-    const secondHalfYearAverage = isHalfYear2Dropped
-      ? null
-      : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 2);
-
-    let totalPoints = 0;
-    let count = 0;
-
-    if (firstHalfYearAverage !== null) {
-      totalPoints += firstHalfYearAverage;
-      count += 1;
-    }
-
-    if (secondHalfYearAverage !== null) {
-      totalPoints += secondHalfYearAverage;
-      count += 1;
-    }
-
-    return { totalPoints, count };
-  }, [subjects, gradesBySubject, dropSelections]);
+    },
+    [fachreferat]
+  );
 
   const fobosoSummary = useMemo(() => {
     const examCount = examSubjectsWithPoints.length;
@@ -741,6 +737,8 @@ export default function FinalGrade() {
 
   const failedByHalfYearCount = halfYearSummary.count !== 17;
 
+  const failedByMissingFachreferat = !hasFachreferat;
+
   const failedBySubjectPoints =
     hasAllExamPoints &&
     ((subjectsBelowFourPoints === 1 && fobosoSummary.totalPoints < 130) ||
@@ -753,6 +751,7 @@ export default function FinalGrade() {
 
   const isFailed =
     failedByHalfYearCount ||
+    failedByMissingFachreferat ||
     failedBySubjectPoints ||
     failedByExamGrade ||
     failedByFinalGrade;
