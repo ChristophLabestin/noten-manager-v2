@@ -80,7 +80,7 @@ export default function FachreferatDetail() {
   );
 
   const addGradeTitle = useMemo(() => {
-    if (!encryptionKey) return "Lade Schl\u00fcssel...";
+    if (!encryptionKey) return "Lade Schlüssel...";
     if (subjectsWithoutFachreferat.length === 0)
       return "Lege zuerst ein Fach an";
     return "";
@@ -127,7 +127,7 @@ export default function FachreferatDetail() {
 
     const gradeNumber = Number(gradeValue);
     if (!Number.isFinite(gradeNumber) || gradeNumber < 0 || gradeNumber > 15) {
-      alert("Bitte eine g\u00fcltige Punktzahl zwischen 0 und 15 eingeben.");
+      alert("Bitte eine gültige Punktzahl zwischen 0 und 15 eingeben.");
       return;
     }
 
@@ -267,11 +267,6 @@ export default function FachreferatDetail() {
                     <div className="home-summary-label final-grade-label">
                       Fachreferat in {fachreferat.subjectName}
                     </div>
-                    {fachreferat.note && (
-                      <div className="subject-detail-grade-note" style={{ marginTop: 8 }}>
-                        {fachreferat.note}
-                      </div>
-                    )}
                     <div className="subject-detail-grade-actions">
                       {!isEditing ? (
                         <>
@@ -432,7 +427,7 @@ export default function FachreferatDetail() {
             <h2 className="section-head no-padding">Fachreferat löschen?</h2>
             <p style={{ marginTop: "12px", fontSize: "14px" }}>
               Möchtest du das Fachreferat wirklich löschen? Diese Aktion kann
-              nicht r\u00fcckgängig gemacht werden.
+              nicht rückgängig gemacht werden.
             </p>
             <div
               style={{

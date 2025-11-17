@@ -81,6 +81,7 @@ export default function FinalGrade() {
   const [examPointsBySubject, setExamPointsBySubject] = useState<
     Record<string, number | null>
   >({});
+  const [finalGradeToFixed, setFinalGradeToFixed] = useState<number>(1);
 
   const hasFachreferat = !!fachreferat;
 
@@ -820,6 +821,14 @@ export default function FinalGrade() {
   const limitReached =
     maxDroppedHalfYears > 0 && selectedDropCount >= maxDroppedHalfYears;
 
+  const toggleFinalGradeToFixed = () => {
+    if (finalGradeToFixed === 1) {
+      setFinalGradeToFixed(2)
+    } else if (finalGradeToFixed === 2) {
+      setFinalGradeToFixed(1)
+    }
+  }
+
   return (
     <div className="home-layout final-grade-page">
       {isLoading && <Loading progress={progress} label={loadingLabel} />}
@@ -838,9 +847,10 @@ export default function FinalGrade() {
             className={`subject-detail-summary-pill ${getGradeClass(
               finalAverage
             )}`}
+            onClick={toggleFinalGradeToFixed}
           >
             {fobosoSummary.maxPoints > 0 && fobosoSummary.grade !== null
-              ? fobosoSummary.grade.toFixed(1)
+              ? fobosoSummary.grade.toFixed(finalGradeToFixed)
               : formatAverage(finalAverage)}
           </div>
         </div>

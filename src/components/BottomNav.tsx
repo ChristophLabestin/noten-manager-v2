@@ -141,7 +141,7 @@ export default function BottomNav({
               <img
                 src={folderIcon}
                 className="bottom-nav-icon"
-                alt={"F\u00e4cher"}
+                alt={"Fächer"}
                 width={26}
                 height={26}
               />
@@ -254,23 +254,9 @@ export default function BottomNav({
               <button
                 className="bottom-nav-actions-button"
                 type="button"
-                onClick={handleAbiturClick}
-              >
-                <span className="bottom-nav-actions-icon-circle">+</span>
-                <div className="bottom-nav-actions-text">
-                  <span className="bottom-nav-actions-label">Abitur</span>
-                  <span className="bottom-nav-actions-description">
-                    Abschlusspr&uuml;fung eintragen
-                  </span>
-                </div>
-              </button>
-
-              <button
-                className="bottom-nav-actions-button"
-                type="button"
                 onClick={handleAddFachreferatClick}
                 disabled={!encryptionKey}
-                title={!encryptionKey ? "Lade Schl\u00fcssel..." : ""}
+                title={!encryptionKey ? "Lade Schlüssel..." : ""}
               >
                 <span className="bottom-nav-actions-icon-circle">
                   {hasFachreferat ? (
@@ -287,6 +273,22 @@ export default function BottomNav({
                     {hasFachreferat
                       ? "Bestehendes Fachreferat bearbeiten"
                       : "Fachreferatsnote eintragen"}
+                  </span>
+                </div>
+              </button>
+
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
+                onClick={handleAbiturClick}
+              >
+                <span className="bottom-nav-actions-icon-circle">
+                  <EditIcon size={18} className="bottom-nav-actions-icon" />
+                </span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">Abitur</span>
+                  <span className="bottom-nav-actions-description">
+                    Abschlusspr&uuml;fung eintragen
                   </span>
                 </div>
               </button>
@@ -323,7 +325,7 @@ export default function BottomNav({
               src={closeIcon}
               className="close-icon"
               onClick={() => setActiveModal("")}
-              alt={"Schlie\u00dfen"}
+              alt={"Schließen"}
             />
           </div>
         </div>

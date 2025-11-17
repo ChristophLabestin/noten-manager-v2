@@ -564,7 +564,7 @@ export default function Abitur() {
 
       <div className="home-summary single-column">
         <div className="home-summary-card home-summary-card--row">
-          <span className="home-summary-label">Gesamtpunkte (Orientierung)</span>
+          <span className="home-summary-label">Gesamtpunkte</span>
           <div
             className={`subject-detail-summary-pill ${getGradeClass(
               overallAverage
@@ -824,7 +824,7 @@ export default function Abitur() {
                   : `Mündliche Note in ${activeModal.subject.name}`}
               </h2>
               <div className="form-group">
-                <label className="form-label">Punkte (0-15)</label>
+                <label className="form-label">Punkte (15-0)</label>
                 <div className="grade-points-group">
                   {Array.from({ length: 16 }, (_, index) => {
                     const value = 15 - index;
