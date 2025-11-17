@@ -8,7 +8,7 @@ import { db } from "../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import type { UserProfile } from "../interfaces/UserProfile";
 
-const CURRENT_VERSION = "1.3";
+const CURRENT_VERSION = "1.4";
 const STORAGE_KEY = `nm_features_seen_v${CURRENT_VERSION}`;
 
 export default function NewFeaturesModal() {
@@ -97,10 +97,27 @@ export default function NewFeaturesModal() {
         <div className="new-features-modal">
           <h2 className="section-headline">Neu in Version {CURRENT_VERSION}</h2>
           <p className="settings-help-text">
-            Wir haben ein neues Feature hinzugefügt, das dir hilft, deine
-            Abschlussnote besser zu planen:
+            Wir haben neue Features hinzugefügt, die dir helfen, dein Abitur
+            noch besser zu planen:
           </p>
           <ul className="new-features-list">
+            <li>
+              <strong>Fachreferatsnote eintragen:</strong> Über die
+              Schnellaktionen unten kannst du die Note deines Fachreferats
+              erfassen; sie wird automatisch als zusätzliche Halbjahresleistung
+              berücksichtigt.
+            </li>
+            <li>
+              <strong>Pr&uuml;fungsf&auml;cher festlegen:</strong> Du kannst
+              bequem auswählen, welche deiner Fächer Pr&uuml;fungsf&auml;cher
+              sind – die Auswahl lässt sich später in den Einstellungen
+              anpassen.
+            </li>
+            <li>
+              <strong>Abschlusspr&uuml;fungsnoten erfassen:</strong> Im Bereich
+              „Abschlusspr&uuml;fung“ trägst du schriftliche und (optional)
+              m&uuml;ndliche Pr&uuml;fungsnoten ein.
+            </li>
             <li>
               <strong>Abschlussnoten-Seite:</strong> Unter{" "}
               <BookIcon size={16} className="bottom-nav-icon" /> in der

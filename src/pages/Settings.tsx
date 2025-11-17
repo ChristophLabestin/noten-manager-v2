@@ -519,7 +519,7 @@ export default function Settings() {
               </button>
             </div>
             <div className="settings-privacy-link">
-              <p>App Version 1.3</p>
+              <p>App Version 1.4</p>
             </div>
           </div>
         </div>
