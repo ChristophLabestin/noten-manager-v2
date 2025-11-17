@@ -530,6 +530,9 @@ body.dark-mode .login-forgot-link:focus-visible {
 .info-message {
   font-size: 0.85rem;
   color: variables.$color-text-medium;
+  &.end-of-page {
+    margin: 0 !important;
+  }
 }
 
 body.dark-mode .success-message {
@@ -671,6 +674,10 @@ body.compact-view .home-layout {
     justify-content: space-between;
     align-items: center;
   }
+}
+
+.final-grade-disclaimer {
+  margin-top: 0 !important;
 }
 
 .final-grade-failure-reasons {
@@ -836,6 +843,14 @@ body.theme-feminine.dark-mode .home-halfyear-toggle-button--active {
 
 .home-summary-card--average .home-summary-label {
   color: rgba(249, 250, 251, 0.9);
+}
+
+.final-grade-page .home-summary-card .home-summary-label {
+  color: variables.$color-text-dark;
+}
+
+body.dark-mode .final-grade-page .home-summary-card .home-summary-label {
+  color: variables.$color-text-dark-dark;
 }
 
 .home-summary-value {
@@ -2457,6 +2472,19 @@ body.dark-mode .add-subject-form .form-input {
   background: rgba(15, 23, 42, 0.96);
   border-color: rgba(148, 163, 184, 0.85);
   color: variables.$color-text-dark-dark;
+}
+
+/* Improved readability for New Features modal and grade point pills */
+.new-features-list {
+  color: variables.$color-text-medium;
+}
+
+body.dark-mode .new-features-list {
+  color: variables.$color-text-medium-dark;
+}
+
+.add-subject-form .grade-point-pill {
+  color: variables.$color-text-medium;
 }
 
 .form-two-columns {

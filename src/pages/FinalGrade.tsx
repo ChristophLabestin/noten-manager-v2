@@ -883,39 +883,39 @@ export default function FinalGrade() {
               failedByHalfYearCount ||
               failedByMissingFachreferat ||
               failedBySubjectPoints) && (
-              <div className="final-grade-failure-reasons">
-                {failedByHalfYearTooFew && (
-                  <div className="final-grade-failure-reason">
-                    zu wenige Halbjahre eingebracht
-                  </div>
-                )}
-                {failedByHalfYearTooMany && (
-                  <div className="final-grade-failure-reason">
-                    zu viele Halbjahre eingebracht
-                  </div>
-                )}
-                {failedByExamGrade && (
-                  <div className="final-grade-failure-reason">
-                    benötigter Schnitt nicht erreicht
-                  </div>
-                )}
-                {failedByFinalGrade && (
-                  <div className="final-grade-failure-reason">
-                    benötigte Abschlussnote nicht erreicht
-                  </div>
-                )}
-                {failedByMissingFachreferat && (
-                  <div className="final-grade-failure-reason">
-                    Fachreferat Note nicht eingetragen
-                  </div>
-                )}
-                {failedBySubjectPoints && (
-                  <div className="final-grade-failure-reason">
-                    benötigte Punktzahl nicht erreicht
-                  </div>
-                )}
-              </div>
-            )}
+                <div className="final-grade-failure-reasons">
+                  {failedByHalfYearTooFew && (
+                    <div className="final-grade-failure-reason">
+                      zu wenige Halbjahre eingebracht
+                    </div>
+                  )}
+                  {failedByHalfYearTooMany && (
+                    <div className="final-grade-failure-reason">
+                      zu viele Halbjahre eingebracht
+                    </div>
+                  )}
+                  {failedByExamGrade && (
+                    <div className="final-grade-failure-reason">
+                      benötigter Schnitt nicht erreicht
+                    </div>
+                  )}
+                  {failedByFinalGrade && (
+                    <div className="final-grade-failure-reason">
+                      benötigte Abschlussnote nicht erreicht
+                    </div>
+                  )}
+                  {failedByMissingFachreferat && (
+                    <div className="final-grade-failure-reason">
+                      Fachreferat Note nicht eingetragen
+                    </div>
+                  )}
+                  {failedBySubjectPoints && (
+                    <div className="final-grade-failure-reason">
+                      benötigte Punktzahl nicht erreicht
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
         )}
       </div>
@@ -1213,15 +1213,15 @@ export default function FinalGrade() {
             </div>
           )}
 
-          {maxDroppedHalfYears > 0 && limitReached && (
-            <p className="info-message">
-              Du hast bereits die maximal erlaubte Anzahl an gestrichenen
-              Halbjahren ausgew&auml;hlt. Entferne zuerst eine Auswahl, um ein
-              weiteres Halbjahr zu streichen.
-            </p>
-          )}
         </div>
       </section>
+      {maxDroppedHalfYears > 0 && limitReached && (
+        <p className="info-message end-of-page">
+          Du hast bereits die maximal erlaubte Anzahl an gestrichenen
+          Halbjahren ausgew&auml;hlt. Entferne zuerst eine Auswahl, um ein
+          weiteres Halbjahr zu streichen.
+        </p>
+      )}
 
       <BottomNav
         subjects={subjects}
@@ -1236,7 +1236,7 @@ export default function FinalGrade() {
 
       <section className="home-section final-grade-disclaimer">
         <div className="home-section-body">
-          <p className="info-message">
+          <p className="info-message end-of-page">
             Hinweis: Das Streichen von Halbjahren in dieser Ansicht dient nur
             dir selbst als Orientierung und Merkhilfe. Es werden keine Daten an
             deine Schule oder andere Dritte &uuml;bermittelt. Offizielle

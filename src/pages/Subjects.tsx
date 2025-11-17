@@ -18,6 +18,7 @@ import BurgerMenu from "../components/BurgerMenu";
 import BottomNav from "../components/BottomNav";
 import Loading from "../components/Loading";
 import { CancelIcon, DeleteIcon, EditIcon, SaveIcon } from "../components/icons";
+import { navigate } from "../services/navigation";
 
 export default function SubjectsPage() {
   const { user } = useAuth();
@@ -508,6 +509,16 @@ export default function SubjectsPage() {
                               Bearbeiten
                             </button>
                             <button
+                              className="btn-small"
+                              type="button"
+                              onClick={() =>
+                                navigate(`/fach/${subject.name}`)
+                              }
+                              disabled={isDeleting}
+                            >
+                              Fach öffnen
+                            </button>
+                            <button
                               className="btn-small btn-small--delete"
                               type="button"
                               onClick={() => openDeleteModal(subject.name)}
@@ -583,4 +594,3 @@ export default function SubjectsPage() {
     </div>
   );
 }
-

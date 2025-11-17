@@ -782,7 +782,7 @@ export default function Abitur() {
       {oralLimitReached && (
         <section className="home-section" style={{margin: 0}}>
           <div className="home-section-body">
-            <p className="info-message">
+            <p className="info-message end-of-page">
               Du hast bereits drei m&uuml;ndliche Pr&uuml;fungsnoten
               eingetragen. Es k&ouml;nnen maximal drei m&uuml;ndliche
               Pr&uuml;fungen ber&uuml;cksichtigt werden.
@@ -793,7 +793,7 @@ export default function Abitur() {
 
       <section className="home-section final-grade-disclaimer">
         <div className="home-section-body">
-          <p className="info-message">
+          <p className="info-message end-of-page">
             Hinweis: Die hier berechneten Punkte dienen dir als Orientierung
             f&uuml;r dein Abitur an der FOS/BOS in Bayern. Es handelt sich nicht
             um eine offizielle Berechnung nach FOBOSO. F&uuml;r verbindliche
@@ -912,7 +912,6 @@ export default function Abitur() {
     </div>
   );
 }
-
 
 
 

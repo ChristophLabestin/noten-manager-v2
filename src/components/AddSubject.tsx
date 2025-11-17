@@ -61,7 +61,7 @@ export default function AddSubject({
         teacher: teacherName,
         room: roomName,
         email: teacherEmail,
-        alias: teacherAlias,
+        alias: teacherAlias.toUpperCase(),
       };
 
       await setDoc(subjectDocRef, newSubject);
@@ -162,7 +162,7 @@ export default function AddSubject({
               <label className="form-label">E-Mail</label>
               <input
                 className="form-input"
-                type="text"
+                type="email"
                 value={teacherEmail}
                 onChange={handleTeacherEmailChange}
                 placeholder="mustermann@gmail.com"
