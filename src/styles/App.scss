@@ -663,6 +663,36 @@ body.compact-view .home-layout {
   animation-delay: 0.16s;
 }
 
+.final-grade-top-card {
+  flex-direction: column !important;
+  &>:first-child {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.final-grade-failure-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.final-grade-failure-reason {
+  color: #f87171;
+  padding-left: 16px;
+  position: relative;
+  &::before {
+    content: "x";
+    position: absolute;
+    left: 0;
+    top: -2px;
+  }
+}
+
 .home-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

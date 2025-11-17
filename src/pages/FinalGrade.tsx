@@ -717,11 +717,11 @@ export default function FinalGrade() {
     () =>
       hasAllExamPoints
         ? subjectFinalResults.reduce((sum, entry) => {
-            if (entry.finalPoints !== null && entry.finalPoints < 4) {
-              return sum + 1;
-            }
-            return sum;
-          }, 0)
+          if (entry.finalPoints !== null && entry.finalPoints < 4) {
+            return sum + 1;
+          }
+          return sum;
+        }, 0)
         : 0,
     [hasAllExamPoints, subjectFinalResults]
   );
@@ -731,12 +731,21 @@ export default function FinalGrade() {
 
   const finalGradeAtLeastFour =
     hasAllExamPoints &&
-    fobosoSummary.maxPoints > 0 &&
-    fobosoSummary.grade !== null
+      fobosoSummary.maxPoints > 0 &&
+      fobosoSummary.grade !== null
       ? fobosoSummary.grade <= 4
       : null;
 
-  const failedByHalfYearCount = halfYearSummary.count !== 17;
+  const requiredHalfYearCount = 17;
+
+  const failedByHalfYearTooFew =
+    halfYearSummary.count < requiredHalfYearCount;
+
+  const failedByHalfYearTooMany =
+    halfYearSummary.count > requiredHalfYearCount;
+
+  const failedByHalfYearCount =
+    failedByHalfYearTooFew || failedByHalfYearTooMany;
 
   const failedByMissingFachreferat = !hasFachreferat;
 
@@ -760,15 +769,15 @@ export default function FinalGrade() {
   const isPassed =
     !isFailed &&
     hasAllExamPoints &&
-    halfYearSummary.count === 17 &&
+    halfYearSummary.count === requiredHalfYearCount &&
     examResultAtLeastFour === true &&
     finalGradeAtLeastFour === true;
 
   const passFailStatus: "open" | "passed" | "failed" = isFailed
     ? "failed"
     : isPassed
-    ? "passed"
-    : "open";
+      ? "passed"
+      : "open";
 
   const examSubjectFinals = useMemo(
     () =>
@@ -852,20 +861,61 @@ export default function FinalGrade() {
             {fobosoSummary.maxPoints > 0 && fobosoSummary.grade !== null
               ? fobosoSummary.grade.toFixed(finalGradeToFixed)
               : formatAverage(finalAverage)}
+
           </div>
+
         </div>
         {passFailStatus !== "open" && (
-          <div className="home-summary-card home-summary-card--row">
-            <span className="home-summary-label final-grade-label">
-              Prüfungsstatus
-            </span>
-            <div
-              className={`subject-detail-summary-pill ${
-                passFailStatus === "passed" ? "good" : "bad"
-              }`}
-            >
-              {passFailStatus === "passed" ? "Bestanden" : "Nicht bestanden"}
+          <div className="home-summary-card home-summary-card--row final-grade-top-card">
+            <div className="">
+              <span className="home-summary-label final-grade-label">
+                Prüfungsstatus
+              </span>
+              <div
+                className={`subject-detail-summary-pill ${passFailStatus === "passed" ? "good" : "bad"
+                  }`}
+              >
+                {passFailStatus === "passed" ? "Bestanden" : "Nicht bestanden"}
+              </div>
             </div>
+            {(failedByExamGrade ||
+              failedByFinalGrade ||
+              failedByHalfYearCount ||
+              failedByMissingFachreferat ||
+              failedBySubjectPoints) && (
+              <div className="final-grade-failure-reasons">
+                {failedByHalfYearTooFew && (
+                  <div className="final-grade-failure-reason">
+                    zu wenige Halbjahre eingebracht
+                  </div>
+                )}
+                {failedByHalfYearTooMany && (
+                  <div className="final-grade-failure-reason">
+                    zu viele Halbjahre eingebracht
+                  </div>
+                )}
+                {failedByExamGrade && (
+                  <div className="final-grade-failure-reason">
+                    benötigter Schnitt nicht erreicht
+                  </div>
+                )}
+                {failedByFinalGrade && (
+                  <div className="final-grade-failure-reason">
+                    benötigte Abschlussnote nicht erreicht
+                  </div>
+                )}
+                {failedByMissingFachreferat && (
+                  <div className="final-grade-failure-reason">
+                    Fachreferat Note nicht eingetragen
+                  </div>
+                )}
+                {failedBySubjectPoints && (
+                  <div className="final-grade-failure-reason">
+                    benötigte Punktzahl nicht erreicht
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -905,8 +955,8 @@ export default function FinalGrade() {
             </ul>
           )}
         </div>
-        </section>
-        <section className="home-section" style={{margin: 0}}>
+      </section>
+      <section className="home-section" style={{ margin: 0 }}>
         {fobosoSummary.maxPoints > 0 && (
           <div className="home-summary-card">
             <span className="home-summary-label final-grade-label">
@@ -1068,11 +1118,10 @@ export default function FinalGrade() {
                     <header className="subject-card-header">
                       <h3 className="subject-card-title">{subject.name}</h3>
                       <span
-                        className={`subject-tag ${
-                          subject.type === 1
-                            ? "subject-tag--main"
-                            : "subject-tag--minor"
-                        }`}
+                        className={`subject-tag ${subject.type === 1
+                          ? "subject-tag--main"
+                          : "subject-tag--minor"
+                          }`}
                       >
                         {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
                       </span>
@@ -1095,13 +1144,11 @@ export default function FinalGrade() {
                       <div className="final-grade-halfyear-row">
                         <div className="final-grade-halfyear-main">
                           <label
-                            className={`settings-switch final-grade-switch ${
-                              isHalfYear1Selected ? "settings-switch--on" : ""
-                            } ${
-                              disableHalfYear1
+                            className={`settings-switch final-grade-switch ${isHalfYear1Selected ? "settings-switch--on" : ""
+                              } ${disableHalfYear1
                                 ? "final-grade-switch--disabled"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <input
                               type="checkbox"
@@ -1118,11 +1165,10 @@ export default function FinalGrade() {
                           </span>
                         </div>
                         <div
-                          className={`subject-detail-summary-pill final-grade-pill final-grade-halfyear-pill ${
-                            isHalfYear1Selected
-                              ? "final-grade-halfyear-pill--dropped"
-                              : ""
-                          } ${getGradeClass(firstHalfYearAverage)}`}
+                          className={`subject-detail-summary-pill final-grade-pill final-grade-halfyear-pill ${isHalfYear1Selected
+                            ? "final-grade-halfyear-pill--dropped"
+                            : ""
+                            } ${getGradeClass(firstHalfYearAverage)}`}
                         >
                           {formatAverage(firstHalfYearAverage)}
                         </div>
@@ -1131,13 +1177,11 @@ export default function FinalGrade() {
                       <div className="final-grade-halfyear-row">
                         <div className="final-grade-halfyear-main">
                           <label
-                            className={`settings-switch final-grade-switch ${
-                              isHalfYear2Selected ? "settings-switch--on" : ""
-                            } ${
-                              disableHalfYear2
+                            className={`settings-switch final-grade-switch ${isHalfYear2Selected ? "settings-switch--on" : ""
+                              } ${disableHalfYear2
                                 ? "final-grade-switch--disabled"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <input
                               type="checkbox"
@@ -1154,11 +1198,10 @@ export default function FinalGrade() {
                           </span>
                         </div>
                         <div
-                          className={`subject-detail-summary-pill final-grade-pill final-grade-halfyear-pill ${
-                            isHalfYear2Selected
-                              ? "final-grade-halfyear-pill--dropped"
-                              : ""
-                          } ${getGradeClass(secondHalfYearAverage)}`}
+                          className={`subject-detail-summary-pill final-grade-pill final-grade-halfyear-pill ${isHalfYear2Selected
+                            ? "final-grade-halfyear-pill--dropped"
+                            : ""
+                            } ${getGradeClass(secondHalfYearAverage)}`}
                         >
                           {formatAverage(secondHalfYearAverage)}
                         </div>
