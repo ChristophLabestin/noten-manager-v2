@@ -30,11 +30,19 @@ export default function Home() {
   const [halfYearFilter, setHalfYearFilter] =
     useState<"all" | 1 | 2>("all");
 
-  const isFirstSubject = subjects.length === 0;
+  const subjectsWithoutFachreferat = useMemo(
+    () => subjects.filter((s) => s.name !== "Fachreferat"),
+    [subjects]
+  );
+
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
+
+  const isFirstSubject = subjectsWithoutFachreferat.length === 0;
 
   const disableAddGrade = useMemo(
-    () => !encryptionKey || subjects.length === 0,
-    [encryptionKey, subjects.length]
+    () => !encryptionKey || subjectsWithoutFachreferat.length === 0,
+    [encryptionKey, subjectsWithoutFachreferat.length]
   );
 
   const addGradeTitle = useMemo(() => {
@@ -333,7 +341,7 @@ export default function Home() {
           <div className="home-summary-card">
             <span className="home-summary-label">Fächer</span>
             <span className="home-summary-value home-summary-value-pill">
-              {subjects.length}
+              {subjectsWithoutFachreferat.length}
             </span>
           </div>
           <div className="home-summary-card">
@@ -400,6 +408,7 @@ export default function Home() {
         isFirstSubject={isFirstSubject}
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
+        hasFachreferat={hasFachreferat}
       />
     </div>
   );

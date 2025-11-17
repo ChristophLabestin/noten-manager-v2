@@ -81,6 +81,13 @@ export default function FinalGrade() {
     Record<string, number | null>
   >({});
 
+  const hasFachreferat = (gradesBySubject["Fachreferat"] || []).length > 0;
+
+  const subjectsWithoutFachreferat = useMemo(
+    () => subjects.filter((s) => s.name !== "Fachreferat"),
+    [subjects]
+  );
+
   useEffect(() => {
     setDropSelections((prev) => {
       const next: Record<string, HalfYearDropOption> = {};
@@ -224,10 +231,11 @@ export default function FinalGrade() {
 
   const selectedDropCount = useMemo(
     () =>
-      Object.values(dropSelections).filter(
-        (value) => value === 1 || value === 2
-      ).length,
-    [dropSelections]
+      subjectsWithoutFachreferat.reduce((sum, subject) => {
+        const value = dropSelections[subject.name];
+        return sum + (value === 1 || value === 2 ? 1 : 0);
+      }, 0),
+    [subjectsWithoutFachreferat, dropSelections]
   );
 
   const filteredSubjectGrades = useMemo(() => {
@@ -254,7 +262,7 @@ export default function FinalGrade() {
 
   const droppedHalfYears = useMemo(
     () =>
-      subjects
+      subjectsWithoutFachreferat
         .map((subject) => ({
           subject,
           halfYear: dropSelections[subject.name],
@@ -262,19 +270,24 @@ export default function FinalGrade() {
         .filter(
           (
             entry
-          ): entry is { subject: Subject; halfYear: Exclude<HalfYearDropOption, "none"> } =>
-            entry.halfYear === 1 || entry.halfYear === 2
+          ): entry is {
+            subject: Subject;
+            halfYear: Exclude<HalfYearDropOption, "none">;
+          } => entry.halfYear === 1 || entry.halfYear === 2
         ),
-    [subjects, dropSelections]
+    [subjectsWithoutFachreferat, dropSelections]
   );
 
   const examSubjects = useMemo(
-    () => subjects.filter((subject) => subject.examSubject === true),
-    [subjects]
+    () =>
+      subjectsWithoutFachreferat.filter(
+        (subject) => subject.examSubject === true
+      ),
+    [subjectsWithoutFachreferat]
   );
 
   const subjectAverages = useMemo(() => {
-    return subjects.map((subject) => {
+    return subjectsWithoutFachreferat.map((subject) => {
       const grades = filteredSubjectGrades[subject.name] || [];
 
       if (!grades.length) {
@@ -296,10 +309,10 @@ export default function FinalGrade() {
 
       return { subject, average: total / totalWeight };
     });
-  }, [subjects, filteredSubjectGrades]);
+  }, [subjectsWithoutFachreferat, filteredSubjectGrades]);
 
   const sortedSubjects = useMemo(() => {
-    if (subjects.length === 0) return [];
+    if (subjectsWithoutFachreferat.length === 0) return [];
 
     const getSubjectAverageForSort = (subject: Subject): number | null => {
       const grades = filteredSubjectGrades[subject.name] || [];
@@ -319,19 +332,19 @@ export default function FinalGrade() {
     };
 
     if (subjectSortMode === "name") {
-      return [...subjects].sort((a, b) =>
+      return [...subjectsWithoutFachreferat].sort((a, b) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de")
       );
     }
 
     if (subjectSortMode === "name_desc") {
-      return [...subjects].sort((a, b) =>
+      return [...subjectsWithoutFachreferat].sort((a, b) =>
         b.name.toLowerCase().localeCompare(a.name.toLowerCase(), "de")
       );
     }
 
     if (subjectSortMode === "average") {
-      return [...subjects].sort((a, b) => {
+      return [...subjectsWithoutFachreferat].sort((a, b) => {
         const avgA = getSubjectAverageForSort(a);
         const avgB = getSubjectAverageForSort(b);
 
@@ -346,7 +359,7 @@ export default function FinalGrade() {
     }
 
     if (subjectSortMode === "average_worst") {
-      return [...subjects].sort((a, b) => {
+      return [...subjectsWithoutFachreferat].sort((a, b) => {
         const avgA = getSubjectAverageForSort(a);
         const avgB = getSubjectAverageForSort(b);
 
@@ -362,7 +375,7 @@ export default function FinalGrade() {
 
     if (subjectSortMode === "custom") {
       if (!subjectSortOrder.length) {
-        return [...subjects].sort((a, b) =>
+        return [...subjectsWithoutFachreferat].sort((a, b) =>
           a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de")
         );
       }
@@ -372,7 +385,7 @@ export default function FinalGrade() {
         orderMap.set(name, index);
       });
 
-      return [...subjects].sort((a, b) => {
+      return [...subjectsWithoutFachreferat].sort((a, b) => {
         const indexA = orderMap.get(a.name);
         const indexB = orderMap.get(b.name);
 
@@ -386,8 +399,13 @@ export default function FinalGrade() {
       });
     }
 
-    return subjects;
-  }, [subjects, filteredSubjectGrades, subjectSortMode, subjectSortOrder]);
+    return subjectsWithoutFachreferat;
+  }, [
+    subjectsWithoutFachreferat,
+    filteredSubjectGrades,
+    subjectSortMode,
+    subjectSortOrder,
+  ]);
 
   const gradesOnlyFinalAverage = useMemo(() => {
     if (subjects.length === 0) return null;
@@ -461,12 +479,7 @@ export default function FinalGrade() {
 
     const sum = subjectFinals.reduce((acc, value) => acc + value, 0);
     return sum / subjectFinals.length;
-  }, [
-    examSubjects,
-    examPointsBySubject,
-    gradesBySubject,
-    dropSelections,
-  ]);
+  }, [examSubjects, examPointsBySubject, gradesBySubject, dropSelections]);
 
   const finalAverage = abiturFinalAverage ?? gradesOnlyFinalAverage;
 
@@ -478,6 +491,284 @@ export default function FinalGrade() {
       }),
     [examSubjects, examPointsBySubject]
   );
+
+  const halfYearSummary = useMemo(() => {
+    let totalPoints = 0;
+    let count = 0;
+
+    for (const subject of subjects) {
+      // Fachreferat nicht in die HJE-Punkte einrechnen
+      if (subject.name === "Fachreferat") continue;
+
+      const subjectGrades = gradesBySubject[subject.name] || [];
+      const dropOption = dropSelections[subject.name];
+
+      const isHalfYear1Dropped = dropOption === 1;
+      const isHalfYear2Dropped = dropOption === 2;
+
+      const firstHalfYearAverage = isHalfYear1Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 1);
+
+      const secondHalfYearAverage = isHalfYear2Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 2);
+
+      if (firstHalfYearAverage !== null) {
+        totalPoints += firstHalfYearAverage;
+        count += 1;
+      }
+
+      if (secondHalfYearAverage !== null) {
+        totalPoints += secondHalfYearAverage;
+        count += 1;
+      }
+    }
+
+    return { totalPoints, count };
+  }, [subjects, gradesBySubject, dropSelections]);
+
+  const fachreferatHalfYearSummary = useMemo(() => {
+    const subject = subjects.find((s) => s.name === "Fachreferat");
+    if (!subject) {
+      return {
+        totalPoints: 0,
+        count: 0,
+      };
+    }
+
+    const subjectGrades = gradesBySubject[subject.name] || [];
+    if (!subjectGrades.length) {
+      return {
+        totalPoints: 0,
+        count: 0,
+      };
+    }
+
+    const dropOption = dropSelections[subject.name];
+    const isHalfYear1Dropped = dropOption === 1;
+    const isHalfYear2Dropped = dropOption === 2;
+
+    const firstHalfYearAverage = isHalfYear1Dropped
+      ? null
+      : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 1);
+
+    const secondHalfYearAverage = isHalfYear2Dropped
+      ? null
+      : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 2);
+
+    let totalPoints = 0;
+    let count = 0;
+
+    if (firstHalfYearAverage !== null) {
+      totalPoints += firstHalfYearAverage;
+      count += 1;
+    }
+
+    if (secondHalfYearAverage !== null) {
+      totalPoints += secondHalfYearAverage;
+      count += 1;
+    }
+
+    return { totalPoints, count };
+  }, [subjects, gradesBySubject, dropSelections]);
+
+  const fobosoSummary = useMemo(() => {
+    const examCount = examSubjectsWithPoints.length;
+
+    let examPointsDouble = 0;
+    for (const subject of examSubjectsWithPoints) {
+      const value = examPointsBySubject[subject.name];
+      if (typeof value === "number") {
+        examPointsDouble += value * 2;
+      }
+    }
+
+    const halfYearCount = halfYearSummary.count;
+    const halfYearPoints = halfYearSummary.totalPoints;
+
+    const fachreferatCount = fachreferatHalfYearSummary.count;
+    const fachreferatPoints = fachreferatHalfYearSummary.totalPoints;
+
+    const units = examCount * 2 + halfYearCount + fachreferatCount;
+    if (units === 0) {
+      return {
+        examCount,
+        halfYearCount,
+        examPointsDouble: 0,
+        halfYearPoints: 0,
+        totalPoints: 0,
+        maxPoints: 0,
+        grade: null as number | null,
+        gradeRaw: null as number | null,
+      };
+    }
+
+    const maxPoints = units * 15;
+    const totalPoints = examPointsDouble + halfYearPoints + fachreferatPoints;
+    const gradeRaw = 17 / 3 - (5 * totalPoints) / maxPoints;
+
+    let grade: number;
+    if (gradeRaw < 1) {
+      grade = 1;
+    } else {
+      grade = Math.floor(gradeRaw * 10) / 10;
+    }
+
+    return {
+      examCount,
+      halfYearCount,
+      examPointsDouble,
+      halfYearPoints,
+      totalPoints,
+      maxPoints,
+      grade,
+      gradeRaw,
+    };
+  }, [
+    examSubjectsWithPoints,
+    examPointsBySubject,
+    halfYearSummary,
+    fachreferatHalfYearSummary,
+  ]);
+
+  const subjectFinalResults = useMemo(() => {
+    if (!examSubjects.length) return [];
+
+    const results: { subject: Subject; finalPoints: number | null }[] = [];
+
+    for (const subject of examSubjects) {
+      const examPoints = examPointsBySubject[subject.name];
+      const subjectGrades = gradesBySubject[subject.name] || [];
+      const dropOption = dropSelections[subject.name];
+
+      const isHalfYear1Dropped = dropOption === 1;
+      const isHalfYear2Dropped = dropOption === 2;
+
+      const firstHalfYearAverage = isHalfYear1Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 1);
+
+      const secondHalfYearAverage = isHalfYear2Dropped
+        ? null
+        : calculateHalfYearAverageForSubject(subjectGrades, subject.type, 2);
+
+      const components: { value: number; weight: number }[] = [];
+
+      if (firstHalfYearAverage !== null) {
+        components.push({ value: firstHalfYearAverage, weight: 1 });
+      }
+
+      if (secondHalfYearAverage !== null) {
+        components.push({ value: secondHalfYearAverage, weight: 1 });
+      }
+
+      if (typeof examPoints === "number") {
+        components.push({ value: examPoints, weight: 2 });
+      }
+
+      if (!components.length) {
+        results.push({ subject, finalPoints: null });
+        continue;
+      }
+
+      const totalWeight = components.reduce(
+        (sum, item) => sum + item.weight,
+        0
+      );
+      const totalValue = components.reduce(
+        (sum, item) => sum + item.value * item.weight,
+        0
+      );
+
+      results.push({ subject, finalPoints: totalValue / totalWeight });
+    }
+
+    return results;
+  }, [examSubjects, examPointsBySubject, gradesBySubject, dropSelections]);
+
+  const hasAllExamPoints = useMemo(
+    () =>
+      examSubjects.length > 0 &&
+      examSubjects.every((subject) => {
+        const value = examPointsBySubject[subject.name];
+        return typeof value === "number";
+      }),
+    [examSubjects, examPointsBySubject]
+  );
+
+  const examAveragePoints = useMemo(() => {
+    if (!hasAllExamPoints) return null;
+    if (!examSubjects.length) return null;
+
+    let total = 0;
+    let count = 0;
+
+    for (const subject of examSubjects) {
+      const value = examPointsBySubject[subject.name];
+      if (typeof value === "number") {
+        total += value;
+        count += 1;
+      }
+    }
+
+    if (count === 0) return null;
+    return total / count;
+  }, [hasAllExamPoints, examSubjects, examPointsBySubject]);
+
+  const subjectsBelowFourPoints = useMemo(
+    () =>
+      hasAllExamPoints
+        ? subjectFinalResults.reduce((sum, entry) => {
+            if (entry.finalPoints !== null && entry.finalPoints < 4) {
+              return sum + 1;
+            }
+            return sum;
+          }, 0)
+        : 0,
+    [hasAllExamPoints, subjectFinalResults]
+  );
+
+  const examResultAtLeastFour =
+    examAveragePoints === null ? null : examAveragePoints >= 4;
+
+  const finalGradeAtLeastFour =
+    hasAllExamPoints &&
+    fobosoSummary.maxPoints > 0 &&
+    fobosoSummary.grade !== null
+      ? fobosoSummary.grade <= 4
+      : null;
+
+  const failedByHalfYearCount = halfYearSummary.count !== 17;
+
+  const failedBySubjectPoints =
+    hasAllExamPoints &&
+    ((subjectsBelowFourPoints === 1 && fobosoSummary.totalPoints < 130) ||
+      (subjectsBelowFourPoints >= 2 && fobosoSummary.totalPoints < 156));
+
+  const failedByExamGrade = hasAllExamPoints && examResultAtLeastFour === false;
+
+  const failedByFinalGrade =
+    hasAllExamPoints && finalGradeAtLeastFour === false;
+
+  const isFailed =
+    failedByHalfYearCount ||
+    failedBySubjectPoints ||
+    failedByExamGrade ||
+    failedByFinalGrade;
+
+  const isPassed =
+    !isFailed &&
+    hasAllExamPoints &&
+    halfYearSummary.count === 17 &&
+    examResultAtLeastFour === true &&
+    finalGradeAtLeastFour === true;
+
+  const passFailStatus: "open" | "passed" | "failed" = isFailed
+    ? "failed"
+    : isPassed
+    ? "passed"
+    : "open";
 
   const examSubjectFinals = useMemo(
     () =>
@@ -541,20 +832,39 @@ export default function FinalGrade() {
       />
       <div className="home-summary single-column">
         <div className="home-summary-card home-summary-card--row">
-          <span className="home-summary-label final-grade-label">Abschlussnote</span>
+          <span className="home-summary-label final-grade-label">
+            Abschlussnote
+          </span>
           <div
             className={`subject-detail-summary-pill ${getGradeClass(
               finalAverage
             )}`}
           >
-            {formatAverage(finalAverage)}
+            {fobosoSummary.maxPoints > 0 && fobosoSummary.grade !== null
+              ? fobosoSummary.grade.toFixed(1)
+              : formatAverage(finalAverage)}
           </div>
         </div>
+        {passFailStatus !== "open" && (
+          <div className="home-summary-card home-summary-card--row">
+            <span className="home-summary-label final-grade-label">
+              Prüfungsstatus
+            </span>
+            <div
+              className={`subject-detail-summary-pill ${
+                passFailStatus === "passed" ? "good" : "bad"
+              }`}
+            >
+              {passFailStatus === "passed" ? "Bestanden" : "Nicht bestanden"}
+            </div>
+          </div>
+        )}
+      </div>
+      <section className="home-section" style={{ margin: 0 }}>
         <div className="home-summary-card">
           <div className="home-summary-card-text">
-            <span className="home-summary-label">Abiturnoten</span> <br/>
-            <span className="subject-detail-subheadline">
-              Punkte deiner Abiturpr&uuml;fungen pro Fach.
+            <span className="home-summary-label final-grade-label">
+              Abiturnoten
             </span>
           </div>
           {examSubjectFinals.length === 0 ? (
@@ -586,13 +896,43 @@ export default function FinalGrade() {
             </ul>
           )}
         </div>
-      </div>
+        </section>
+        <section className="home-section" style={{margin: 0}}>
+        {fobosoSummary.maxPoints > 0 && (
+          <div className="home-summary-card">
+            <span className="home-summary-label final-grade-label">
+              Erreichte Punkte
+            </span>
+            <span className="home-summary-value home-summary-value-pill">
+              {Math.round(fobosoSummary.totalPoints)} /{" "}
+              {fobosoSummary.maxPoints}
+            </span>
+            <p className="subject-detail-subheadline" style={{ margin: 0 }}>
+              {`Prüfungen (zweifach): ${Math.round(
+                fobosoSummary.examPointsDouble
+              )} Punkte`}
+            </p>
+            <p className="subject-detail-subheadline" style={{ margin: 0 }}>
+              {`Halbjahresergebnisse: ${Math.round(
+                fobosoSummary.halfYearPoints
+              )} Punkte (${fobosoSummary.halfYearCount} HJE).`}
+            </p>
+            {fachreferatHalfYearSummary.count > 0 && (
+              <p className="subject-detail-subheadline" style={{ margin: 0 }}>
+                {`Fachreferat: ${Math.round(
+                  fachreferatHalfYearSummary.totalPoints
+                )} Punkte (${fachreferatHalfYearSummary.count} HJE).`}
+              </p>
+            )}
+          </div>
+        )}
+      </section>
 
       <div className="home-summary two-columns">
         <div className="home-summary-card">
           <span className="home-summary-label">F&auml;cher</span>
           <span className="home-summary-value home-summary-value-pill">
-            {subjects.length}
+            {subjectsWithoutFachreferat.length}
           </span>
         </div>
         <div className="home-summary-card">
@@ -605,7 +945,10 @@ export default function FinalGrade() {
         </div>
       </div>
 
-      <section className="home-section final-grade-dropped-section">
+      <section
+        className="home-section final-grade-dropped-section"
+        style={{ marginTop: 0 }}
+      >
         <div className="home-section-header">
           <div className="home-section-header-main">
             <h2 className="section-head no-padding">Gestrichene Halbjahre</h2>
@@ -625,12 +968,11 @@ export default function FinalGrade() {
             <ul className="final-grade-dropped-list">
               {droppedHalfYears.map(({ subject, halfYear }) => {
                 const subjectGrades = gradesBySubject[subject.name] || [];
-                const droppedAverage =
-                  calculateHalfYearAverageForSubject(
-                    subjectGrades,
-                    subject.type,
-                    halfYear
-                  );
+                const droppedAverage = calculateHalfYearAverageForSubject(
+                  subjectGrades,
+                  subject.type,
+                  halfYear
+                );
 
                 return (
                   <li
@@ -670,7 +1012,7 @@ export default function FinalGrade() {
           </div>
         </div>
         <div className="home-section-body">
-          {subjects.length === 0 ? (
+          {subjectsWithoutFachreferat.length === 0 ? (
             <p className="info-message">
               Lege zuerst F&auml;cher und Noten an, um deine Abschlussnote zu
               berechnen.
@@ -697,12 +1039,11 @@ export default function FinalGrade() {
                 const subjectAverage = subjectAverageEntry?.average ?? null;
 
                 const subjectGrades = gradesBySubject[subject.name] || [];
-                const firstHalfYearAverage =
-                  calculateHalfYearAverageForSubject(
-                    subjectGrades,
-                    subject.type,
-                    1
-                  );
+                const firstHalfYearAverage = calculateHalfYearAverageForSubject(
+                  subjectGrades,
+                  subject.type,
+                  1
+                );
                 const secondHalfYearAverage =
                   calculateHalfYearAverageForSubject(
                     subjectGrades,
@@ -838,6 +1179,7 @@ export default function FinalGrade() {
         isFirstSubject={isFirstSubject}
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
+        hasFachreferat={hasFachreferat}
       />
 
       <section className="home-section final-grade-disclaimer">

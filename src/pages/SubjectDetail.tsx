@@ -90,6 +90,9 @@ export default function SubjectDetailPage({
   });
   const [halfYearFilter, setHalfYearFilter] = useState<"all" | 1 | 2>("all");
 
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
+
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.name === subjectId),
     [subjects, subjectId]
@@ -348,6 +351,7 @@ export default function SubjectDetailPage({
           isFirstSubject={isFirstSubject}
           disableAddGrade={disableAddGrade}
           addGradeTitle={addGradeTitle}
+          hasFachreferat={hasFachreferat}
         />
       </div>
     );
@@ -718,6 +722,7 @@ export default function SubjectDetailPage({
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
         defaultSubjectId={subjectId}
+        hasFachreferat={hasFachreferat}
       />
 
       {noteModalOpen && (

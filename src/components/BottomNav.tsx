@@ -4,6 +4,7 @@ import type { EncryptedGrade } from "../interfaces/Grade";
 import { HomeIcon, BookIcon, SettingsIcon } from "./icons";
 import AddGrade from "./AddGrade";
 import AddSubject from "./AddSubject";
+import AddFachreferat from "./AddFachreferat";
 import closeIcon from "../assets/close.svg";
 import folderIcon from "../assets/folder.svg";
 import { navigate } from "../services/navigation";
@@ -23,6 +24,7 @@ interface BottomNavProps {
   disableAddGrade: boolean;
   addGradeTitle: string;
   defaultSubjectId?: string;
+  hasFachreferat?: boolean;
 }
 
 export default function BottomNav({
@@ -34,9 +36,12 @@ export default function BottomNav({
   disableAddGrade,
   addGradeTitle,
   defaultSubjectId,
+  hasFachreferat = false,
 }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState<"" | "grade" | "subject">("");
+  const [activeModal, setActiveModal] = useState<
+    "" | "grade" | "subject" | "fachreferat"
+  >("");
 
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
@@ -45,6 +50,16 @@ export default function BottomNav({
   const handleAddGradeClick = () => {
     setActiveModal("grade");
     setIsOpen(false);
+  };
+
+  const handleAddFachreferatClick = () => {
+    if (hasFachreferat) {
+      setIsOpen(false);
+      navigate("/fachreferat");
+    } else {
+      setActiveModal("fachreferat");
+      setIsOpen(false);
+    }
   };
 
   const handleAddSubjectClick = () => {
@@ -225,6 +240,22 @@ export default function BottomNav({
               <button
                 className="bottom-nav-actions-button"
                 type="button"
+                onClick={handleAddFachreferatClick}
+                disabled={!encryptionKey}
+                title={!encryptionKey ? "Lade Schl\u00fcssel..." : ""}
+              >
+                <span className="bottom-nav-actions-icon-circle">+</span>
+                <div className="bottom-nav-actions-text">
+                  <span className="bottom-nav-actions-label">Fachreferat</span>
+                  <span className="bottom-nav-actions-description">
+                    Fachreferatsnote eintragen
+                  </span>
+                </div>
+              </button>
+
+              <button
+                className="bottom-nav-actions-button"
+                type="button"
                 onClick={handleAddSubjectClick}
               >
                 <span className="bottom-nav-actions-icon-circle">+</span>
@@ -261,16 +292,23 @@ export default function BottomNav({
             onClick={() => setActiveModal("")}
           ></div>
           <div className="modal">
-            {activeModal === "grade" ? (
+            {activeModal === "grade" && encryptionKey && (
               <AddGrade
                 subjectsProp={subjects}
                 onAddGrade={handleGradeAdded}
                 encryptionKeyProp={encryptionKey as CryptoKey}
                 defaultSubjectId={defaultSubjectId}
               />
-            ) : (
-              <AddSubject
-                onAddSubject={handleSubjectAdded}
+            )}
+            {activeModal === "subject" && (
+              <AddSubject onAddSubject={handleSubjectAdded} />
+            )}
+            {activeModal === "fachreferat" && encryptionKey && (
+              <AddFachreferat
+                subjects={subjects}
+                encryptionKeyProp={encryptionKey as CryptoKey}
+                onAddGrade={handleGradeAdded}
+                onAddSubjectToState={onAddSubjectToState}
               />
             )}
             <img

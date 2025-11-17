@@ -16,7 +16,8 @@ import type { Subject, ExamType } from "../interfaces/Subject";
 
 export default function Settings() {
   const { user } = useAuth();
-  const { subjects, encryptionKey, addSubject, updateSubject } = useGrades();
+  const { subjects, gradesBySubject, encryptionKey, addSubject, updateSubject } =
+    useGrades();
   const [newName, setNewName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -26,6 +27,9 @@ export default function Settings() {
   const [compactView, setCompactView] = useState<boolean>(false);
   const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(true);
   const [maxDroppedHalfYears, setMaxDroppedHalfYears] = useState<number>(3);
+
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -498,6 +502,7 @@ export default function Settings() {
               ? "Lege zuerst ein Fach an"
               : ""
           }
+          hasFachreferat={hasFachreferat}
         />
       </>
     );

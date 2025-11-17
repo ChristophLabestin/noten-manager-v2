@@ -48,6 +48,28 @@ const getGradeCategory = (points: number): "good" | "medium" | "bad" => {
   return "bad";
 };
 
+const calculateHalfYearAverageForSubject = (
+  grades: GradeWithId[],
+  subjectType: number,
+  halfYear: 1 | 2
+): number | null => {
+  const filtered = grades.filter((grade) => grade.halfYear === halfYear);
+
+  if (!filtered.length) return null;
+
+  let total = 0;
+  let totalWeight = 0;
+
+  for (const grade of filtered) {
+    const weight = calculateGradeWeightForSubject(subjectType, grade);
+    total += grade.grade * weight;
+    totalWeight += weight;
+  }
+
+  if (totalWeight === 0) return null;
+  return total / totalWeight;
+};
+
 const computeExamPoints = (
   writtenPoints: number | null,
   oralPoints: number | null
@@ -73,6 +95,9 @@ export default function Abitur() {
     addGrade,
     updateSubject,
   } = useGrades();
+
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
 
   const [examState, setExamState] = useState<ExamState>({});
   const [activeModal, setActiveModal] = useState<
@@ -371,6 +396,27 @@ export default function Abitur() {
   };
 
   const handleOpenOralModal = (subject: Subject) => {
+    const current = examState[subject.name];
+    const alreadyHasOral =
+      current?.oralPoints !== null && current?.oralPoints !== undefined;
+
+    if (!alreadyHasOral) {
+      const existingOralCount = subjects.reduce((sum, s) => {
+        if (s.examSubject !== true) return sum;
+        const state = examState[s.name];
+        const hasOral =
+          state?.oralPoints !== null && state?.oralPoints !== undefined;
+        return sum + (hasOral ? 1 : 0);
+      }, 0);
+
+      if (existingOralCount >= 3) {
+        alert(
+          "Es können maximal 3 freiwillige mündliche Prüfungsnoten eingetragen werden."
+        );
+        return;
+      }
+    }
+
     setActiveModal({ type: "oral", subject });
   };
 
@@ -399,19 +445,51 @@ export default function Abitur() {
     });
   }, [subjects, gradesBySubject]);
 
-  const totalYearPoints = useMemo(
-    () =>
-      subjectAverages.reduce((sum, entry) => {
-        if (entry.average === null) return sum;
-        return sum + entry.average;
-      }, 0),
-    [subjectAverages]
+  const halfYearSummary = useMemo(
+    () => {
+      let totalPoints = 0;
+      let count = 0;
+
+      for (const subject of subjects) {
+        const subjectGrades = gradesBySubject[subject.name] || [];
+        const dropOption = subject.droppedHalfYear;
+
+        const isHalfYear1Dropped = dropOption === 1;
+        const isHalfYear2Dropped = dropOption === 2;
+
+        const firstHalfYearAverage = isHalfYear1Dropped
+          ? null
+          : calculateHalfYearAverageForSubject(
+              subjectGrades,
+              subject.type,
+              1
+            );
+
+        const secondHalfYearAverage = isHalfYear2Dropped
+          ? null
+          : calculateHalfYearAverageForSubject(
+              subjectGrades,
+              subject.type,
+              2
+            );
+
+        if (firstHalfYearAverage !== null) {
+          totalPoints += firstHalfYearAverage;
+          count += 1;
+        }
+
+        if (secondHalfYearAverage !== null) {
+          totalPoints += secondHalfYearAverage;
+          count += 1;
+        }
+      }
+
+      return { totalPoints, count };
+    },
+    [subjects, gradesBySubject]
   );
 
-  const yearSubjectsCount = useMemo(
-    () => subjectAverages.filter((entry) => entry.average !== null).length,
-    [subjectAverages]
-  );
+  const totalYearPoints = halfYearSummary.totalPoints;
 
   const examSubjects = useMemo(
     () => subjects.filter((subject) => subject.examSubject === true),
@@ -423,13 +501,13 @@ export default function Abitur() {
       examSubjects.reduce((sum, subject) => {
         const state = examState[subject.name];
         if (!state || state.combinedPoints === null) return sum;
-        return sum + state.combinedPoints;
+        return sum + state.combinedPoints * 2;
       }, 0),
     [examSubjects, examState]
   );
 
-  const maxYearPoints = yearSubjectsCount * 15;
-  const maxExamPoints = examSubjects.length * 15;
+  const maxYearPoints = halfYearSummary.count * 15;
+  const maxExamPoints = examSubjects.length * 30;
   const totalPoints = totalYearPoints + totalExamPoints;
   const maxTotalPoints = maxYearPoints + maxExamPoints;
 
@@ -513,7 +591,7 @@ export default function Abitur() {
         </div>
       </div>
 
-      <section className="home-section">
+      <section className="home-section" style={{margin: 0}}>
         <div className="home-section-header">
           <div className="home-section-header-main">
             <h2 className="section-head no-padding">Pr&uuml;fungsf&auml;cher</h2>
@@ -582,7 +660,7 @@ export default function Abitur() {
         </div>
       </section>
 
-      <section className="home-section">
+      <section className="home-section" style={{margin: 0}}>
         <div className="home-section-header">
           <div className="home-section-header-main">
             <h2 className="section-head no-padding">Abiturnoten</h2>
@@ -704,6 +782,7 @@ export default function Abitur() {
         isFirstSubject={isFirstSubject}
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
+        hasFachreferat={hasFachreferat}
       />
 
       {activeModal && (

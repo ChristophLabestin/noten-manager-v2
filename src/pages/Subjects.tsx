@@ -49,36 +49,47 @@ export default function SubjectsPage() {
     string | null
   >(null);
 
+  const subjectsWithoutFachreferat = useMemo(
+    () => subjects.filter((s) => s.name !== "Fachreferat"),
+    [subjects]
+  );
+
+  const hasFachreferat =
+    (gradesBySubject["Fachreferat"] || []).length > 0;
+
   const sortedSubjects = useMemo(
     () =>
-      [...subjects].sort((a, b) =>
+      [...subjectsWithoutFachreferat].sort((a, b) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       ),
-    [subjects]
+    [subjectsWithoutFachreferat]
   );
 
   const mainSubjectsCount = useMemo(
-    () => subjects.filter((s) => s.type === 1).length,
-    [subjects]
+    () =>
+      subjectsWithoutFachreferat.filter((s) => s.type === 1).length,
+    [subjectsWithoutFachreferat]
   );
 
   const minorSubjectsCount = useMemo(
-    () => subjects.filter((s) => s.type === 0).length,
-    [subjects]
+    () =>
+      subjectsWithoutFachreferat.filter((s) => s.type === 0).length,
+    [subjectsWithoutFachreferat]
   );
 
-  const isFirstSubject = subjects.length === 0;
+  const isFirstSubject = subjectsWithoutFachreferat.length === 0;
 
   const disableAddGrade = useMemo(
-    () => !encryptionKey || subjects.length === 0,
-    [encryptionKey, subjects.length]
+    () => !encryptionKey || subjectsWithoutFachreferat.length === 0,
+    [encryptionKey, subjectsWithoutFachreferat.length]
   );
 
   const addGradeTitle = useMemo(() => {
     if (!encryptionKey) return "Lade Schlüssel...";
-    if (subjects.length === 0) return "Lege zuerst ein Fach an";
+    if (subjectsWithoutFachreferat.length === 0)
+      return "Lege zuerst ein Fach an";
     return "";
-  }, [encryptionKey, subjects.length]);
+  }, [encryptionKey, subjectsWithoutFachreferat.length]);
 
   const handleAddSubjectToState = (newSubject: Subject) => {
     addSubject(newSubject);
@@ -283,7 +294,7 @@ export default function SubjectsPage() {
                 <div className="home-summary-card">
                   <span className="home-summary-label">Fächer</span>
                   <span className="subjects-manage-summary-value home-summary-value-pill">
-                    {subjects.length}
+                    {subjectsWithoutFachreferat.length}
                   </span>
                 </div>
                 <div className="home-summary-card">
@@ -306,7 +317,7 @@ export default function SubjectsPage() {
             </div>
           </header>
 
-          {subjects.length === 0 ? (
+          {subjectsWithoutFachreferat.length === 0 ? (
             <p className="subjects-empty-hint">
               Du hast noch keine Fächer angelegt. Nutze unten die
               Schnellaktionen, um dein erstes Fach zu erstellen.
@@ -528,6 +539,7 @@ export default function SubjectsPage() {
         isFirstSubject={isFirstSubject}
         disableAddGrade={disableAddGrade}
         addGradeTitle={addGradeTitle}
+        hasFachreferat={hasFachreferat}
       />
 
       {deleteModalOpen && (

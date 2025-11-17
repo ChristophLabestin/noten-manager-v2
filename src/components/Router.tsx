@@ -13,6 +13,7 @@ import Abitur from "../pages/Abitur";
 import ResetPassword from "../pages/auth/ResetPassword";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import { unlockBodyScroll } from "../services/scrollLock";
+import FachreferatDetail from "../pages/FachreferatDetail";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
@@ -34,6 +35,11 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/abschlussnote": () => (
     <PrivateRoute>
       <FinalGrade />
+    </PrivateRoute>
+  ),
+  "/fachreferat": () => (
+    <PrivateRoute>
+      <FachreferatDetail />
     </PrivateRoute>
   ),
   "/fach": () => (

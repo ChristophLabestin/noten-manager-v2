@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
-import type { Subject } from "../interfaces/Subject";
+import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import { Timestamp, addDoc, collection } from "firebase/firestore";
 import type { EncryptedGrade } from "../interfaces/Grade";
+import type { Subject } from "../interfaces/Subject";
+import { db } from "../firebase/firebaseConfig";
 import helpIcon from "../assets/help.svg";
 import { encryptString } from "../services/cryptoService";
 import { BackIcon } from "./icons";
 
 interface AddGradeProps {
-  subjectsProp: Subject[]; // Fächer aus Home
+  subjectsProp: Subject[];
   onAddGrade: (
     subjectId: string,
     gradeId: string,
     grade: EncryptedGrade,
     encryptionKey: CryptoKey
-  ) => void; // Callback für neue Note
+  ) => void;
   encryptionKeyProp: CryptoKey;
   defaultSubjectId?: string;
 }
@@ -43,19 +43,17 @@ export default function AddGrade({
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>(
     defaultSubjectId || ""
   );
-  const [newGradeInput, setNewGradeInput] = useState<string>(""); // Input als String
+  const [newGradeInput, setNewGradeInput] = useState<string>("");
   const [gradeWeight, setGradeWeight] = useState<number>(0);
   const [helpActive, setHelpActive] = useState<boolean>(false);
   const [infosExtended, setInfosExtended] = useState<boolean>(false);
   const [gradeNote, setGradeNote] = useState<string>("");
   const [halfYear, setHalfYear] = useState<1 | 2>(getDefaultHalfYear());
 
-  // Update lokale Subjects, wenn Props sich ändern
   useEffect(() => {
-    setSubjects(subjectsProp);
+    setSubjects(subjectsProp.filter((s) => s.name !== "Fachreferat"));
   }, [subjectsProp]);
 
-  // Fach vorauswählen, falls über Fach-Detailseite geöffnet
   useEffect(() => {
     if (defaultSubjectId) {
       setSelectedSubjectId(defaultSubjectId);
@@ -65,6 +63,7 @@ export default function AddGrade({
   const findSubjectType = (subjectId: string) => {
     const subject = subjects.find((s) => s.name === subjectId);
     if (subject) return subject.type;
+    return undefined;
   };
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -95,19 +94,24 @@ export default function AddGrade({
       return;
     }
 
+    if (!selectedSubjectId) {
+      alert("Bitte zuerst ein Fach auswählen.");
+      return;
+    }
+
     if (newGradeInput === "") {
       alert("Bitte Notenpunkte auswählen.");
       return;
     }
 
     const gradeNumber = Number(newGradeInput);
-    if (isNaN(gradeNumber)) {
-      alert("Bitte eine gültige Zahl eingeben");
+    if (!Number.isFinite(gradeNumber)) {
+      alert("Bitte eine gültige Zahl eingeben.");
       return;
     }
 
     if (gradeNumber > 15 || gradeNumber < 0) {
-      alert("Bitte eine gültige Zahl im Bereich 0-15 eingeben.");
+      alert("Bitte eine gültige Zahl im Bereich 0–15 eingeben.");
       return;
     }
 
@@ -127,8 +131,11 @@ export default function AddGrade({
 
       const auth = getAuth();
       const user = auth.currentUser;
-      if (!user) throw new Error("Kein Benutzer angemeldet");
-      if (!selectedSubjectId) throw new Error("Kein Fach ausgewählt");
+
+      if (!user) {
+        alert("Kein Benutzer angemeldet.");
+        return;
+      }
 
       const gradesRef = collection(
         db,
@@ -141,17 +148,14 @@ export default function AddGrade({
 
       const docRef = await addDoc(gradesRef, gradeToAdd);
 
-      // Callback an Home
       onAddGrade(selectedSubjectId, docRef.id, gradeToAdd, encryptionKeyProp);
 
       setNewGradeInput("");
       setGradeNote("");
       setHalfYear(getDefaultHalfYear());
     } catch (err) {
-      throw new Error(
-        "Fehler beim Hinzufügen: " +
-          (err instanceof Error ? err.message : String(err))
-      );
+      console.error("Fehler beim Hinzufügen der Note:", err);
+      alert("Fehler beim Hinzufügen der Note.");
     }
   };
 
@@ -167,10 +171,8 @@ export default function AddGrade({
           <img src={helpIcon} alt="Hilfe" />
         </span>
         <div className={`help-box ${helpActive ? "active" : ""}`}>
-          <p>
-            Hier kannst du eine Note hinzufügen für ein Fach deiner Wahl.
-          </p>
-          <p>Die Notenpunkte können maximal 15 betragen und minimal 0.</p>
+          <p>Hier kannst du eine Note für ein Fach deiner Wahl eintragen.</p>
+          <p>Die Notenpunkte können maximal 15 und minimal 0 betragen.</p>
           <p>
             Die Art ist abhängig vom ausgewählten Fach. Wenn dein Fach als
             Nebenfach erstellt wurde, kannst du hier nur „Mündlich“ und
@@ -180,9 +182,9 @@ export default function AddGrade({
           <p>
             Berechnung der Gewichtung:
             <br />
-            - bei Hauptfach: Schulaufgabe 2x, Kurzarbeit 1x, Mündlich 1x
+            – bei Hauptfach: Schulaufgabe 2x, Kurzarbeit 1x, Mündlich 1x
             <br />
-            - bei Nebenfach: Kurzarbeit 2x, Mündlich 1x
+            – bei Nebenfach: Kurzarbeit 2x, Mündlich 1x
           </p>
         </div>
       </h2>
@@ -193,7 +195,7 @@ export default function AddGrade({
           value={selectedSubjectId}
           onChange={handleSubjectChange}
         >
-          <option value="">— Fach auswählen —</option>
+          <option value="">– Fach auswählen –</option>
           {subjects.map((subject) => (
             <option key={subject.name} value={subject.name}>
               {subject.name}
@@ -218,10 +220,7 @@ export default function AddGrade({
                 .filter(Boolean)
                 .join(" ");
               return (
-                <label
-                  key={value}
-                  className={classes}
-                >
+                <label key={value} className={classes}>
                   <input
                     type="radio"
                     name="grade-points"
@@ -245,13 +244,11 @@ export default function AddGrade({
             >
               {findSubjectType(selectedSubjectId) === 0 ? (
                 <>
-                  <option value={3}>Fachreferat</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich / EX</option>
                 </>
               ) : (
                 <>
-                  <option value={3}>Fachreferat</option>
                   <option value={2}>Schulaufgabe</option>
                   <option value={1}>Kurzarbeit</option>
                   <option value={0}>Mündlich / EX</option>
@@ -278,7 +275,7 @@ export default function AddGrade({
             className="form-input hidden-textarea"
             value={gradeNote}
             onChange={handleNoteChange}
-            placeholder="Mitarbeitsnote vom Freitag..."
+            placeholder="Mitarbeitsnote, Kurzbeschreibung …"
           ></textarea>
         </div>
       </div>

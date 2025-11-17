@@ -88,6 +88,7 @@ body.dark-mode .subject-detail-summary-card,
 body.dark-mode .subject-detail-details-list,
 body.dark-mode .subject-detail-grade-card,
 body.dark-mode .settings-top,
+body.dark-mode .final-grade-dropped-item,
 body.dark-mode .settings-card {
   background: variables.$color-bg-light-dark;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.7);
@@ -1058,16 +1059,21 @@ tr {
   margin: 4px 0 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .final-grade-dropped-item {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 8px 10px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 14px;
+  text-align: center;
 }
 
 .final-grade-dropped-main {
@@ -2247,7 +2253,7 @@ body.dark-mode .close-icon {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 6px;
-  &>:last-child {
+  & > :last-child {
     grid-column: span 3;
   }
 }
@@ -2968,7 +2974,7 @@ body.theme-feminine.dark-mode .settings-switch--on .settings-switch-slider {
   margin: 16px auto 0;
   display: flex;
   justify-content: center;
-  &>p{
+  & > p {
     margin: 0;
   }
 }

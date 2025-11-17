@@ -81,7 +81,11 @@ export default function SubjectsTable({
   onReorder,
 }: SubjectsTableProps) {
   const goToSubjectPage = (subjectId: string) => {
-    navigate(`/fach/${subjectId}`);
+    if (subjectId === "Fachreferat") {
+      navigate("/fachreferat");
+    } else {
+      navigate(`/fach/${subjectId}`);
+    }
   };
 
   const subjectIds = subjects.map((subject) => subject.name);
