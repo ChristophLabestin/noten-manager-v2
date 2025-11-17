@@ -452,13 +452,13 @@ export default function Settings() {
                                     <div className="final-grade-halfyear-row">
                                       <div className="final-grade-halfyear-main">
                                         <label
-                                          className={`settings-switch final-grade-switch ${
-                                            isExamSubject
-                                              ? "settings-switch--on"
-                                              : ""
+                                              className={`settings-switch final-grade-switch ${
+                                                isExamSubject
+                                                  ? "settings-switch--on"
+                                                  : ""
                                           } ${
-                                            disableToggle
-                                              ? "settings-switch--disabled"
+                                                disableToggle
+                                              ? "final-grade-switch--disabled"
                                               : ""
                                           }`}
                                         >
