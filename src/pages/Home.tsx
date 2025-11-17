@@ -28,8 +28,7 @@ export default function Home() {
     fachreferat,
   } = useGrades();
 
-  const [halfYearFilter, setHalfYearFilter] =
-    useState<"all" | 1 | 2>("all");
+  const [halfYearFilter, setHalfYearFilter] = useState<"all" | 1 | 2>("all");
 
   const hasFachreferat = !!fachreferat;
 
@@ -95,61 +94,57 @@ export default function Home() {
     return 1;
   };
 
-  const filteredSubjectGrades = useMemo(
-    () => {
-      const result: Record<string, Grade[]> = {};
+  const filteredSubjectGrades = useMemo(() => {
+    const result: Record<string, Grade[]> = {};
 
-      for (const subject of subjects) {
-        const gradesWithId = gradesBySubject[subject.name] || [];
-        const filtered = gradesWithId
-          .filter(
-            (grade) =>
-              halfYearFilter === "all" || grade.halfYear === halfYearFilter
-          )
-          .map(
-            ({ grade, weight, date, note, halfYear: gradeHalfYear }) =>
-              ({
-                grade,
-                weight,
-                date,
-                note,
-                halfYear: gradeHalfYear,
-              }) as Grade
-          );
+    for (const subject of subjects) {
+      const gradesWithId = gradesBySubject[subject.name] || [];
+      const filtered = gradesWithId
+        .filter(
+          (grade) =>
+            halfYearFilter === "all" || grade.halfYear === halfYearFilter
+        )
+        .map(
+          ({ grade, weight, date, note, halfYear: gradeHalfYear }) =>
+            ({
+              grade,
+              weight,
+              date,
+              note,
+              halfYear: gradeHalfYear,
+            } as Grade)
+        );
 
-        result[subject.name] = filtered;
-      }
+      result[subject.name] = filtered;
+    }
 
-      if (fachreferat) {
-        result["Fachreferat"] = [
-          {
-            grade: fachreferat.grade,
-            weight: 3,
-            date: fachreferat.date,
-            note: fachreferat.note ?? undefined,
-            halfYear: undefined,
-          },
-        ];
-      }
+    if (fachreferat) {
+      result["Fachreferat"] = [
+        {
+          grade: fachreferat.grade,
+          weight: 3,
+          date: fachreferat.date,
+          note: fachreferat.note ?? undefined,
+          halfYear: undefined,
+        },
+      ];
+    }
 
-      return result;
-    },
-    [subjects, gradesBySubject, halfYearFilter, fachreferat]
-  );
+    return result;
+  }, [subjects, gradesBySubject, halfYearFilter, fachreferat]);
 
   const sortedSubjects = useMemo(() => {
     const baseSubjects = [...subjectsWithoutFachreferat];
-    const list =
-      hasFachreferat
-        ? [
-            ...baseSubjects,
-            {
-              name: "Fachreferat",
-              type: 0,
-              date: new Date(),
-            } as Subject,
-          ]
-        : baseSubjects;
+    const list = hasFachreferat
+      ? [
+          ...baseSubjects,
+          {
+            name: "Fachreferat",
+            type: 0,
+            date: new Date(),
+          } as Subject,
+        ]
+      : baseSubjects;
 
     if (list.length === 0) return [];
 
@@ -172,17 +167,13 @@ export default function Home() {
 
     if (subjectSortMode === "name") {
       return [...list].sort((a, b) =>
-        a.name
-          .toLowerCase()
-          .localeCompare(b.name.toLowerCase(), "de")
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de")
       );
     }
 
     if (subjectSortMode === "name_desc") {
       return [...list].sort((a, b) =>
-        b.name
-          .toLowerCase()
-          .localeCompare(a.name.toLowerCase(), "de")
+        b.name.toLowerCase().localeCompare(a.name.toLowerCase(), "de")
       );
     }
 
@@ -192,9 +183,7 @@ export default function Home() {
         const avgB = getSubjectAverage(b);
 
         if (avgA === null && avgB === null) {
-          return a.name
-            .toLowerCase()
-            .localeCompare(b.name.toLowerCase(), "de");
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de");
         }
         if (avgA === null) return 1;
         if (avgB === null) return -1;
@@ -209,9 +198,7 @@ export default function Home() {
         const avgB = getSubjectAverage(b);
 
         if (avgA === null && avgB === null) {
-          return a.name
-            .toLowerCase()
-            .localeCompare(b.name.toLowerCase(), "de");
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de");
         }
         if (avgA === null) return -1;
         if (avgB === null) return 1;
@@ -223,9 +210,7 @@ export default function Home() {
     if (subjectSortMode === "custom") {
       if (!subjectSortOrder.length) {
         return [...list].sort((a, b) =>
-          a.name
-            .toLowerCase()
-            .localeCompare(b.name.toLowerCase(), "de")
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de")
         );
       }
 
@@ -239,9 +224,7 @@ export default function Home() {
         const indexB = orderMap.get(b.name);
 
         if (indexA === undefined && indexB === undefined) {
-          return a.name
-            .toLowerCase()
-            .localeCompare(b.name.toLowerCase(), "de");
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "de");
         }
         if (indexA === undefined) return 1;
         if (indexB === undefined) return -1;
@@ -296,9 +279,7 @@ export default function Home() {
     return "bad";
   };
 
-  const handleSortModeChange = (
-    event: ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleSortModeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as SubjectSortMode;
     updateSubjectSortPreferences(value, subjectSortOrder);
   };
@@ -309,9 +290,7 @@ export default function Home() {
 
   return (
     <div className="home-layout home-layout--home">
-      {isLoading && (
-        <Loading progress={progress} label={loadingLabel} />
-      )}
+      {isLoading && <Loading progress={progress} label={loadingLabel} />}
 
       <InstallPwaModal />
       <NewFeaturesModal />
@@ -337,9 +316,7 @@ export default function Home() {
           <button
             type="button"
             className={`home-halfyear-toggle-button ${
-              halfYearFilter === 1
-                ? "home-halfyear-toggle-button--active"
-                : ""
+              halfYearFilter === 1 ? "home-halfyear-toggle-button--active" : ""
             }`}
             onClick={() => setHalfYearFilter(1)}
           >
@@ -348,9 +325,7 @@ export default function Home() {
           <button
             type="button"
             className={`home-halfyear-toggle-button ${
-              halfYearFilter === 2
-                ? "home-halfyear-toggle-button--active"
-                : ""
+              halfYearFilter === 2 ? "home-halfyear-toggle-button--active" : ""
             }`}
             onClick={() => setHalfYearFilter(2)}
           >
@@ -386,9 +361,7 @@ export default function Home() {
         <section className="home-section">
           <div className="home-section-header">
             <div className="home-section-header-main">
-              <h2 className="section-head no-padding">
-                Fächer &amp; Noten
-              </h2>
+              <h2 className="section-head no-padding">Fächer &amp; Noten</h2>
               <span className="subject-detail-subheadline">
                 Tippe auf ein Fach für Details
               </span>
@@ -400,13 +373,11 @@ export default function Home() {
               subjectGrades={filteredSubjectGrades}
               enableDrag={subjectSortMode === "custom"}
               onReorder={handleReorderSubjects}
+              fachreferatSubjectName={fachreferat?.subjectName ?? null}
             />
             {subjects.length > 0 && (
               <div className="home-sort-select">
-                <label
-                  htmlFor="subject-sort-mode"
-                  className="home-sort-label"
-                >
+                <label htmlFor="subject-sort-mode" className="home-sort-label">
                   Sortierung
                 </label>
                 <select
@@ -417,9 +388,7 @@ export default function Home() {
                 >
                   <option value="name">Name (A-Z)</option>
                   <option value="name_desc">Name (Z-A)</option>
-                  <option value="average">
-                    Ø Note (beste zuerst)
-                  </option>
+                  <option value="average">Ø Note (beste zuerst)</option>
                   <option value="average_worst">
                     Ø Note (schlechteste zuerst)
                   </option>

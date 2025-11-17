@@ -25,6 +25,7 @@ interface SubjectsTableProps {
   subjectGrades: { [key: string]: Grade[] }; // kommt direkt aus Home
   enableDrag?: boolean;
   onReorder?: (newOrder: string[]) => void;
+  fachreferatSubjectName?: string | null;
 }
 
 const calculateGradeWeight = (subject: Subject, grade: Grade): number => {
@@ -81,6 +82,7 @@ export default function SubjectsTable({
   subjectGrades,
   enableDrag = false,
   onReorder,
+  fachreferatSubjectName,
 }: SubjectsTableProps) {
   const goToSubjectPage = (subjectId: string) => {
     if (subjectId === "Fachreferat") {
@@ -137,6 +139,7 @@ export default function SubjectsTable({
               onClick={() => goToSubjectPage(subject.name)}
               showHandle={false}
               animationIndex={index}
+              fachreferatSubjectName={fachreferatSubjectName}
             />
           );
         })}
@@ -163,6 +166,7 @@ export default function SubjectsTable({
                 onClick={() => goToSubjectPage(subject.name)}
                 activeId={activeId}
                 animationIndex={index}
+                fachreferatSubjectName={fachreferatSubjectName}
               />
             );
           })}
@@ -182,6 +186,7 @@ interface SubjectRowProps {
   dragHandleProps?: HTMLAttributes<HTMLDivElement>;
   style?: CSSProperties;
   innerRef?: (node: HTMLButtonElement | null) => void;
+  fachreferatSubjectName?: string | null;
 }
 
 function SubjectRow({
@@ -194,6 +199,7 @@ function SubjectRow({
   dragHandleProps,
   style,
   innerRef,
+  fachreferatSubjectName,
 }: SubjectRowProps) {
   const avg = calculateAverageScore(subject, grades);
   const gradesCount = grades.length;
@@ -205,6 +211,26 @@ function SubjectRow({
         }
       : {}),
   };
+
+  const MAX_SUBJECT_NAME_LENGTH = 30;
+
+  const truncateDisplayName = (
+    text: string,
+    maxLength: number = MAX_SUBJECT_NAME_LENGTH
+  ): string => {
+    if (text.length <= maxLength) return text;
+    // max. 25 Zeichen inkl. "..."
+    return text.slice(0, maxLength - 3) + "...";
+  };
+
+  const isFachreferat = subject.name === "Fachreferat";
+
+  const displayName =
+    isFachreferat && fachreferatSubjectName
+      ? `Fachreferat in ${fachreferatSubjectName}`
+      : subject.name;
+
+  const displayNameShort = truncateDisplayName(displayName);
 
   return (
     <button
@@ -227,33 +253,35 @@ function SubjectRow({
           </div>
         )}
         <div className="subject-row-main">
-          <div className="subject-row-name">{subject.name}</div>
+          <div className="subject-row-name">
+            <span>{displayNameShort}</span>
+          </div>
           <div className="subject-row-meta">
-            {subject.name === "Fachreferat" ? (
-              <span className="subject-tag subject-tag--minor">
-                Fachreferat
+            {isFachreferat ? (
+              <span className="subject-tag subject-tag--main">
+                Halbjahresleistung
               </span>
             ) : (
-              <span
-                className={`subject-tag ${
-                  subject.type === 1
-                    ? "subject-tag--main"
-                    : "subject-tag--minor"
-                }`}
-              >
-                {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
-              </span>
+              <>
+                <span
+                  className={`subject-tag ${
+                    subject.type === 1
+                      ? "subject-tag--main"
+                      : "subject-tag--minor"
+                  }`}
+                >
+                  {subject.type === 1 ? "Hauptfach" : "Nebenfach"}
+                </span>
+                <span className="subject-row-count">
+                  {gradesCount} {gradesCount === 1 ? "Note" : "Noten"}
+                </span>
+              </>
             )}
-            <span className="subject-row-count">
-              {gradesCount} {gradesCount === 1 ? "Note" : "Noten"}
-            </span>
           </div>
         </div>
       </div>
       <div className="subject-row-grade">
-        <div
-          className={`subject-detail-summary-pill ${getGradeClass(avg)}`}
-        >
+        <div className={`subject-detail-summary-pill ${getGradeClass(avg)}`}>
           {formatAverage(avg)}
         </div>
       </div>
@@ -266,7 +294,8 @@ interface SortableSubjectRowProps {
   grades: Grade[];
   onClick: () => void;
   activeId: string | null;
-   animationIndex?: number;
+  animationIndex?: number;
+  fachreferatSubjectName?: string | null;
 }
 
 function SortableSubjectRow({
@@ -275,6 +304,7 @@ function SortableSubjectRow({
   onClick,
   activeId,
   animationIndex,
+  fachreferatSubjectName,
 }: SortableSubjectRowProps) {
   const {
     attributes,
@@ -307,6 +337,7 @@ function SortableSubjectRow({
       style={style}
       innerRef={setNodeRef}
       animationIndex={animationIndex}
+      fachreferatSubjectName={fachreferatSubjectName}
     />
   );
 }
