@@ -1881,6 +1881,7 @@ body.dark-mode .subjects-manage-summary-value {
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   cursor: pointer;
   text-align: left;
+  user-select: none;
 }
 
 body.compact-view .subject-row {
