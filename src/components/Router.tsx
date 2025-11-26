@@ -20,7 +20,7 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/register": () => <Register />,
   "/datenschutz": () => <PrivacyPolicy />,
   "/impressum": () => <Imprint />,
-  "/__/auth/action": () => <ResetPassword />,
+  "/auth/action": () => <ResetPassword />,
   "/passwort-vergessen": () => <ForgotPassword />,
   "/": () => (
     <PrivateRoute>
