@@ -1,53 +1,101 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { auth } from "../../firebase/firebaseConfig";
 import {
+  applyActionCode,
+  checkActionCode,
   confirmPasswordReset,
   verifyPasswordResetCode,
 } from "firebase/auth";
 
+type ActionMode = "resetPassword" | "verifyEmail" | "recoverEmail" | "unknown";
+type Status = "verifying" | "ready" | "success" | "error";
+
+const modeLabel: Record<ActionMode, string> = {
+  resetPassword: "Passwort zurücksetzen",
+  verifyEmail: "E-Mail bestätigen",
+  recoverEmail: "E-Mail wiederherstellen",
+  unknown: "Aktion prüfen",
+};
+
+const statusLabel: Record<Status, string> = {
+  verifying: "Wird geprüft …",
+  ready: "Bereit",
+  success: "Abgeschlossen",
+  error: "Fehler",
+};
+
 const ResetPassword: React.FC = () => {
-  const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
+  const searchParams = useMemo(
+    () => new URLSearchParams(window.location.search),
+    []
+  );
+  const rawMode = (searchParams.get("mode") || "").toLowerCase();
   const oobCode = searchParams.get("oobCode");
+  const continueUrl = searchParams.get("continueUrl");
+
+  const mode: ActionMode =
+    rawMode === "resetpassword"
+      ? "resetPassword"
+      : rawMode === "verifyemail"
+      ? "verifyEmail"
+      : rawMode === "recoveremail"
+      ? "recoverEmail"
+      : "unknown";
 
   const [email, setEmail] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [status, setStatus] = useState<
-    "verifying" | "ready" | "success" | "error"
-  >("verifying");
+  const [status, setStatus] = useState<Status>("verifying");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const run = async () => {
-      if (!oobCode) {
-        setError("Ungültiger Link: Es fehlt ein Code.");
+      if (!oobCode || mode === "unknown") {
+        setError(
+          "Dieser Link kann nicht verarbeitet werden. Prüfe die URL oder fordere einen neuen Link an."
+        );
         setStatus("error");
         return;
       }
 
       try {
-        const email = await verifyPasswordResetCode(auth, oobCode);
-        setEmail(email);
-        setStatus("ready");
+        if (mode === "resetPassword") {
+          const mail = await verifyPasswordResetCode(auth, oobCode);
+          setEmail(mail);
+          setStatus("ready");
+          return;
+        }
+
+        if (mode === "verifyEmail" || mode === "recoverEmail") {
+          const actionInfo = await checkActionCode(auth, oobCode);
+          const mail = (actionInfo.data as { email?: string }).email ?? null;
+          setEmail(mail);
+          await applyActionCode(auth, oobCode);
+          setStatus("success");
+          return;
+        }
+
+        setError("Unbekannter Modus. Bitte fordere einen neuen Link an.");
+        setStatus("error");
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
         setError(
           msg.includes("expired")
-            ? "Dieser Link ist abgelaufen. Fordern Sie bitte einen neuen an."
+            ? "Dieser Link ist abgelaufen. Fordere bitte einen neuen an."
             : "Der Link ist ungültig oder wurde bereits verwendet."
         );
         setStatus("error");
       }
     };
     run();
-  }, [oobCode]);
+  }, [mode, oobCode]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!oobCode) {
-      setError("Ungültiger Code.");
+    if (mode !== "resetPassword" || !oobCode) {
+      setError("Ungültiger oder fehlender Code.");
       return;
     }
     if (newPassword.length < 6) {
@@ -74,73 +122,143 @@ const ResetPassword: React.FC = () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
+  const goToContinue = () => {
+    if (continueUrl) {
+      window.location.href = continueUrl;
+      return;
+    }
+    goToLogin();
+  };
+
+  const isPasswordFlow = mode === "resetPassword" && status === "ready";
+  const headline =
+    mode === "verifyEmail"
+      ? "E-Mail-Adresse bestätigen"
+      : "Passwort neu setzen";
+  const subline =
+    mode === "verifyEmail"
+      ? "Öffne diesen Schritt in Ruhe im Browser, damit deine iOS-App dich wieder erkennt."
+      : "Lege ein neues Passwort für dein Konto fest. Danach kannst du dich in der iOS-App erneut anmelden.";
+
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-header-text">
-            <h1 className="login-header-title">Passwort zurücksetzen</h1>
-            <p className="login-header-subtitle">
-              {status === "verifying" && "Link wird überprüft …"}
-              {status === "ready" &&
-                (email
-                  ? `Für: ${email}`
-                  : "Geben Sie Ihr neues Passwort ein.")}
-              {status === "error" && "Es ist ein Fehler aufgetreten."}
-              {status === "success" && "Ihr Passwort wurde aktualisiert."}
-            </p>
-          </div>
+    <div className="auth-action">
+      <div className="auth-action__background">
+        <span className="auth-glow auth-glow--primary" />
+        <span className="auth-glow auth-glow--accent" />
+        <span className="auth-glow auth-glow--muted" />
+      </div>
+
+      <div className="auth-action__content">
+        <div className="auth-action__intro">
+          <span className="auth-pill">noten.manager • iOS</span>
+          <h1 className="auth-action__title">Kontozugriff sichern</h1>
+          <p className="auth-action__lead">{subline}</p>
         </div>
 
-        {status === "ready" && (
-          <form className="login-form" onSubmit={onSubmit}>
-            <div className="form-group">
-              <label className="form-label">Neues Passwort</label>
-              <input
-                className="form-input"
-                type="password"
-                autoComplete="new-password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="********"
-              />
+        <div className="auth-card">
+          <div className="auth-card__header">
+            <div className={`status-pill status-pill--${status}`}>
+              <span className="status-dot" />
+              <span>{statusLabel[status]}</span>
             </div>
-            <div className="form-group">
-              <label className="form-label">Passwort bestätigen</label>
-              <input
-                className="form-input"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="********"
-              />
+            <div className="auth-card__meta">
+              <p className="auth-eyebrow">{modeLabel[mode]}</p>
+              {email && <p className="auth-meta-email">Für: {email}</p>}
             </div>
-            {error && <p className="error-message">{error}</p>}
-            <button className="btn-primary" type="submit">
-              Passwort setzen
-            </button>
-          </form>
-        )}
-
-        {status === "verifying" && <div className="login-form">Bitte warten …</div>}
-
-        {status === "success" && (
-          <div className="login-form">
-            <button className="btn-primary" onClick={goToLogin}>
-              Zum Login
-            </button>
+            <h2 className="auth-card__title">{headline}</h2>
+            <p className="auth-card__subtitle">
+              {status === "error"
+                ? error ?? "Es ist ein Fehler aufgetreten."
+                : status === "success" && mode === "verifyEmail"
+                ? "Deine E-Mail-Adresse wurde bestätigt. Du kannst jetzt zurück zur App."
+                : status === "success"
+                ? "Dein neues Passwort ist gesetzt. Melde dich jetzt wieder an."
+                : "Dieser Schritt schützt dein Konto in der iOS-App."}
+            </p>
           </div>
-        )}
 
-        {status === "error" && (
-          <div className="login-form">
-            {error && <p className="error-message">{error}</p>}
-            <button className="btn-primary" onClick={goToLogin}>
-              Zur Login-Seite
-            </button>
+          {isPasswordFlow && (
+            <form className="auth-form" onSubmit={onSubmit}>
+              <div className="form-group">
+                <label className="form-label">Neues Passwort</label>
+                <input
+                  className="form-input"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="********"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Passwort bestätigen</label>
+                <input
+                  className="form-input"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="********"
+                />
+              </div>
+              {error && <p className="error-message">{error}</p>}
+              <button className="btn-primary auth-primary" type="submit">
+                Passwort setzen
+              </button>
+            </form>
+          )}
+
+          {status === "verifying" && (
+            <div className="auth-form">
+              <p className="info-message">Link wird überprüft …</p>
+            </div>
+          )}
+
+          {status === "success" && (
+            <div className="auth-form auth-form--center">
+              <button className="btn-primary auth-primary" onClick={goToContinue}>
+                Zur App / zum Login
+              </button>
+              <p className="info-message">
+                Falls die App noch geöffnet ist, starte sie einmal neu.
+              </p>
+            </div>
+          )}
+
+          {status === "error" && (
+            <div className="auth-form auth-form--center">
+              {error && <p className="error-message">{error}</p>}
+              <div className="auth-actions">
+                <button className="btn-primary auth-primary" onClick={goToLogin}>
+                  Zur Login-Seite
+                </button>
+                <button
+                  className="btn-secondary auth-secondary"
+                  onClick={() => (window.location.href = "/passwort-vergessen")}
+                >
+                  Neuen Link anfordern
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="auth-footnotes">
+            <div className="auth-footnote">
+              <span className="auth-dot" />
+              <p>
+                Nutze denselben Account wie in der iOS-App. Dieser Schritt
+                funktioniert auch ohne, dass du eingeloggt bist.
+              </p>
+            </div>
+            <div className="auth-footnote">
+              <span className="auth-dot" />
+              <p>
+                Öffne den Link nur auf vertrauenswürdigen Geräten. Bei Fragen:
+                support@noten-manager.app
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
