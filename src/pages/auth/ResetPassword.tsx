@@ -143,28 +143,39 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="auth-action">
       <div className="auth-action__background">
-        <span className="auth-glow auth-glow--primary" />
-        <span className="auth-glow auth-glow--accent" />
-        <span className="auth-glow auth-glow--muted" />
+        <span className="auth-blob auth-blob--primary" />
+        <span className="auth-blob auth-blob--secondary" />
+        <span className="auth-blob auth-blob--tertiary" />
       </div>
 
-      <div className="auth-action__content">
-        <div className="auth-action__intro">
-          <span className="auth-pill">noten.manager • iOS</span>
-          <h1 className="auth-action__title">Kontozugriff sichern</h1>
-          <p className="auth-action__lead">{subline}</p>
+      <div className="auth-shell">
+        <div className="auth-head">
+          <div className="auth-badge">
+            <span className="auth-badge__glow" />
+            <span className="auth-badge__icon">🔒</span>
+          </div>
+          <div className="auth-head__text">
+            <span className="auth-chip">noten.manager iOS</span>
+            <h1 className="auth-action__title">
+              {mode === "verifyEmail"
+                ? "E-Mail bestätigen"
+                : "Zugang wiederherstellen"}
+            </h1>
+            <p className="auth-action__lead">{subline}</p>
+          </div>
         </div>
 
         <div className="auth-card">
-          <div className="auth-card__header">
+          <div className="auth-card__top">
             <div className={`status-pill status-pill--${status}`}>
               <span className="status-dot" />
               <span>{statusLabel[status]}</span>
             </div>
-            <div className="auth-card__meta">
-              <p className="auth-eyebrow">{modeLabel[mode]}</p>
-              {email && <p className="auth-meta-email">Für: {email}</p>}
-            </div>
+            {email && <span className="auth-tag">Für: {email}</span>}
+          </div>
+
+          <div className="auth-card__header">
+            <p className="auth-eyebrow">{modeLabel[mode]}</p>
             <h2 className="auth-card__title">{headline}</h2>
             <p className="auth-card__subtitle">
               {status === "error"
@@ -173,7 +184,7 @@ const ResetPassword: React.FC = () => {
                 ? "Deine E-Mail-Adresse wurde bestätigt. Du kannst jetzt zurück zur App."
                 : status === "success"
                 ? "Dein neues Passwort ist gesetzt. Melde dich jetzt wieder an."
-                : "Dieser Schritt schützt dein Konto in der iOS-App."}
+                : "Schließe den Schritt im Browser ab, damit die iOS-App deinen Zugang erkennt."}
             </p>
           </div>
 
@@ -241,6 +252,8 @@ const ResetPassword: React.FC = () => {
               </div>
             </div>
           )}
+
+          <div className="auth-divider" />
 
           <div className="auth-footnotes">
             <div className="auth-footnote">
