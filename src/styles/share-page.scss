@@ -1,0 +1,174 @@
+@use "./variables";
+
+:root {
+  --share-accent: #1e3a8a;
+  --share-accent-2: #2563eb;
+  --share-text: #0f172a;
+  --share-text-secondary: #6b7280;
+  --share-bg: linear-gradient(
+    180deg,
+    #eef2ff 0%,
+    #f9fafb 38%,
+    #f7f7f7 100%
+  );
+}
+
+.share-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--share-text);
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Roboto", sans-serif;
+  background: var(--share-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.share-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, rgba(37, 99, 235, 0.15), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(80, 144, 255, 0.12), transparent 32%),
+    radial-gradient(circle at 50% 90%, rgba(37, 99, 235, 0.08), transparent 45%);
+  pointer-events: none;
+}
+
+.share-card {
+  width: min(560px, 100%);
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  padding: 26px 24px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.share-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.08) 0%,
+      rgba(37, 99, 235, 0.02) 42%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.08), transparent 45%);
+  z-index: 0;
+}
+
+.share-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.share-card h1 {
+  margin: 10px 0 14px;
+  font-size: 26px;
+  line-height: 1.3;
+  color: var(--share-text);
+  font-weight: 800;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--share-accent-2);
+  background: rgba(37, 99, 235, 0.12);
+  padding: 6px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
+}
+
+.pill::before {
+  content: "􀌚";
+  font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 700;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.meta:last-of-type {
+  border-bottom: none;
+}
+
+.meta .label {
+  font-size: 13px;
+  color: var(--share-text-secondary);
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+.meta .value {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--share-text);
+}
+
+.cta {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--share-accent), var(--share-accent-2));
+  color: white;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 18px 50px rgba(37, 99, 235, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 60px rgba(37, 99, 235, 0.35);
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--share-text-secondary);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .share-card {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+  .share-card h1 {
+    font-size: 22px;
+  }
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .meta .value {
+    font-size: 15px;
+  }
+}

@@ -1,4 +1,4 @@
-import "../styles/share-page.css";
+import "../styles/share-page.scss";
 import { useMemo } from "react";
 
 type ParsedHomeworkLink = {
