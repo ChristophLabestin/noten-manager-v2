@@ -14,6 +14,7 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import { unlockBodyScroll } from "../services/scrollLock";
 import FachreferatDetail from "../pages/FachreferatDetail";
+import HomeworkSharePage from "../pages/HomeworkShare";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
@@ -22,6 +23,7 @@ const routes: { [key: string]: () => React.JSX.Element } = {
   "/impressum": () => <Imprint />,
   "/auth/action": () => <ResetPassword />,
   "/passwort-vergessen": () => <ForgotPassword />,
+  "/homework/share": () => <HomeworkSharePage />,
   "/": () => (
     <PrivateRoute>
       <Home />
