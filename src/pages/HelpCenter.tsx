@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import "./HelpCenter.scss";
 
 type SectionId =
   | "intro"
@@ -426,7 +427,6 @@ const HelpCenter: React.FC = () => {
 
   return (
     <div className="help-root">
-      <style>{styles}</style>
       <div className="hero">
         <div>
           <p className="eyebrow">Support</p>
@@ -633,67 +633,5 @@ const sectionTitle = (id: SectionId): string => {
       return "Kontakt & Support";
   }
 };
-
-const styles = `
-:root {
-  --bg: #0b1021;
-  --card: rgba(255,255,255,0.06);
-  --stroke: rgba(255,255,255,0.08);
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --indigo: #818cf8;
-  --blue: #38bdf8;
-  --green: #4ade80;
-  --orange: #fb923c;
-}
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: "Inter", system-ui, -apple-system, sans-serif; }
-.help-root { max-width: 1080px; margin: 0 auto; padding: 24px 18px 64px; }
-.hero { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
-.card { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 18px; backdrop-filter: blur(10px); }
-.card + .card { margin-top: 14px; }
-.card-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-.text-button { color: var(--muted); border: none; background: transparent; cursor: pointer; }
-.lead { color: var(--muted); max-width: 640px; }
-.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; color: var(--muted); margin: 0 0 4px; }
-.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.badge { padding: 6px 10px; border-radius: 999px; background: rgba(129,140,248,0.18); color: var(--text); font-size: 13px; }
-.search-card input { width: 100%; border: none; outline: none; background: transparent; color: var(--text); }
-.search-row { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--stroke); border-radius: 12px; background: rgba(255,255,255,0.04); }
-.ghost { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; }
-.quick .chips, .results .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.chip { display: inline-flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--stroke); background: rgba(255,255,255,0.04); color: var(--text); cursor: pointer; }
-.chip.primary { background: var(--indigo); border-color: var(--indigo); color: #0b1021; }
-.chip-title { font-weight: 600; }
-.chip-sub { color: var(--muted); font-size: 12px; }
-.icon { font-size: 18px; }
-.label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
-.results { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
-.result-row { border: 1px solid var(--stroke); background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-align: left; color: inherit; cursor: pointer; }
-.icon-bubble { width: 42px; height: 42px; display: grid; place-items: center; background: rgba(255,255,255,0.06); border-radius: 12px; }
-.result-title { font-weight: 600; }
-.result-summary { color: var(--muted); font-size: 14px; margin-top: 4px; }
-.pill { display: inline-flex; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--muted); font-size: 12px; margin-top: 6px; }
-.arrow { color: var(--indigo); font-size: 18px; }
-.empty { border: 1px dashed var(--stroke); border-radius: 12px; padding: 12px; color: var(--muted); }
-.stack { display: flex; flex-direction: column; gap: 16px; margin-top: 18px; }
-.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.item-title { font-weight: 600; margin-bottom: 4px; }
-.item-text { margin: 0; color: var(--muted); line-height: 1.5; }
-.faq { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-.form { display: grid; gap: 12px; }
-.form input, .form textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--text); }
-.form label { display: grid; gap: 6px; font-weight: 600; color: var(--text); }
-.form small { color: var(--muted); }
-.primary-btn { padding: 12px 16px; border: none; border-radius: 12px; background: linear-gradient(120deg, var(--indigo), var(--blue)); color: #0b1021; font-weight: 700; cursor: pointer; }
-.primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #f87171; }
-.success { color: #4ade80; }
-.mark { background: #facc15; color: #0b1021; }
-@media (max-width: 640px) {
-  .card-head { flex-direction: column; align-items: flex-start; }
-  .hero { grid-template-columns: 1fr; }
-}
-`;
 
 export default HelpCenter;
