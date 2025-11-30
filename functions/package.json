@@ -1,0 +1,14 @@
+{
+  "name": "noten-manager-functions",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@google-cloud/tasks": "^6.2.1",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^4.9.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

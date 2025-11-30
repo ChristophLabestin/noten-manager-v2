@@ -15,12 +15,14 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import { unlockBodyScroll } from "../services/scrollLock";
 import FachreferatDetail from "../pages/FachreferatDetail";
 import HomeworkSharePage from "../pages/HomeworkShare";
+import HelpCenter from "../pages/HelpCenter";
 
 const routes: { [key: string]: () => React.JSX.Element } = {
   "/login": () => <Login />,
   "/register": () => <Register />,
   "/datenschutz": () => <PrivacyPolicy />,
   "/impressum": () => <Imprint />,
+  "/helpcenter": () => <HelpCenter />,
   "/auth/action": () => <ResetPassword />,
   "/passwort-vergessen": () => <ForgotPassword />,
   "/homework/share": () => <HomeworkSharePage />,
